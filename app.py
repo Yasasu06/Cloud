@@ -2392,6 +2392,52 @@ def page_executive_summary():
         
         st.info("💡 **Print to PDF:** Use your browser's print function (Ctrl/Cmd + P) and select 'Save as PDF' for a professional document.")
 
+        def generate_text_report(company, industry, ind, report_date):
+            report = f"""CLOUD INTELLIGENCE PLATFORM
+Executive Summary Report
+Generated: {report_date}
+{"="*50}
+
+COMPANY: {company}
+INDUSTRY: {industry}
+RECOMMENDED PROVIDER: {ind['rec']}
+CONFIDENCE SCORE: {ind['conf']}%
+
+KEY RATIONALE:
+{ind['reason']}
+
+COMPLIANCE REQUIREMENTS: {', '.join(ind['compliance'])}
+
+MARKET CONTEXT:
+- Global cloud market size: $855B (2026)
+- Market CAGR: 19% through 2029
+- AI cloud growth: 47% YoY
+- Multi-cloud adoption: 89% of enterprises
+
+TOP 3 PROVIDERS:
+1. AWS   — Market leader, 30% share, strongest service breadth
+2. Azure — Fastest enterprise growth, 23% share
+3. GCP   — AI/ML leader, 12% share
+
+RECOMMENDATION RATIONALE:
+Based on your industry profile, compliance requirements,
+and workload patterns, the analysis points to {ind['rec']}
+as the optimal fit for {company}.
+
+{"="*50}
+Built by Yasaswi Dutta | Cloud Intelligence Platform
+Data sourced from SEC filings and earnings reports
+"""
+            return report.encode('utf-8')
+
+        report_bytes = generate_text_report(company, industry, ind, report_date)
+        st.download_button(
+            label="⬇️ Download Report (.txt)",
+            data=report_bytes,
+            file_name=f"cloud_intelligence_report_{datetime.now().strftime('%Y%m%d')}.txt",
+            mime="text/plain"
+        )
+
 # ============================================================================
 # PAGE: PROJECTION SIMULATOR
 # ============================================================================
