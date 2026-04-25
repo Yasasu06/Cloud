@@ -1575,9 +1575,10 @@ def projection_chart(proj, show_all_scenarios=False):
         ))
     
     if proj.get('crossover'):
+        crossover_idx = proj['periods'].index(proj['crossover']['q'])
         fig.add_vline(
-            x=proj['crossover']['q'], 
-            line_dash='dash', 
+            x=crossover_idx,
+            line_dash='dash',
             line_color='#ef4444',
             line_width=2,
             annotation_text='Crossover',
@@ -2471,9 +2472,10 @@ def page_simulator():
         
         # Crossover insight
         if proj['crossover']:
-            st.success(f"🚨 **Crossover Alert:** Based on current growth rates, Azure is projected to overtake AWS in **{proj['crossover']['q']}**. This is the moment the cloud industry has been watching.")
+            crossover_q = str(proj['crossover']['q'])
+            st.success(f"🚨 **Crossover Alert:** Based on current growth rates, Azure is projected to overtake AWS in **{crossover_q}**. This is the moment the cloud industry has been watching.")
         else:
-            st.info(f"📊 **No crossover detected** in this scenario's projection window. AWS maintains lead throughout.")
+            st.info("📊 **No crossover detected** in this scenario's projection window. AWS maintains lead throughout.")
 
         st.markdown("---")
         st.caption("Adjust the growth rate sliders above to see how the crossover point shifts across scenarios.")
