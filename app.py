@@ -1516,6 +1516,32 @@ def ai_growth_chart():
     )
     return fig
 
+def cost_shock_calculator(monthly_spend, growth_multiplier, provider):
+    months = list(range(1, 13))
+    costs = []
+    for m in months:
+        scale = 1 + (growth_multiplier - 1) * (m / 12)
+        cost = monthly_spend * scale
+        costs.append(round(cost, 2))
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=months, y=costs,
+        mode='lines+markers',
+        name=provider,
+        line=dict(width=3),
+        fill='tozeroy'
+    ))
+    fig.update_layout(
+        title=f'Cost Growth Projection — {provider} ({growth_multiplier}x scale)',
+        xaxis_title='Month',
+        yaxis_title='Monthly Cost ($)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        height=350
+    )
+    return fig, costs[-1]
+
 def tco_comparison_chart(costs):
     fig = go.Figure()
     providers = list(costs.keys())
@@ -1710,7 +1736,10 @@ def page_home():
     
     with col1:
         st.plotly_chart(revenue_chart(df), use_container_width=True)
-    
+        st.markdown("### 🤖 AI/ML Cloud Revenue Growth")
+        st.caption("Azure is closing the gap on AWS in AI-specific cloud revenue — the fastest growing segment in cloud today.")
+        st.plotly_chart(ai_growth_chart(), use_container_width=True)
+
     with col2:
         st.markdown('<div class="section-header">Live Stock Prices</div>', unsafe_allow_html=True)
         for provider in ['AWS', 'Azure', 'GCP']:
