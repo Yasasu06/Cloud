@@ -1333,36 +1333,58 @@ INDUSTRIES = {
 }
 
 # News Feed
-NEWS_API_KEY = "175abd0f3280d9f52039b87911036702"
-
 def fetch_live_news():
-    try:
-        import urllib.request
-        import urllib.parse
-        import json
-        query = urllib.parse.quote("AWS OR Azure OR Google Cloud")
-        url = f"https://gnews.io/api/v4/search?q={query}&lang=en&topic=technology&max=8&apikey={NEWS_API_KEY}"
-        req = urllib.request.urlopen(url, timeout=8)
-        data = json.loads(req.read().decode())
-        articles = []
-        for item in data.get('articles', []):
-            title_lower = item.get('title', '').lower()
-            provider = 'AWS'
-            if 'azure' in title_lower or 'microsoft' in title_lower:
-                provider = 'Azure'
-            elif 'google cloud' in title_lower or 'gcp' in title_lower:
-                provider = 'GCP'
-            impact = 'High' if any(w in title_lower for w in ['billion', 'major', 'launch', 'acquisition', 'breakthrough']) else 'Medium'
-            articles.append({
-                'date': item.get('publishedAt', '')[:10],
-                'provider': provider,
-                'title': item.get('title', ''),
-                'impact': impact,
-                'url': item.get('url', '')
-            })
-        return articles if articles else None
-    except Exception:
-        return None
+    """Fetch live cloud news from official AWS, Azure, and GCP RSS feeds."""
+    import urllib.request
+    import xml.etree.ElementTree as ET
+
+    feeds = [
+        ('AWS',   'https://aws.amazon.com/blogs/aws/feed/'),
+        ('Azure', 'https://azure.microsoft.com/en-us/blog/feed/'),
+        ('GCP',   'https://cloudblog.withgoogle.com/rss/'),
+    ]
+    ATOM_NS = 'http://www.w3.org/2005/Atom'
+    articles = []
+
+    for provider, feed_url in feeds:
+        try:
+            req = urllib.request.Request(feed_url, headers={'User-Agent': 'Mozilla/5.0'})
+            root = ET.fromstring(urllib.request.urlopen(req, timeout=6).read())
+
+            # RSS 2.0
+            items = root.findall('.//item')
+            for item in items[:3]:
+                title = (item.findtext('title') or '').strip()
+                link  = (item.findtext('link')  or '')
+                date  = (item.findtext('pubDate') or '')[:10]
+                if not title:
+                    continue
+                tl = title.lower()
+                impact = 'High' if any(w in tl for w in
+                    ['billion', 'major', 'launch', 'acquisition', 'breakthrough', 'announce']) else 'Medium'
+                articles.append({'date': date, 'provider': provider,
+                                 'title': title, 'impact': impact, 'url': link})
+
+            # Atom fallback
+            if not items:
+                ns = {'a': ATOM_NS}
+                for entry in root.findall('a:entry', ns)[:3]:
+                    title = (entry.findtext('a:title', namespaces=ns) or '').strip()
+                    link_el = entry.find('a:link', ns)
+                    link  = link_el.get('href', '') if link_el is not None else ''
+                    date  = (entry.findtext('a:published', namespaces=ns) or '')[:10]
+                    if not title:
+                        continue
+                    tl = title.lower()
+                    impact = 'High' if any(w in tl for w in
+                        ['billion', 'major', 'launch', 'acquisition', 'breakthrough', 'announce']) else 'Medium'
+                    articles.append({'date': date, 'provider': provider,
+                                     'title': title, 'impact': impact, 'url': link})
+        except Exception:
+            continue
+
+    return articles if articles else None
+
 
 # ============================================================================
 # HELPER FUNCTIONS
