@@ -1333,7 +1333,7 @@ INDUSTRIES = {
 }
 
 # News Feed
-NEWS_API_KEY = "pub_placeholder"  # Free key from newsdata.io
+NEWS_API_KEY = "pub_efab12ce94b8469eaa07491eeb0cdf98"  # Free key from newsdata.io
 
 def fetch_live_news():
     """Fetch live cloud news from NewsData.io free API"""
