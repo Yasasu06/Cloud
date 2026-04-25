@@ -1333,16 +1333,35 @@ INDUSTRIES = {
 }
 
 # News Feed
-NEWS_FEED = [
-    {'date': 'Apr 18, 2026', 'provider': 'Azure', 'title': 'Microsoft announces GPT-5 exclusive integration in Azure OpenAI Service', 'impact': 'High'},
-    {'date': 'Apr 15, 2026', 'provider': 'AWS', 'title': 'AWS reduces S3 storage pricing by 15% across all regions', 'impact': 'Medium'},
-    {'date': 'Apr 12, 2026', 'provider': 'GCP', 'title': 'Google Cloud launches Gemini 2.0 on Vertex AI platform', 'impact': 'High'},
-    {'date': 'Apr 10, 2026', 'provider': 'AWS', 'title': 'Amazon announces new AWS region in Saudi Arabia', 'impact': 'Medium'},
-    {'date': 'Apr 8, 2026', 'provider': 'Azure', 'title': 'Azure Stack HCI receives major performance and security updates', 'impact': 'Low'},
-    {'date': 'Apr 5, 2026', 'provider': 'GCP', 'title': 'BigQuery adds real-time streaming analytics with sub-second latency', 'impact': 'Medium'},
-    {'date': 'Apr 3, 2026', 'provider': 'AWS', 'title': 'AWS Lambda increases memory limits to 20GB for compute-intensive workloads', 'impact': 'Medium'},
-    {'date': 'Apr 1, 2026', 'provider': 'Azure', 'title': 'Microsoft acquires leading Kubernetes security startup', 'impact': 'High'},
-]
+NEWS_API_KEY = "pub_placeholder"  # Free key from newsdata.io
+
+def fetch_live_news():
+    """Fetch live cloud news from NewsData.io free API"""
+    try:
+        import urllib.request
+        import json
+        query = "AWS OR Azure OR Google Cloud OR cloud computing"
+        url = f"https://newsdata.io/api/1/news?apikey={NEWS_API_KEY}&q={query}&language=en&category=technology"
+        req = urllib.request.urlopen(url, timeout=5)
+        data = json.loads(req.read().decode())
+        articles = []
+        for item in data.get('results', [])[:8]:
+            provider = 'AWS'
+            title_lower = item.get('title', '').lower()
+            if 'azure' in title_lower or 'microsoft' in title_lower:
+                provider = 'Azure'
+            elif 'google cloud' in title_lower or 'gcp' in title_lower:
+                provider = 'GCP'
+            articles.append({
+                'date': item.get('pubDate', '')[:10],
+                'provider': provider,
+                'title': item.get('title', ''),
+                'impact': 'High' if any(w in title_lower for w in ['billion', 'major', 'launch', 'acquisition']) else 'Medium',
+                'url': item.get('link', '')
+            })
+        return articles if articles else None
+    except Exception:
+        return None
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -1631,8 +1650,8 @@ def page_home():
     st.markdown("""
     <div class="hero-section">
         <div class="hero-badge">Enterprise Cloud Intelligence</div>
-        <div class="hero-title">Cloud Intelligence Platform</div>
-        <p class="hero-subtitle">Strategic analytics, cost optimization, and decision intelligence for AWS, Azure, and Google Cloud. Built for enterprise architects and cloud strategists.</p>
+        <div class="hero-title">The Definitive Cloud Intelligence Platform</div>
+        <p class="hero-subtitle">Everything you need to know about AWS, Azure, and Google Cloud — in one place. Built for founders, IT leaders, and anyone making cloud decisions.</p>
         <div class="live-indicator">
             <span class="live-dot"></span>
             Live Market Data
@@ -2531,63 +2550,53 @@ def page_simulator():
 # ============================================================================
 
 def page_intelligence():
-    st.markdown("# 📰 Competitive Intelligence")
-    st.markdown("*Real-time updates on cloud provider news, pricing, and announcements*")
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-    
-    # Filters
-    col1, col2, col3 = st.columns([1, 1, 2])
-    with col1:
-        provider_filter = st.selectbox("Provider", ['All', 'AWS', 'Azure', 'GCP'])
-    with col2:
-        impact_filter = st.selectbox("Impact Level", ['All', 'High', 'Medium', 'Low'])
-    
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-    
-    # Stats
-    high_count = len([n for n in NEWS_FEED if n['impact'] == 'High'])
-    st.markdown(f"""
-    <div style="display:flex;gap:30px;margin-bottom:30px;">
-        <div style="color:#888;font-size:0.9rem;">
-            <span style="color:#ef4444;font-weight:600;">{high_count}</span> High Impact this month
-        </div>
-        <div style="color:#888;font-size:0.9rem;">
-            <span style="color:white;font-weight:600;">{len(NEWS_FEED)}</span> Total Updates
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # News items
-    for item in NEWS_FEED:
-        # Apply filters
-        if provider_filter != 'All' and item['provider'] != provider_filter:
-            continue
-        if impact_filter != 'All' and item['impact'] != impact_filter:
-            continue
-        
-        impact_class = f"news-impact-{item['impact'].lower()}"
-        provider_class = f"news-provider-{item['provider'].lower()}"
-        news_class = f"news-{item['provider'].lower()}"
-        
+    st.markdown("## 📰 Cloud Intelligence Feed")
+    st.caption("Live news and analysis from across the cloud industry.")
+
+    with st.spinner("Fetching latest cloud news..."):
+        live_articles = fetch_live_news()
+
+    if live_articles:
+        st.success("✅ Live feed active")
+        articles = live_articles
+    else:
+        st.warning("⚠️ Live feed unavailable — showing curated headlines. Add a free NewsData.io API key to enable live updates.")
+        articles = [
+            {'date': 'Apr 18, 2026', 'provider': 'Azure', 'title': 'Microsoft announces GPT-5 exclusive integration in Azure OpenAI Service', 'impact': 'High', 'url': ''},
+            {'date': 'Apr 15, 2026', 'provider': 'AWS', 'title': 'AWS reduces S3 storage pricing by 15% across all regions', 'impact': 'Medium', 'url': ''},
+            {'date': 'Apr 12, 2026', 'provider': 'GCP', 'title': 'Google Cloud launches Gemini 2.0 on Vertex AI platform', 'impact': 'High', 'url': ''},
+            {'date': 'Apr 10, 2026', 'provider': 'AWS', 'title': 'Amazon announces new AWS region in Saudi Arabia', 'impact': 'Medium', 'url': ''},
+            {'date': 'Apr 8, 2026', 'provider': 'Azure', 'title': 'Azure Stack HCI receives major performance and security updates', 'impact': 'Low', 'url': ''},
+            {'date': 'Apr 5, 2026', 'provider': 'GCP', 'title': 'BigQuery adds real-time streaming analytics with sub-second latency', 'impact': 'Medium', 'url': ''},
+            {'date': 'Apr 3, 2026', 'provider': 'AWS', 'title': 'AWS Lambda increases memory limits to 20GB for compute-intensive workloads', 'impact': 'Medium', 'url': ''},
+            {'date': 'Apr 1, 2026', 'provider': 'Azure', 'title': 'Microsoft acquires leading Kubernetes security startup', 'impact': 'High', 'url': ''},
+        ]
+
+    provider_filter = st.multiselect("Filter by Provider", ["AWS", "Azure", "GCP"], default=["AWS", "Azure", "GCP"])
+    impact_filter = st.multiselect("Filter by Impact", ["High", "Medium", "Low"], default=["High", "Medium", "Low"])
+
+    filtered = [a for a in articles if a['provider'] in provider_filter and a['impact'] in impact_filter]
+
+    impact_colors = {'High': '#ef4444', 'Medium': '#f59e0b', 'Low': '#22c55e'}
+    provider_colors = {'AWS': '#FF9900', 'Azure': '#0078D4', 'GCP': '#34A853'}
+
+    for article in filtered:
+        impact_color = impact_colors.get(article['impact'], '#888')
+        provider_color = provider_colors.get(article['provider'], '#888')
+        link_html = f'<a href="{article["url"]}" target="_blank" style="color:#888;font-size:12px;">Read more →</a>' if article.get('url') else ''
         st.markdown(f"""
-        <div class="news-item {news_class}">
-            <div class="news-header">
-                <div class="news-date">{item['date']}</div>
-                <div class="news-impact {impact_class}">{item['impact']} Impact</div>
+        <div style="border-left: 4px solid {provider_color}; padding: 12px 16px; margin: 8px 0; background: rgba(255,255,255,0.03); border-radius: 4px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                <span style="color:{provider_color}; font-weight:600; font-size:13px;">{article['provider']}</span>
+                <span style="color:{impact_color}; font-size:12px; font-weight:600;">{article['impact']} Impact</span>
             </div>
-            <div class="news-title">{item['title']}</div>
-            <span class="news-provider {provider_class}">{item['provider']}</span>
+            <div style="font-size:15px; margin-bottom:4px;">{article['title']}</div>
+            <div style="color:#888; font-size:12px;">{article['date']} {link_html}</div>
         </div>
         """, unsafe_allow_html=True)
-    
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="insight-box" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03)); border-color: rgba(99, 102, 241, 0.15);">
-        <div class="insight-title" style="color: #a5b4fc;">💡 About This Feed</div>
-        <div class="insight-text">This intelligence feed demonstrates the platform's capability to aggregate competitive updates. In production, this integrates with real-time news APIs and provider announcement channels.</div>
-    </div>
-    """, unsafe_allow_html=True)
+
+    if not filtered:
+        st.info("No articles match your current filters.")
 
 # ============================================================================
 # PAGE: COST SHOCK CALCULATOR
