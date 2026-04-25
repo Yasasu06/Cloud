@@ -1776,246 +1776,238 @@ def page_home():
         """, unsafe_allow_html=True)
 
 # ============================================================================
-# PAGE: CLOUD ADVISOR (Unified TCO + Recommendation + Industry)
+# PAGE: CLOUD ADVISOR (Recommendation Quiz)
 # ============================================================================
 
 def page_cloud_advisor():
     st.markdown("# 🧭 Cloud Advisor")
-    st.markdown("*Unified analysis: TCO calculation, provider recommendation, and industry insights*")
-    
-    # Initialize wizard state
-    if 'advisor_step' not in st.session_state:
-        st.session_state.advisor_step = 1
-    
-    step = st.session_state.advisor_step
-    
-    # Wizard Progress
-    steps_info = [
-        ('Company Profile', step >= 1, step > 1),
-        ('Infrastructure', step >= 2, step > 2),
-        ('Priorities', step >= 3, step > 3),
-        ('Results', step >= 4, False)
-    ]
-    
-    wizard_steps_html = ''.join([
-        f'<div class="wizard-step {"active" if active and not completed else "completed" if completed else ""}"></div>'
-        for _, active, completed in steps_info
-    ])
-    
-    wizard_labels_html = ''.join([
-        f'<span class="wizard-label {"active" if active and not completed else "completed" if completed else ""}">{name}</span>'
-        for name, active, completed in steps_info
-    ])
-    
-    st.markdown(f"""
-    <div class="wizard-container">
-        <div class="wizard-steps">{wizard_steps_html}</div>
-        <div class="wizard-labels">{wizard_labels_html}</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
+    st.markdown("*Answer 5 quick questions — get your ideal cloud provider in seconds.*")
     st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-    
-    if step == 1:
-        st.markdown("### Step 1: Company Profile")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            industry = st.selectbox(
-                "Industry",
-                list(INDUSTRIES.keys()),
-                help="Your primary industry vertical affects compliance requirements and recommended services"
+
+    if 'quiz_step' not in st.session_state:
+        st.session_state.quiz_step = 1
+
+    step = st.session_state.quiz_step
+
+    QUESTIONS = [
+        "Who are you?",
+        "What's your main workload?",
+        "Are you already in the Microsoft ecosystem?",
+        "What's your monthly cloud budget?",
+        "Do you need specific compliance?",
+    ]
+
+    if step <= 5:
+        st.markdown(f"**Question {step} of 5 — {QUESTIONS[step - 1]}**")
+        st.progress(step / 5)
+        st.markdown("")
+
+        if step == 1:
+            st.session_state.quiz_ans1 = st.radio(
+                "Who are you?",
+                ["Individual Developer", "Startup (1–50 people)", "Mid-size Business", "Enterprise"],
+                key="quiz_q1", label_visibility="collapsed"
             )
-            st.markdown('<p class="tooltip-text">Select the industry that best describes your organization\'s primary business</p>', unsafe_allow_html=True)
-            
-            company_size = st.selectbox(
-                "Company Size",
-                ['Startup', 'SMB', 'Mid-Market', 'Enterprise'],
-                index=2,
-                help="Company size influences support needs, pricing tiers, and recommended approach"
+        elif step == 2:
+            st.session_state.quiz_ans2 = st.radio(
+                "What's your main workload?",
+                ["Web Apps & APIs", "AI & Machine Learning", "Data Analytics & BI", "Gaming", "File Storage Only"],
+                key="quiz_q2", label_visibility="collapsed"
             )
-            st.markdown('<p class="tooltip-text">Startup: &lt;50 employees | SMB: 50-200 | Mid-Market: 200-1000 | Enterprise: 1000+</p>', unsafe_allow_html=True)
-        
-        with col2:
-            primary_usecase = st.selectbox(
-                "Primary Use Case",
-                ['AI/ML', 'Data Analytics', 'Web Hosting', 'DevOps', 'Security', 'Kubernetes', 'IoT', 'Serverless'],
-                help="The main workload type you plan to run in the cloud"
+        elif step == 3:
+            st.session_state.quiz_ans3 = st.radio(
+                "Are you already in the Microsoft ecosystem?",
+                ["Yes, we use Office 365 / Teams / Azure AD", "Somewhat", "No, we're independent"],
+                key="quiz_q3", label_visibility="collapsed"
             )
-            st.markdown('<p class="tooltip-text">Choose your most important workload category for optimization</p>', unsafe_allow_html=True)
-            
-            current_infra = st.selectbox(
-                "Current Infrastructure",
-                ['On-Premises', 'AWS', 'Azure', 'GCP', 'Other Cloud', 'Colocation', 'Hybrid'],
-                help="Where your workloads currently run"
+        elif step == 4:
+            st.session_state.quiz_ans4 = st.radio(
+                "What's your monthly cloud budget?",
+                ["Under $500", "$500 – $5,000", "$5,000 – $50,000", "$50,000+"],
+                key="quiz_q4", label_visibility="collapsed"
             )
-            st.markdown('<p class="tooltip-text">This helps us assess migration complexity and recommend transition strategies</p>', unsafe_allow_html=True)
-        
-        # Store in session state
-        st.session_state.advisor_industry = industry
-        st.session_state.advisor_size = company_size
-        st.session_state.advisor_usecase = primary_usecase
-        st.session_state.advisor_current = current_infra
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("Next: Infrastructure →", use_container_width=True):
-                st.session_state.advisor_step = 2
+        elif step == 5:
+            st.session_state.quiz_ans5 = st.radio(
+                "Do you need specific compliance?",
+                ["None", "HIPAA (Healthcare)", "GDPR (Europe)", "FedRAMP (Government)", "Multiple"],
+                key="quiz_q5", label_visibility="collapsed"
+            )
+
+        st.markdown("")
+        col_back, col_spacer, col_next = st.columns([1, 2, 1])
+        with col_back:
+            if step > 1:
+                if st.button("← Back", use_container_width=True):
+                    st.session_state.quiz_step -= 1
+                    st.rerun()
+        with col_next:
+            label = "Get My Recommendation →" if step == 5 else "Next →"
+            btn_type = "primary" if step == 5 else "secondary"
+            if st.button(label, type=btn_type, use_container_width=True):
+                st.session_state.quiz_step += 1
                 st.rerun()
-    
-    elif step == 2:
-        st.markdown("### Step 2: Infrastructure Requirements")
-        st.markdown("*Estimate your monthly infrastructure needs for accurate TCO calculation*")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            vms = st.number_input(
-                "Number of VMs/Instances",
-                min_value=1, max_value=1000, value=10,
-                help="Total number of virtual machines or compute instances across all environments"
-            )
-            st.markdown('<p class="tooltip-text">Include dev, staging, and production environments</p>', unsafe_allow_html=True)
-            
-            vcpus = st.number_input(
-                "Average vCPUs per VM",
-                min_value=1, max_value=96, value=4,
-                help="Average number of virtual CPUs per instance"
-            )
-            st.markdown('<p class="tooltip-text">Typical: 2-4 for web servers, 8-16 for databases, 32+ for compute</p>', unsafe_allow_html=True)
-            
-            storage = st.number_input(
-                "Total Storage (TB)",
-                min_value=1, max_value=1000, value=10,
-                help="Total storage needed including databases, files, and backups"
-            )
-            st.markdown('<p class="tooltip-text">Consider database storage, file storage, and backup retention</p>', unsafe_allow_html=True)
-        
-        with col2:
-            egress = st.number_input(
-                "Monthly Data Transfer Out (GB)",
-                min_value=0, max_value=100000, value=1000,
-                help="Data transferred out of the cloud to internet/users"
-            )
-            st.markdown('<p class="tooltip-text">Egress costs vary significantly between providers</p>', unsafe_allow_html=True)
-            
-            db_hours = st.number_input(
-                "Database Hours/Month",
-                min_value=0, max_value=730, value=730,
-                help="Hours of managed database service usage"
-            )
-            st.markdown('<p class="tooltip-text">730 = always on (24/7), less for dev/test environments</p>', unsafe_allow_html=True)
-            
-            reserved = st.checkbox(
-                "Consider Reserved/Committed Pricing",
-                value=True,
-                help="1-3 year commitments offer 30-40% discounts on compute"
-            )
-        
-        # Real-time cost preview
-        preview_costs = calculate_tco(vms, vcpus, storage, egress, db_hours, reserved)
-        min_cost = min(preview_costs.values())
+
+    else:
+        q1 = st.session_state.get('quiz_ans1', 'Startup (1–50 people)')
+        q2 = st.session_state.get('quiz_ans2', 'Web Apps & APIs')
+        q3 = st.session_state.get('quiz_ans3', "No, we're independent")
+        q4 = st.session_state.get('quiz_ans4', '$500 – $5,000')
+        q5 = st.session_state.get('quiz_ans5', 'None')
+
+        # ── Scoring ──────────────────────────────────────────────────────────
+        scores = {'AWS': 0, 'Azure': 0, 'GCP': 0}
+
+        if q3 == "Yes, we use Office 365 / Teams / Azure AD":
+            scores['Azure'] += 3
+        elif q3 == "Somewhat":
+            scores['Azure'] += 1
+
+        if q2 == "AI & Machine Learning":
+            scores['GCP'] += 2; scores['Azure'] += 1
+        elif q2 == "Data Analytics & BI":
+            scores['GCP'] += 2; scores['AWS'] += 1
+        elif q2 in ("Web Apps & APIs", "Gaming"):
+            scores['AWS'] += 2
+
+        if q1 == "Enterprise":
+            scores['Azure'] += 2; scores['AWS'] += 1
+        elif q1 == "Startup (1–50 people)":
+            scores['AWS'] += 2; scores['GCP'] += 1
+        elif q1 == "Individual Developer":
+            scores['GCP'] += 2
+
+        if q4 == "Under $500":
+            scores['GCP'] += 2
+        elif q4 == "$50,000+":
+            scores['AWS'] += 1; scores['Azure'] += 1
+
+        if q5 == "HIPAA (Healthcare)":
+            scores['Azure'] += 2; scores['AWS'] += 1
+        elif q5 == "FedRAMP (Government)":
+            scores['AWS'] += 3
+        elif q5 == "GDPR (Europe)":
+            scores['Azure'] += 2; scores['GCP'] += 1
+        elif q5 == "Multiple":
+            scores['Azure'] += 2; scores['AWS'] += 1
+
+        ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        winner, winner_score = ranked[0]
+        runner_up, _ = ranked[1]
+
+        MAX_SCORE = 10
+        confidence = min(95, max(50, int((winner_score / MAX_SCORE) * 100))) if winner_score > 0 else 55
+
+        # ── Dynamic reasoning bullets ─────────────────────────────────────────
+        reasons = []
+
+        workload_map = {
+            "AI & Machine Learning": {
+                'GCP':   "Your AI/ML focus is GCP's strongest suit — Vertex AI and TPU infrastructure lead the industry.",
+                'Azure': "Azure OpenAI Service gives you exclusive access to GPT-4 and Copilot for enterprise AI workloads.",
+                'AWS':   "AWS SageMaker provides a mature, full-lifecycle ML platform with the broadest tooling ecosystem.",
+            },
+            "Data Analytics & BI": {
+                'GCP':   "BigQuery is the gold standard for serverless analytics — faster and cheaper at petabyte scale.",
+                'AWS':   "AWS Redshift and the Athena/Glue ecosystem provide enterprise-grade analytics pipelines.",
+                'Azure': "Azure Synapse Analytics integrates natively with Power BI for seamless end-to-end BI.",
+            },
+            "Web Apps & APIs": {
+                'AWS':   "AWS has the deepest web hosting ecosystem — CloudFront, Lambda, and Elastic Beanstalk are battle-tested at massive scale.",
+                'Azure': "Azure App Service and API Management make web deployments simple with strong enterprise SLAs.",
+                'GCP':   "Cloud Run and Firebase offer a modern serverless stack for web apps with minimal ops overhead.",
+            },
+            "Gaming": {
+                'AWS':   "AWS GameTech (GameLift, GameSparks) powers the majority of global online games today.",
+                'Azure': "Azure PlayFab is a dedicated gaming backend platform with live ops, telemetry, and matchmaking built in.",
+                'GCP':   "Google Cloud's global network delivers low-latency connections for real-time multiplayer gaming.",
+            },
+            "File Storage Only": {
+                'AWS':   "S3 is the world's most widely used object storage — reliable, cheap, and universally supported by every tool.",
+                'Azure': "Azure Blob Storage integrates seamlessly with Microsoft tools and offers strong compliance and tiering.",
+                'GCP':   "Google Cloud Storage offers the best price-performance for large-scale and cold storage workloads.",
+            },
+        }
+        reasons.append(workload_map.get(q2, workload_map["Web Apps & APIs"])[winner])
+
+        if q3 == "Yes, we use Office 365 / Teams / Azure AD":
+            if winner == "Azure":
+                reasons.append("Your existing Microsoft ecosystem (Office 365 / Azure AD) means Azure is a natural extension — single identity, single contract, native integrations out of the box.")
+            else:
+                reasons.append(f"Even with Microsoft tools in use, {winner} connects cleanly via SSO and API connectors, so you keep your existing workflows without friction.")
+        elif q3 == "Somewhat" and winner == "Azure":
+            reasons.append("Partial Microsoft adoption is a natural on-ramp to Azure — you can deepen integration at your own pace without a hard cutover.")
+
+        compliance_map = {
+            "HIPAA (Healthcare)": {
+                'Azure': "Azure has the most comprehensive HIPAA/HITECH coverage with pre-signed BAAs and Microsoft Cloud for Healthcare purpose-built for the industry.",
+                'AWS':   "AWS offers HIPAA-eligible services across 100+ products and has been the healthcare cloud of choice for years.",
+                'GCP':   "Google Cloud supports HIPAA workloads with strong encryption, audit logging, and a signed BAA.",
+            },
+            "FedRAMP (Government)": {
+                'AWS':   "FedRAMP High is your critical requirement — AWS GovCloud leads with the broadest FedRAMP High and DoD IL5 authorization of any provider.",
+                'Azure': "Azure Government holds the widest set of US government compliance certifications including FedRAMP High, ITAR, and CJIS.",
+                'GCP':   "Google Cloud's Assured Workloads and FedRAMP Moderate authorization cover most government use cases.",
+            },
+            "GDPR (Europe)": {
+                'Azure': "Azure leads on GDPR with 90+ compliance certifications, EU data residency guarantees, and established European legal infrastructure.",
+                'GCP':   "Google Cloud offers strong GDPR tooling including data residency controls and transparent data processing agreements.",
+                'AWS':   "AWS provides GDPR-compliant EU regions with comprehensive data processing agreements and detailed compliance docs.",
+            },
+        }
+        if q5 in compliance_map:
+            reasons.append(compliance_map[q5][winner])
+
+        if len(reasons) < 3:
+            size_map = {
+                "Individual Developer": {
+                    'GCP':   "GCP's free tier is the most generous for solo developers — $300 credit plus always-free BigQuery and Cloud Run.",
+                    'AWS':   "AWS Free Tier covers 12 months of core services — the best starting point for learning and building solo.",
+                    'Azure': "Azure gives $200 credit plus 55+ always-free services, with excellent learning resources for individuals.",
+                },
+                "Startup (1–50 people)": {
+                    'AWS':   "AWS Activate offers startups up to $100k in credits, and the ecosystem makes hiring engineers easier than any other platform.",
+                    'GCP':   "Google for Startups provides up to $200k in credits plus direct access to Google's ML infrastructure from day one.",
+                    'Azure': "Microsoft for Startups includes $150k in Azure credits plus free GitHub and Microsoft 365 — a strong all-in package.",
+                },
+                "Enterprise": {
+                    'Azure': "Enterprises with existing Microsoft EAs can roll Azure costs into their existing agreement, consolidating spend and simplifying procurement.",
+                    'AWS':   "AWS Enterprise Discount Program (EDP) offers the best long-term economics at scale with dedicated support and custom pricing.",
+                    'GCP':   "Google Cloud's committed use contracts offer predictable pricing for large enterprise workloads with strong negotiated discounts.",
+                },
+                "Mid-size Business": {
+                    'AWS':   "AWS's breadth of managed services lets mid-size teams move fast without maintaining infrastructure — pay only for what you use.",
+                    'Azure': "Azure hybrid benefit and dev/test pricing offer mid-size businesses significant savings on Windows and SQL Server workloads.",
+                    'GCP':   "GCP's sustained use discounts apply automatically with no commitment required — ideal for predictable mid-size workloads.",
+                },
+            }
+            reasons.append(size_map.get(q1, size_map["Mid-size Business"])[winner])
+
+        reasons = reasons[:3]
+
+        runner_notes = {
+            ('AWS', 'Azure'): "Azure is a strong second if your Microsoft footprint grows or compliance needs increase.",
+            ('AWS', 'GCP'):   "GCP is worth a close look if AI/ML becomes a bigger priority down the road.",
+            ('Azure', 'AWS'): "AWS offers the widest service breadth if you ever need to operate outside the Microsoft ecosystem.",
+            ('Azure', 'GCP'): "GCP's AI tools and analytics are compelling if data workloads become your core differentiator.",
+            ('GCP', 'AWS'):   "AWS has unmatched ecosystem depth and is the safe default if your workloads diversify.",
+            ('GCP', 'Azure'): "Azure is the natural fallback if you move into the Microsoft ecosystem or need deep compliance coverage.",
+        }
+        runner_note = runner_notes.get((winner, runner_up), f"{runner_up} is a solid alternative worth evaluating.")
+
+        # ── Render results ────────────────────────────────────────────────────
+        st.markdown("### Your Result")
         st.markdown(f"""
-        <div class="insight-box" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(99, 102, 241, 0.05)); border-color: rgba(99, 102, 241, 0.2);">
-            <div class="insight-title" style="color: #a5b4fc;">💡 Real-Time Estimate</div>
-            <div class="insight-text">Based on your inputs, estimated monthly cost starts at <strong style="color:white;">${min_cost:,.0f}/month</strong></div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Store in session state
-        st.session_state.advisor_vms = vms
-        st.session_state.advisor_vcpus = vcpus
-        st.session_state.advisor_storage = storage
-        st.session_state.advisor_egress = egress
-        st.session_state.advisor_db = db_hours
-        st.session_state.advisor_reserved = reserved
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("← Back", use_container_width=True):
-                st.session_state.advisor_step = 1
-                st.rerun()
-        with col2:
-            if st.button("Next: Priorities →", use_container_width=True):
-                st.session_state.advisor_step = 3
-                st.rerun()
-    
-    elif step == 3:
-        st.markdown("### Step 3: Business Priorities")
-        st.markdown("*Help us understand what matters most to your organization*")
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            budget = st.selectbox(
-                "Budget Approach",
-                ['Cost-first', 'Balanced', 'Performance-first'],
-                index=1,
-                help="Your primary budget consideration when evaluating cloud options"
-            )
-            st.markdown('<p class="tooltip-text">Cost-first: Minimize spend | Balanced: Optimize value | Performance-first: Best capabilities</p>', unsafe_allow_html=True)
-        
-        with col2:
-            priority = st.selectbox(
-                "Top Business Priority",
-                ['Speed to Market', 'Cost Optimization', 'Scalability', 'Compliance'],
-                help="The most important outcome for your cloud strategy"
-            )
-            st.markdown('<p class="tooltip-text">This weighs heavily in our recommendation algorithm</p>', unsafe_allow_html=True)
-        
-        # Store in session state
-        st.session_state.advisor_budget = budget
-        st.session_state.advisor_priority = priority
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("← Back", use_container_width=True):
-                st.session_state.advisor_step = 2
-                st.rerun()
-        with col2:
-            if st.button("Get Results →", type="primary", use_container_width=True):
-                st.session_state.advisor_step = 4
-                st.rerun()
-    
-    else:  # Step 4: Results
-        st.markdown("### Your Cloud Recommendation")
-        
-        # Retrieve all stored values
-        industry = st.session_state.get('advisor_industry', 'Technology')
-        size = st.session_state.get('advisor_size', 'Mid-Market')
-        usecase = st.session_state.get('advisor_usecase', 'Web Hosting')
-        budget = st.session_state.get('advisor_budget', 'Balanced')
-        priority = st.session_state.get('advisor_priority', 'Scalability')
-        vms = st.session_state.get('advisor_vms', 10)
-        vcpus = st.session_state.get('advisor_vcpus', 4)
-        storage = st.session_state.get('advisor_storage', 10)
-        egress = st.session_state.get('advisor_egress', 1000)
-        db_hours = st.session_state.get('advisor_db', 730)
-        reserved = st.session_state.get('advisor_reserved', True)
-        
-        # Calculate recommendation
-        rec = get_recommendation(industry, size, usecase, budget, priority)
-        provider = rec['primary'][0]
-        score = rec['primary'][1]
-        
-        # Calculate TCO
-        costs = calculate_tco(vms, vcpus, storage, egress, db_hours, reserved)
-        winner = min(costs, key=costs.get)
-        max_cost = max(costs.values())
-        
-        # Industry data
-        ind_data = INDUSTRIES.get(industry, INDUSTRIES['Technology'])
-        
-        # Main recommendation card
-        st.markdown(f"""
-        <div class="card" style="border-left: 5px solid {COLORS[provider]}; padding: 35px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="card" style="border-left:6px solid {COLORS[winner]};padding:40px;margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;">
                 <div>
-                    <h2 style="color:{COLORS[provider]}; margin:0 0 8px 0;">✅ Recommended: {provider}</h2>
-                    <p style="color:#888; margin:0; font-size: 1.05rem;">Based on your profile as a <strong style="color:white;">{size}</strong> organization in <strong style="color:white;">{industry}</strong> focused on <strong style="color:white;">{usecase}</strong></p>
+                    <div style="font-size:0.8rem;color:#888;text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px;">Recommended Provider</div>
+                    <div style="font-size:3.5rem;font-weight:800;color:{COLORS[winner]};line-height:1;">{winner}</div>
+                    <div style="font-size:1rem;color:#aaa;margin-top:8px;">{q2} · {q1}</div>
                 </div>
                 <div class="confidence-display">
-                    <div class="confidence-circle" style="--conf-color: {COLORS[provider]}; --conf-percent: {score};">
+                    <div class="confidence-circle" style="--conf-color:{COLORS[winner]};--conf-percent:{confidence};">
                         <div class="confidence-inner">
-                            <div class="confidence-value">{score}%</div>
+                            <div class="confidence-value">{confidence}%</div>
                             <div class="confidence-label">Match</div>
                         </div>
                     </div>
@@ -2023,78 +2015,32 @@ def page_cloud_advisor():
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
+
         st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-        
-        # Score comparison bars
-        st.markdown('<div class="section-header">Provider Match Scores</div>', unsafe_allow_html=True)
-        
-        for p in ['AWS', 'Azure', 'GCP']:
-            pct = rec['scores'][p]
+        st.markdown("**Why this fits you:**")
+        for reason in reasons:
             st.markdown(f"""
-            <div style="margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                    <span style="color: white; font-weight: 600;">{p}</span>
-                    <span style="color: {COLORS[p]}; font-weight: 600;">{pct}%</span>
-                </div>
-                <div class="comparison-bar">
-                    <div class="comparison-fill" style="width: {pct}%; background: linear-gradient(90deg, {COLORS[p]}, {COLORS[p]}88);"></div>
-                </div>
+            <div class="insight-box" style="margin-bottom:12px;">
+                <div class="insight-text">✦ {reason}</div>
             </div>
             """, unsafe_allow_html=True)
-        
+
         st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-        
-        # TCO Comparison
-        st.markdown('<div class="section-header">Monthly Cost Comparison (TCO)</div>', unsafe_allow_html=True)
-        
-        c1, c2, c3 = st.columns(3)
-        
-        for col, p in zip([c1, c2, c3], ['AWS', 'Azure', 'GCP']):
-            with col:
-                savings = ((max_cost - costs[p]) / max_cost) * 100 if costs[p] != max_cost else 0
-                badge_html = '<div class="winner-badge">Best Price</div>' if p == winner else ''
-                savings_html = f'<div class="tco-savings">Save {savings:.0f}% vs highest</div>' if savings > 0 else '<div style="color:#666;font-size:0.9rem;margin-top:8px;">Highest cost option</div>'
-                
-                st.markdown(f"""
-                <div class="tco-result tco-{p.lower()}">
-                    <div class="tco-provider">{p}</div>
-                    <div class="tco-amount">${costs[p]:,.0f}</div>
-                    <div style="color:#666;font-size:0.85rem;">per month</div>
-                    {savings_html}
-                    {badge_html}
-                </div>
-                """, unsafe_allow_html=True)
-        
-        st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-        
-        # Why this recommendation
-        with st.expander("💡 Why this recommendation?", expanded=True):
-            st.markdown(f"""
-            **Industry Fit ({industry}):** {ind_data['reason']}
-            
-            **Compliance Requirements:** {', '.join(ind_data['compliance'])}
-            
-            **Scoring Weights:**
-            - Industry alignment: 30%
-            - Company size fit: 20%
-            - Use case optimization: 25%
-            - Budget approach: 10%
-            - Business priority: 15%
-            """)
-        
-        st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("← Start Over", use_container_width=True):
-                st.session_state.advisor_step = 1
-                st.rerun()
-        with col2:
-            if st.button("📊 Generate Executive Summary →", use_container_width=True):
-                st.session_state.current_page = "📊 Executive Summary"
-                st.session_state.exec_prefill = True
-                st.rerun()
+        st.markdown(f"""
+        <div class="card" style="padding:24px;">
+            <div style="font-size:0.75rem;color:#666;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:8px;">Also Consider</div>
+            <div style="display:flex;align-items:center;gap:16px;">
+                <div style="font-size:1.6rem;font-weight:700;color:{COLORS[runner_up]};">{runner_up}</div>
+                <div style="color:#aaa;font-size:0.95rem;">{runner_note}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        st.markdown("")
+        if st.button("← Start Over"):
+            for key in ['quiz_step', 'quiz_ans1', 'quiz_ans2', 'quiz_ans3', 'quiz_ans4', 'quiz_ans5']:
+                st.session_state.pop(key, None)
+            st.rerun()
 
 # ============================================================================
 # PAGE: MIGRATION ANALYZER
