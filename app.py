@@ -1483,6 +1483,39 @@ def revenue_chart(df):
     fig.update_yaxes(title_text='Revenue ($B)', title_font=dict(size=12))
     return fig
 
+def ai_growth_chart():
+    df = pd.read_csv(StringIO(AI_CLOUD_DATA))
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df['Period'], y=df['Azure_AI_Revenue_B'],
+        name='Azure AI', mode='lines+markers',
+        line=dict(color='#0078D4', width=3),
+        marker=dict(size=8)
+    ))
+    fig.add_trace(go.Scatter(
+        x=df['Period'], y=df['AWS_AI_Revenue_B'],
+        name='AWS AI', mode='lines+markers',
+        line=dict(color='#FF9900', width=3),
+        marker=dict(size=8)
+    ))
+    fig.add_trace(go.Scatter(
+        x=df['Period'], y=df['GCP_AI_Revenue_B'],
+        name='GCP AI', mode='lines+markers',
+        line=dict(color='#34A853', width=3),
+        marker=dict(size=8)
+    ))
+    fig.update_layout(
+        title='AI/ML Cloud Revenue Growth ($B)',
+        xaxis_title='Quarter',
+        yaxis_title='Revenue ($B)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(color='white'),
+        legend=dict(bgcolor='rgba(0,0,0,0)'),
+        height=400
+    )
+    return fig
+
 def tco_comparison_chart(costs):
     fig = go.Figure()
     providers = list(costs.keys())
