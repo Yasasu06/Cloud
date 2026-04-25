@@ -1613,7 +1613,19 @@ def page_home():
     df = load_data()
     latest = df.iloc[-1]
     stocks = get_stocks()
-    
+
+    st.markdown("### 📡 Market Pulse")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Cloud Market Size", "$855B", delta="2026 estimate")
+    with col2:
+        st.metric("Market CAGR", "19%", delta="through 2029")
+    with col3:
+        st.metric("AI Cloud Growth", "47% YoY", delta="fastest segment")
+    with col4:
+        st.metric("Multi-cloud Adoption", "89%", delta="enterprises 2026")
+    st.markdown("---")
+
     # Hero Section
     st.markdown("""
     <div class="hero-section">
@@ -2190,6 +2202,61 @@ def page_migration():
             """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
+    st.markdown("### 🗺️ Migration Path Detail")
+
+    migration_paths = {
+        ("AWS", "Azure"): {
+            "hardest": ["IAM roles → Azure AD migration", "S3 → Azure Blob Storage data transfer costs", "Lambda → Azure Functions rewrite"],
+            "easiest": ["EC2 → Azure VMs (near identical)", "RDS → Azure SQL Database"],
+            "time": "3-6 months typical"
+        },
+        ("AWS", "GCP"): {
+            "hardest": ["IAM → GCP IAM restructure", "CloudFormation → Terraform/Deployment Manager rewrite", "VPC networking differences"],
+            "easiest": ["S3 → Cloud Storage (simple)", "BigQuery is superior to Redshift for analytics"],
+            "time": "4-8 months typical"
+        },
+        ("Azure", "AWS"): {
+            "hardest": ["Azure AD → AWS IAM/Cognito", "Azure DevOps pipelines → CodePipeline rewrite", "ARM templates → CloudFormation"],
+            "easiest": ["Azure VMs → EC2 (straightforward)", "Blob Storage → S3 (easy mapping)"],
+            "time": "3-5 months typical"
+        },
+        ("Azure", "GCP"): {
+            "hardest": ["Azure AD → Google Workspace/Cloud Identity", "Cost management tooling differences", "Azure-specific compliance tools"],
+            "easiest": ["AI/ML workloads improve on GCP", "BigQuery vs Azure Synapse — GCP wins"],
+            "time": "4-7 months typical"
+        },
+        ("GCP", "AWS"): {
+            "hardest": ["Deployment Manager → CloudFormation", "GKE → EKS differences", "BigQuery → Redshift performance gap"],
+            "easiest": ["Compute Engine → EC2 (simple)", "Cloud Storage → S3 (easy)"],
+            "time": "3-5 months typical"
+        },
+        ("GCP", "Azure"): {
+            "hardest": ["Google Workspace → Microsoft 365 integration", "GCP IAM → Azure AD", "Anthos → Azure Arc differences"],
+            "easiest": ["AI workloads stay strong on Azure OpenAI", "Enterprise compliance tools better on Azure"],
+            "time": "4-6 months typical"
+        }
+    }
+
+    col1, col2 = st.columns(2)
+    with col1:
+        from_provider = st.selectbox("Migrating FROM", ["AWS", "Azure", "GCP"], key="mig_from")
+    with col2:
+        to_options = [p for p in ["AWS", "Azure", "GCP"] if p != from_provider]
+        to_provider = st.selectbox("Migrating TO", to_options, key="mig_to")
+
+    path = migration_paths.get((from_provider, to_provider))
+    if path:
+        st.markdown(f"**Estimated timeline: {path['time']}**")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**⚠️ Hardest Parts:**")
+            for item in path['hardest']:
+                st.markdown(f"- {item}")
+        with col2:
+            st.markdown("**✅ Easiest Parts:**")
+            for item in path['easiest']:
+                st.markdown(f"- {item}")
+
 # ============================================================================
 # PAGE: EXECUTIVE SUMMARY
 # ============================================================================
@@ -2404,19 +2471,12 @@ def page_simulator():
         
         # Crossover insight
         if proj['crossover']:
-            st.markdown(f"""
-            <div class="insight-box" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.03)); border-color: rgba(239, 68, 68, 0.2);">
-                <div class="insight-title" style="color: #ef4444;">🎯 Market Crossover Detected</div>
-                <div class="insight-text">At current growth rates, <strong style="color:white;">Azure passes AWS in {proj['crossover']['q']}</strong>. This would represent a historic shift in cloud market leadership.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.success(f"🚨 **Crossover Alert:** Based on current growth rates, Azure is projected to overtake AWS in **{proj['crossover']['q']}**. This is the moment the cloud industry has been watching.")
         else:
-            st.markdown(f"""
-            <div class="insight-box">
-                <div class="insight-title">📊 Projection Insight</div>
-                <div class="insight-text">At current growth rates, <strong style="color:white;">no market leadership change occurs within {years} years</strong>. AWS maintains its position as market leader.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info(f"📊 **No crossover detected** in this scenario's projection window. AWS maintains lead throughout.")
+
+        st.markdown("---")
+        st.caption("Adjust the growth rate sliders above to see how the crossover point shifts across scenarios.")
 
 # ============================================================================
 # PAGE: INTELLIGENCE FEED
