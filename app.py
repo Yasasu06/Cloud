@@ -1333,45 +1333,36 @@ INDUSTRIES = {
 }
 
 # News Feed
-NEWS_API_KEY = "pub_0287276a90d54543abde9f315660481e"  # Free key from newsdata.io
+NEWS_API_KEY = "175abd0f3280d9f52039b87911036702"
 
 def fetch_live_news():
-    """Fetch live cloud news from NewsData.io free API.
-    Returns (articles, error_message). articles is None on failure."""
-    import urllib.request
-    import urllib.parse
-    import urllib.error
-    import json
     try:
-        query = urllib.parse.quote("AWS OR Azure OR Google Cloud OR cloud computing")
-        url = f"https://newsdata.io/api/1/news?apikey={NEWS_API_KEY}&q={query}&language=en&category=technology"
-        req = urllib.request.urlopen(url, timeout=5)
+        import urllib.request
+        import urllib.parse
+        import json
+        query = urllib.parse.quote("AWS OR Azure OR Google Cloud")
+        url = f"https://gnews.io/api/v4/search?q={query}&lang=en&topic=technology&max=8&apikey={NEWS_API_KEY}"
+        req = urllib.request.urlopen(url, timeout=8)
         data = json.loads(req.read().decode())
-        if data.get('status') != 'success':
-            return None, f"API error: {data.get('message', 'unknown')}"
         articles = []
-        for item in data.get('results', [])[:8]:
-            provider = 'AWS'
+        for item in data.get('articles', []):
             title_lower = item.get('title', '').lower()
+            provider = 'AWS'
             if 'azure' in title_lower or 'microsoft' in title_lower:
                 provider = 'Azure'
             elif 'google cloud' in title_lower or 'gcp' in title_lower:
                 provider = 'GCP'
+            impact = 'High' if any(w in title_lower for w in ['billion', 'major', 'launch', 'acquisition', 'breakthrough']) else 'Medium'
             articles.append({
-                'date': item.get('pubDate', '')[:10],
+                'date': item.get('publishedAt', '')[:10],
                 'provider': provider,
                 'title': item.get('title', ''),
-                'impact': 'High' if any(w in title_lower for w in ['billion', 'major', 'launch', 'acquisition']) else 'Medium',
-                'url': item.get('link', '')
+                'impact': impact,
+                'url': item.get('url', '')
             })
-        return (articles, None) if articles else (None, "API returned no articles")
-    except urllib.error.HTTPError as e:
-        body = e.read().decode(errors='ignore')
-        if 'allowlist' in body.lower() or 'whitelist' in body.lower():
-            return None, "Host not in allowlist — remove the domain restriction on your NewsData.io API key (dashboard → API Keys → edit)"
-        return None, f"HTTP {e.code}: {body[:120]}"
-    except Exception as e:
-        return None, str(e)
+        return articles if articles else None
+    except Exception:
+        return None
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -2564,16 +2555,13 @@ def page_intelligence():
     st.caption("Live news and analysis from across the cloud industry.")
 
     with st.spinner("Fetching latest cloud news..."):
-        live_articles, fetch_error = fetch_live_news()
+        live_articles = fetch_live_news()
 
     if live_articles:
         st.success("✅ Live feed active")
         articles = live_articles
     else:
-        if fetch_error:
-            st.warning(f"⚠️ Live feed unavailable: {fetch_error}")
-        else:
-            st.warning("⚠️ Live feed unavailable — showing curated headlines.")
+        st.warning("⚠️ Live feed unavailable — showing curated headlines.")
         articles = [
             {'date': 'Apr 18, 2026', 'provider': 'Azure', 'title': 'Microsoft announces GPT-5 exclusive integration in Azure OpenAI Service', 'impact': 'High', 'url': ''},
             {'date': 'Apr 15, 2026', 'provider': 'AWS', 'title': 'AWS reduces S3 storage pricing by 15% across all regions', 'impact': 'Medium', 'url': ''},
