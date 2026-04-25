@@ -2536,6 +2536,102 @@ def page_intelligence():
     """, unsafe_allow_html=True)
 
 # ============================================================================
+# PAGE: COST SHOCK CALCULATOR
+# ============================================================================
+
+def page_cost_shock():
+    st.markdown("# 💸 Cost Shock Calculator")
+    st.markdown("*See how your cloud bill scales as your company grows — month by month.*")
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1, 2])
+
+    with col1:
+        st.markdown("### Inputs")
+
+        monthly_spend = st.number_input(
+            "Current Monthly Spend ($)",
+            min_value=100, max_value=10_000_000, value=10_000, step=500,
+            help="Your current total cloud bill per month"
+        )
+
+        st.markdown("**Growth Scenario**")
+        preset_col1, preset_col2, preset_col3 = st.columns(3)
+        if 'shock_multiplier' not in st.session_state:
+            st.session_state.shock_multiplier = 3.0
+        with preset_col1:
+            if st.button("2x\nSteady", use_container_width=True):
+                st.session_state.shock_multiplier = 2.0
+                st.rerun()
+        with preset_col2:
+            if st.button("5x\nHyper", use_container_width=True):
+                st.session_state.shock_multiplier = 5.0
+                st.rerun()
+        with preset_col3:
+            if st.button("10x\nBlitz", use_container_width=True):
+                st.session_state.shock_multiplier = 10.0
+                st.rerun()
+
+        growth_multiplier = st.slider(
+            "End-of-Year Scale Factor",
+            min_value=1.1, max_value=20.0,
+            value=st.session_state.shock_multiplier,
+            step=0.1,
+            help="How many times larger your infrastructure will be by month 12"
+        )
+        st.session_state.shock_multiplier = growth_multiplier
+
+        provider = st.selectbox(
+            "Cloud Provider",
+            ["AWS", "Azure", "GCP"],
+            help="Provider whose branding and color to use in the chart"
+        )
+
+        st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div style="font-size:0.82rem;color:#666;line-height:1.7;">
+        • Scale factor applies linearly over 12 months<br>
+        • Month 1 ≈ current spend<br>
+        • Month 12 = spend × scale factor<br>
+        • Does not account for reserved pricing
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col2:
+        fig, projected_month12 = cost_shock_calculator(monthly_spend, growth_multiplier, provider)
+
+        annual_total = sum(
+            round(monthly_spend * (1 + (growth_multiplier - 1) * (m / 12)), 2)
+            for m in range(1, 13)
+        )
+        absolute_increase = projected_month12 - monthly_spend
+
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Current Monthly", f"${monthly_spend:,.0f}")
+        m2.metric("Month 12 Projected", f"${projected_month12:,.0f}",
+                  f"+${absolute_increase:,.0f}")
+        m3.metric("Total Annual Cost", f"${annual_total:,.0f}")
+        m4.metric("Growth Factor", f"{growth_multiplier:.1f}x")
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        if growth_multiplier >= 8:
+            level, color, advice = "Extreme", "#ef4444", "At this scale velocity, architecture and contract renegotiation should begin immediately. Reserved pricing and enterprise agreements become critical."
+        elif growth_multiplier >= 4:
+            level, color, advice = "High", "#eab308", "Significant spend increase ahead. Evaluate reserved instances and savings plans now to lock in discounts before costs compound."
+        elif growth_multiplier >= 2:
+            level, color, advice = "Moderate", "#6366f1", "Manageable growth trajectory. Review your auto-scaling policies and rightsizing opportunities to keep efficiency high."
+        else:
+            level, color, advice = "Low", "#22c55e", "Stable growth. Good time to audit existing spend for waste and negotiate better rates with your provider."
+
+        st.markdown(f"""
+        <div class="insight-box" style="background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03)); border-color: rgba(99,102,241,0.2); margin-top: 16px;">
+            <div class="insight-title" style="color:{color};">⚡ {level} Growth Alert</div>
+            <div class="insight-text">{advice}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+# ============================================================================
 # MAIN
 # ============================================================================
 
@@ -2557,7 +2653,8 @@ def main():
         "🔄 Migration Analyzer",
         "📊 Executive Summary",
         "🔮 Simulator",
-        "📰 Intelligence Feed"
+        "📰 Intelligence Feed",
+        "💸 Cost Shock"
     ]
     
     # Use session state for page if set by navigation buttons
@@ -2586,7 +2683,8 @@ def main():
         "🔄 Migration Analyzer": page_migration,
         "📊 Executive Summary": page_executive_summary,
         "🔮 Simulator": page_simulator,
-        "📰 Intelligence Feed": page_intelligence
+        "📰 Intelligence Feed": page_intelligence,
+        "💸 Cost Shock": page_cost_shock
     }
     
     page_functions[page]()
