@@ -97,6 +97,13 @@ export default function Navbar() {
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-3">
             <Link
+              href="/chat"
+              className="hidden sm:block px-4 py-2 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-105"
+              style={{ background: '#6366f1' }}
+            >
+              Ask AI
+            </Link>
+            <Link
               href="/advisor"
               className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
               style={{
