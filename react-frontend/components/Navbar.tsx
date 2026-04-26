@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '/advisor', label: 'Cloud Advisor', special: false },
   { href: '/planner', label: 'Planner', special: false },
   { href: '/migration', label: 'Migration', special: false },
+  { href: '/executive', label: 'Executive', special: false },
   { href: '/intelligence', label: 'Intelligence', special: false },
   { href: '/others', label: 'Alternatives', special: false },
   { href: '/start', label: 'Start Here →', special: true },

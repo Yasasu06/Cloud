@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
+import LiveTicker from '@/components/LiveTicker'
 import { JourneyProvider } from '@/lib/journeyContext'
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function RootLayout({
       </head>
       <body>
         <Navbar />
+        <LiveTicker />
         <JourneyProvider>
           <main>{children}</main>
         </JourneyProvider>

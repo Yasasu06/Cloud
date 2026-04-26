@@ -46,9 +46,11 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PROVIDERS.map((provider) => (
-              <ProviderCard key={provider.key} name={provider.name} color={provider.color}
-                marketShare={provider.marketShare} revenue={provider.revenue}
-                growth={provider.growth} tag={provider.tag} description={provider.description} />
+              <div key={provider.key} className="card-hover">
+                <ProviderCard name={provider.name} color={provider.color}
+                  marketShare={provider.marketShare} revenue={provider.revenue}
+                  growth={provider.growth} tag={provider.tag} description={provider.description} />
+              </div>
             ))}
           </div>
         </div>
@@ -78,7 +80,7 @@ export default function HomePage() {
               return (
                 <div
                   key={feature.title}
-                  className="rounded-2xl p-6 text-center"
+                  className="rounded-2xl p-6 text-center card-hover"
                   style={{
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border)',
@@ -101,6 +103,46 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section style={{
+        padding: '80px 24px',
+        borderTop: '1px solid #ffffff08',
+        borderBottom: '1px solid #ffffff08',
+        textAlign: 'center',
+      }}>
+        <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>
+          HOW IT WORKS
+        </p>
+        <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16 }}>
+          From confusion to confident decision in 3 steps
+        </h2>
+        <p style={{ color: '#a0a0b0', marginBottom: 48, maxWidth: 500, margin: '0 auto 48px' }}>
+          No jargon. No bias. Just clear guidance based on your actual situation.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 800, margin: '0 auto' }}>
+          {[
+            { step: '01', title: 'Tell us about yourself', desc: 'Answer 5 quick questions about your team, workload, and budget. Takes 60 seconds.', icon: '🎯' },
+            { step: '02', title: 'Get your recommendation', desc: 'Our engine scores every provider against your specific needs and tells you exactly why.', icon: '⚡' },
+            { step: '03', title: 'Plan with confidence', desc: 'See cost projections, migration complexity, and compliance requirements — all in one place.', icon: '🚀' },
+          ].map((s) => (
+            <div key={s.step} className="card-hover" style={{
+              background: '#1a1a2e',
+              borderRadius: 16,
+              padding: 32,
+              textAlign: 'center',
+              border: '1px solid #ffffff08',
+            }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>{s.icon}</div>
+              <div style={{ color: '#6366f1', fontSize: 12, fontWeight: 700, marginBottom: 8, letterSpacing: 2 }}>
+                STEP {s.step}
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>{s.title}</h3>
+              <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6 }}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Journey CTA */}
       <section style={{ borderTop: '1px solid #ffffff10', background: 'var(--bg-secondary)' }}>
         <div style={{ textAlign: 'center', padding: '60px 24px' }}>
@@ -116,6 +158,7 @@ export default function HomePage() {
           </p>
           <button
             onClick={() => router.push('/start')}
+            className="btn-primary"
             style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: 12, padding: '16px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
           >
             Start My Cloud Journey →
