@@ -294,7 +294,7 @@ export default function AdvisorPage() {
                   <RotateCcw size={14} /> Retake Quiz
                 </button>
                 <Link
-                  href="/simulator"
+                  href="/planner"
                   className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.01]"
                   style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
                 >
@@ -319,7 +319,7 @@ export default function AdvisorPage() {
                   like as you grow — and how it compares to the alternatives.
                 </p>
                 <button
-                  onClick={() => router.push('/cost-shock')}
+                  onClick={() => router.push('/planner')}
                   style={{
                     background: PROVIDER_INFO[result.winner].color,
                     color: 'white',

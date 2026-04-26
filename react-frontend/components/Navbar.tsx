@@ -8,9 +8,8 @@ import { Cloud, Menu, X } from 'lucide-react'
 const NAV_LINKS = [
   { href: '/', label: 'Home', special: false },
   { href: '/advisor', label: 'Cloud Advisor', special: false },
-  { href: '/simulator', label: 'Simulator', special: false },
+  { href: '/planner', label: 'Planner', special: false },
   { href: '/migration', label: 'Migration', special: false },
-  { href: '/cost-shock', label: 'Cost Shock', special: false },
   { href: '/intelligence', label: 'Intelligence', special: false },
   { href: '/others', label: 'Alternatives', special: false },
   { href: '/start', label: 'Start Here →', special: true },
