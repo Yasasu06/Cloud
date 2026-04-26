@@ -4,9 +4,36 @@ import Navbar from '@/components/Navbar'
 import { JourneyProvider } from '@/lib/journeyContext'
 
 export const metadata: Metadata = {
-  title: 'Cloud Intelligence Platform',
-  description: 'The definitive platform for AWS, Azure, and Google Cloud analysis, cost modeling, and strategic recommendations.',
-  keywords: ['AWS', 'Azure', 'Google Cloud', 'cloud computing', 'cloud comparison', 'TCO calculator'],
+  title: {
+    default: 'Cloud Intelligence Platform — AWS vs Azure vs GCP Comparison',
+    template: '%s | Cloud Intelligence Platform',
+  },
+  description:
+    'The definitive cloud computing resource. Compare AWS, Azure, and Google Cloud with real financial data, AI-powered recommendations, cost projections, and migration planning tools.',
+  keywords: [
+    'cloud computing',
+    'AWS vs Azure',
+    'Google Cloud comparison',
+    'cloud cost calculator',
+    'cloud migration',
+    'cloud advisor',
+    'AWS pricing',
+    'Azure pricing',
+    'GCP pricing',
+  ],
+  authors: [{ name: 'Yasaswi Dutta' }],
+  openGraph: {
+    title: 'Cloud Intelligence Platform',
+    description:
+      'Compare AWS, Azure, and GCP with real data. Get personalized recommendations, cost projections, and migration plans.',
+    type: 'website',
+    siteName: 'Cloud Intelligence Platform',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cloud Intelligence Platform',
+    description: 'The definitive AWS vs Azure vs GCP comparison tool.',
+  },
 }
 
 export default function RootLayout({

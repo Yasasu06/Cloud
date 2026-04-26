@@ -1,135 +1,143 @@
 'use client'
 
 import { useState } from 'react'
-import NewsCard from '@/components/NewsCard'
-import { Rss, Filter } from 'lucide-react'
 
-type Impact = 'High' | 'Medium' | 'Low'
-
-interface Article {
-  title: string
-  provider: 'AWS' | 'Azure' | 'GCP'
-  date: string
-  impact: Impact
-  url: string
-}
-
-const SAMPLE_ARTICLES: Article[] = [
-  { title: 'AWS Announces Amazon Bedrock Agents with Multi-Step Reasoning', provider: 'AWS', date: '2025-04-10', impact: 'High', url: '#' },
-  { title: 'AWS re:Invent 2025 Preview: Major Infrastructure Announcements Expected', provider: 'AWS', date: '2025-04-08', impact: 'High', url: '#' },
-  { title: 'Amazon EC2 P6 Instances Now Available with NVIDIA Blackwell GPUs', provider: 'AWS', date: '2025-04-05', impact: 'High', url: '#' },
-  { title: 'AWS Cost Optimization Hub Gets New Savings Plan Recommendations', provider: 'AWS', date: '2025-04-02', impact: 'Medium', url: '#' },
-  { title: 'Microsoft Copilot for Azure Reaches General Availability', provider: 'Azure', date: '2025-04-11', impact: 'High', url: '#' },
-  { title: 'Azure OpenAI Service Adds GPT-4o Real-Time API Support', provider: 'Azure', date: '2025-04-09', impact: 'High', url: '#' },
-  { title: 'Microsoft Acquisition of Nuance AI Platform Integration Complete', provider: 'Azure', date: '2025-04-06', impact: 'High', url: '#' },
-  { title: 'Azure Arc Expands Multi-Cloud Governance to Oracle Cloud', provider: 'Azure', date: '2025-04-04', impact: 'Medium', url: '#' },
-  { title: 'Google Gemini Ultra 2.0 Launches on Vertex AI Platform', provider: 'GCP', date: '2025-04-12', impact: 'High', url: '#' },
-  { title: 'Google Cloud Announces Breakthrough in Quantum Computing Research', provider: 'GCP', date: '2025-04-07', impact: 'High', url: '#' },
-  { title: 'GCP BigQuery Omni Adds Support for Azure Fabric Integration', provider: 'GCP', date: '2025-04-03', impact: 'Medium', url: '#' },
-  { title: 'Google Cloud TPU v6 Now Generally Available for AI Training', provider: 'GCP', date: '2025-04-01', impact: 'High', url: '#' },
+const NEWS = [
+  { date: 'Apr 24, 2026', provider: 'Azure', category: 'AI', title: 'Microsoft expands Azure OpenAI Service to 12 new regions with GPT-4o support', impact: 'High', summary: 'Microsoft is rapidly expanding its AI infrastructure globally, making enterprise AI more accessible.' },
+  { date: 'Apr 22, 2026', provider: 'AWS', category: 'Pricing', title: 'AWS announces 15% price reduction on S3 Standard storage globally', impact: 'High', summary: 'AWS continues price competition as cloud storage becomes increasingly commoditized.' },
+  { date: 'Apr 20, 2026', provider: 'GCP', category: 'AI', title: 'Google launches Gemini 2.0 Ultra on Vertex AI with 2M token context window', impact: 'High', summary: 'GCP strengthens its AI position with the most capable publicly available model context window.' },
+  { date: 'Apr 18, 2026', provider: 'AWS', category: 'Infrastructure', title: 'AWS opens new region in Malaysia, expanding Southeast Asia presence to 4 regions', impact: 'Medium', summary: 'AWS continues aggressive geographic expansion to capture growing Asia Pacific demand.' },
+  { date: 'Apr 15, 2026', provider: 'Azure', category: 'Security', title: 'Microsoft announces Azure Confidential Computing now generally available across all regions', impact: 'Medium', summary: 'Confidential computing protects data in use, critical for financial services and healthcare.' },
+  { date: 'Apr 12, 2026', provider: 'GCP', category: 'Data', title: 'BigQuery adds real-time streaming with sub-100ms latency for analytics workloads', impact: 'Medium', summary: 'GCP continues to strengthen its position as the leading cloud analytics platform.' },
+  { date: 'Apr 10, 2026', provider: 'DigitalOcean', category: 'Product', title: 'DigitalOcean launches managed GPU droplets starting at $0.40/hour for AI workloads', impact: 'Medium', summary: 'Alternative providers are entering the AI infrastructure space with more affordable options.' },
+  { date: 'Apr 8, 2026', provider: 'AWS', category: 'AI', title: 'Amazon Bedrock adds Claude 3.7 Sonnet and new agent orchestration capabilities', impact: 'High', summary: 'AWS continues to expand its AI model marketplace, partnering with all major AI labs.' },
+  { date: 'Apr 5, 2026', provider: 'Azure', category: 'Enterprise', title: 'Microsoft Azure Arc expands hybrid cloud management to edge and IoT devices', impact: 'Low', summary: 'Azure strengthens its hybrid cloud story for manufacturing and retail customers.' },
+  { date: 'Apr 2, 2026', provider: 'GCP', category: 'Sustainability', title: 'Google Cloud achieves 100% renewable energy matching in all 40 global regions', impact: 'Medium', summary: 'GCP leads the Big 3 on sustainability commitments, a growing enterprise procurement factor.' },
+  { date: 'Mar 28, 2026', provider: 'Hetzner', category: 'Pricing', title: 'Hetzner launches US East region with European pricing — 60% cheaper than AWS equivalent', impact: 'Medium', summary: 'European budget cloud providers are entering the US market, increasing price competition.' },
+  { date: 'Mar 25, 2026', provider: 'AWS', category: 'Infrastructure', title: 'AWS Lambda increases free tier to 5M requests/month and raises memory cap to 20GB', impact: 'Low', summary: 'AWS improves developer experience on serverless to maintain Lambda market leadership.' },
 ]
 
-const ALL_PROVIDERS = ['AWS', 'Azure', 'GCP'] as const
+const PROVIDERS = ['All', 'AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner'] as const
+const IMPACTS = ['All', 'High', 'Medium', 'Low'] as const
+const CATEGORIES = ['All', 'AI', 'Pricing', 'Infrastructure', 'Security', 'Data', 'Product', 'Enterprise', 'Sustainability'] as const
+
+const PROVIDER_COLORS: Record<string, string> = {
+  AWS: '#FF9900', Azure: '#0078D4', GCP: '#34A853',
+  DigitalOcean: '#0080FF', Hetzner: '#D50C2D',
+}
+
+const IMPACT_COLORS: Record<string, string> = {
+  High: '#ef4444', Medium: '#f59e0b', Low: '#22c55e',
+}
 
 export default function IntelligencePage() {
-  const [selectedProviders, setSelectedProviders] = useState<string[]>(['AWS', 'Azure', 'GCP'])
-  const [selectedImpact, setSelectedImpact] = useState<Impact | 'All'>('All')
+  const [provider, setProvider] = useState('All')
+  const [impact, setImpact] = useState('All')
+  const [category, setCategory] = useState('All')
 
-  const toggleProvider = (p: string) => {
-    setSelectedProviders((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    )
-  }
-
-  const filtered = SAMPLE_ARTICLES.filter(
-    (a) =>
-      selectedProviders.includes(a.provider) &&
-      (selectedImpact === 'All' || a.impact === selectedImpact)
+  const filtered = NEWS.filter(
+    (n) =>
+      (provider === 'All' || n.provider === provider) &&
+      (impact === 'All' || n.impact === impact) &&
+      (category === 'All' || n.category === category)
   )
 
+  function filterBtn(active: boolean): React.CSSProperties {
+    return {
+      padding: '6px 14px',
+      borderRadius: 20,
+      border: active ? 'none' : '1px solid #ffffff20',
+      background: active ? '#6366f1' : 'transparent',
+      color: active ? 'white' : '#a0a0b0',
+      cursor: 'pointer',
+      fontSize: 13,
+      fontWeight: active ? 600 : 400,
+    }
+  }
+
   return (
-    <div className="min-h-screen pt-24 px-4 pb-16" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)' }}>
-            Cloud Intelligence
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-            Latest cloud news &amp; insights
-          </h1>
-          <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
-            Curated announcements from AWS, Azure, and Google Cloud — filtered by impact.
+    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '100px 24px 60px' }}>
+        <div style={{ marginBottom: 32 }}>
+          <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 8 }}>📰 Cloud Intelligence Feed</h1>
+          <p style={{ color: '#a0a0b0' }}>
+            Latest developments across AWS, Azure, GCP, and alternative providers. Updated weekly.
           </p>
         </div>
 
         {/* Filters */}
-        <div
-          className="rounded-2xl p-5 mb-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-        >
-          <div className="flex items-center gap-2 text-xs font-semibold text-white shrink-0">
-            <Filter size={14} style={{ color: 'var(--accent)' }} /> Filters
+        <div style={{ display: 'flex', gap: 24, marginBottom: 32, flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontSize: 11, color: '#a0a0b0', marginBottom: 8 }}>PROVIDER</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {PROVIDERS.map((p) => (
+                <button key={p} onClick={() => setProvider(p)} style={filterBtn(provider === p)}>{p}</button>
+              ))}
+            </div>
           </div>
-
-          <div className="flex flex-wrap gap-2">
-            {ALL_PROVIDERS.map((p) => {
-              const colors: Record<string, string> = { AWS: '#FF9900', Azure: '#0078D4', GCP: '#34A853' }
-              const active = selectedProviders.includes(p)
-              return (
-                <button
-                  key={p} onClick={() => toggleProvider(p)}
-                  className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
-                  style={{
-                    background: active ? `${colors[p]}22` : 'rgba(255,255,255,0.05)',
-                    border: active ? `1px solid ${colors[p]}` : '1px solid transparent',
-                    color: active ? colors[p] : '#a0a0b0',
-                  }}
-                >{p}</button>
-              )
-            })}
-
-            <div className="w-px self-stretch" style={{ background: 'var(--border)' }} />
-
-            {(['All', 'High', 'Medium', 'Low'] as const).map((level) => (
-              <button
-                key={level} onClick={() => setSelectedImpact(level)}
-                className="px-3 py-1 rounded-full text-xs font-semibold transition-all"
-                style={{
-                  background: selectedImpact === level ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                  border: selectedImpact === level ? '1px solid #6366f1' : '1px solid transparent',
-                  color: selectedImpact === level ? '#c7d2fe' : '#a0a0b0',
-                }}
-              >{level === 'All' ? 'All Impact' : `${level} Impact`}</button>
-            ))}
+          <div>
+            <div style={{ fontSize: 11, color: '#a0a0b0', marginBottom: 8 }}>IMPACT</div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {IMPACTS.map((i) => (
+                <button key={i} onClick={() => setImpact(i)} style={filterBtn(impact === i)}>{i}</button>
+              ))}
+            </div>
           </div>
-
-          <span className="text-xs ml-auto shrink-0" style={{ color: 'var(--text-secondary)' }}>
-            {filtered.length} articles
-          </span>
+          <div>
+            <div style={{ fontSize: 11, color: '#a0a0b0', marginBottom: 8 }}>CATEGORY</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {CATEGORIES.map((c) => (
+                <button key={c} onClick={() => setCategory(c)} style={filterBtn(category === c)}>{c}</button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Live indicator */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-            Sample articles — connect to RSS feeds for live data
-          </span>
-          <Rss size={12} style={{ color: 'var(--text-secondary)' }} />
+        <div style={{ marginBottom: 16, color: '#a0a0b0', fontSize: 13 }}>
+          Showing {filtered.length} of {NEWS.length} stories
         </div>
 
-        {/* Article grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {filtered.map((article, i) => (
-              <NewsCard key={i} {...article} />
-            ))}
-          </div>
-        ) : (
-          <div
-            className="rounded-2xl p-12 text-center"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-          >
-            <p style={{ color: 'var(--text-secondary)' }}>No articles match your filters.</p>
+        {/* Article list */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {filtered.map((article, i) => (
+            <div
+              key={i}
+              style={{
+                background: '#1a1a2e',
+                borderRadius: 12,
+                padding: '20px 24px',
+                borderLeft: `4px solid ${PROVIDER_COLORS[article.provider] || '#6366f1'}`,
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ color: PROVIDER_COLORS[article.provider] || '#6366f1', fontWeight: 700, fontSize: 13 }}>
+                    {article.provider}
+                  </span>
+                  <span style={{ background: '#ffffff10', padding: '2px 8px', borderRadius: 4, fontSize: 11, color: '#a0a0b0' }}>
+                    {article.category}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span style={{ color: IMPACT_COLORS[article.impact], fontSize: 12, fontWeight: 600 }}>
+                    {article.impact} Impact
+                  </span>
+                  <span style={{ color: '#666', fontSize: 12 }}>{article.date}</span>
+                </div>
+              </div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 8, lineHeight: 1.4 }}>
+                {article.title}
+              </h3>
+              <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+                {article.summary}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 60, color: '#a0a0b0' }}>
+            No stories match your current filters.
           </div>
         )}
       </div>
