@@ -7,7 +7,14 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 
-const QUESTIONS = [
+interface Question {
+  id: number | string
+  question: string
+  options: { label: string; value: string }[]
+  isDynamic?: boolean
+}
+
+const BASE_QUESTIONS: Question[] = [
   {
     id: 1,
     question: 'What best describes your primary workload?',
@@ -65,6 +72,41 @@ const QUESTIONS = [
   },
 ]
 
+const DYNAMIC_QUESTIONS: Record<string, Question> = {
+  microsoftEcosystem: {
+    id: 'microsoftEcosystem',
+    isDynamic: true,
+    question: 'Does your organization currently use Microsoft 365 or Azure AD?',
+    options: [
+      { label: 'Yes, heavily integrated', value: 'heavy' },
+      { label: 'Somewhat', value: 'somewhat' },
+      { label: 'No, we are independent', value: 'no' },
+    ],
+  },
+  aiType: {
+    id: 'aiType',
+    isDynamic: true,
+    question: 'What type of AI work are you doing?',
+    options: [
+      { label: 'Training large models', value: 'training' },
+      { label: 'Running inference/APIs', value: 'inference' },
+      { label: 'Building AI apps on existing models', value: 'apps' },
+      { label: 'Just experimenting', value: 'experimenting' },
+    ],
+  },
+  healthcareData: {
+    id: 'healthcareData',
+    isDynamic: true,
+    question: 'What type of healthcare data are you handling?',
+    options: [
+      { label: 'Patient records (PHI)', value: 'phi' },
+      { label: 'Insurance claims', value: 'insurance' },
+      { label: 'Medical devices/IoT', value: 'iot' },
+      { label: 'Research data only', value: 'research' },
+    ],
+  },
+}
+
 const SCORES: Record<string, Record<string, { aws: number; azure: number; gcp: number }>> = {
   workload: {
     web: { aws: 3, azure: 2, gcp: 1 },
@@ -114,12 +156,14 @@ const PROVIDER_INFO: Record<string, { color: string; name: string; tagline: stri
 export default function AdvisorPage() {
   const { setJourney } = useJourney()
   const router = useRouter()
+  const [questionQueue, setQuestionQueue] = useState<Question[]>(BASE_QUESTIONS)
   const [step, setStep] = useState(0)
-  const [answers, setAnswers] = useState<string[]>([])
+  const [answerMap, setAnswerMap] = useState<Record<string, string>>({})
   const [selected, setSelected] = useState<string | null>(null)
+  const [bonusScores, setBonusScores] = useState({ aws: 0, azure: 0, gcp: 0 })
   const [result, setResult] = useState<{ winner: string; confidence: number; scores: Record<string, number> } | null>(null)
 
-  const question = QUESTIONS[step]
+  const question = questionQueue[step]
 
   function handleSelect(value: string) {
     setSelected(value)
@@ -127,22 +171,64 @@ export default function AdvisorPage() {
 
   function handleNext() {
     if (!selected) return
-    const newAnswers = [...answers, selected]
-    if (step < QUESTIONS.length - 1) {
-      setAnswers(newAnswers)
+
+    const currentQ = questionQueue[step]
+    const newAnswerMap = { ...answerMap, [String(currentQ.id)]: selected }
+    let newBonus = { ...bonusScores }
+    let newQueue = [...questionQueue]
+
+    // Score dynamic questions
+    if (currentQ.isDynamic) {
+      if (currentQ.id === 'microsoftEcosystem') {
+        if (selected === 'heavy') newBonus.azure += 3
+        if (selected === 'somewhat') newBonus.azure += 1
+      } else if (currentQ.id === 'aiType') {
+        if (selected === 'training') newBonus.gcp += 3
+        if (selected === 'inference') { newBonus.azure += 2; newBonus.aws += 1 }
+        if (selected === 'apps') newBonus.azure += 2
+        if (selected === 'experimenting') newBonus.gcp += 1
+      } else if (currentQ.id === 'healthcareData') {
+        if (selected === 'phi') newBonus.azure += 2
+        if (selected === 'iot') newBonus.azure += 2
+        if (selected === 'research') newBonus.gcp += 1
+      }
+      setBonusScores(newBonus)
+    }
+
+    // Insert dynamic questions after workload (Q1)
+    if (currentQ.id === 1) {
+      if (selected === 'enterprise') {
+        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.microsoftEcosystem, ...newQueue.slice(step + 1)]
+      }
+      if (selected === 'ai') {
+        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.aiType, ...newQueue.slice(step + 1)]
+      }
+      setQuestionQueue(newQueue)
+    }
+
+    // Insert dynamic questions after compliance (Q2)
+    if (currentQ.id === 2) {
+      if (selected === 'hipaa') {
+        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.healthcareData, ...newQueue.slice(step + 1)]
+        setQuestionQueue(newQueue)
+      }
+    }
+
+    if (step < newQueue.length - 1) {
+      setAnswerMap(newAnswerMap)
       setSelected(null)
       setStep(step + 1)
     } else {
-      const totals = { aws: 0, azure: 0, gcp: 0 }
-      newAnswers.forEach((ans, idx) => {
-        const key = SCORE_KEYS[idx]
-        const s = SCORES[key][ans]
-        if (s) {
-          totals.aws += s.aws
-          totals.azure += s.azure
-          totals.gcp += s.gcp
+      // Calculate final scores from base questions + bonuses
+      const totals = { aws: newBonus.aws, azure: newBonus.azure, gcp: newBonus.gcp }
+      SCORE_KEYS.forEach((key, idx) => {
+        const ans = newAnswerMap[String(idx + 1)]
+        if (ans) {
+          const s = SCORES[key][ans]
+          if (s) { totals.aws += s.aws; totals.azure += s.azure; totals.gcp += s.gcp }
         }
       })
+
       const max = Math.max(totals.aws, totals.azure, totals.gcp)
       const winner = totals.azure === max ? 'azure' : totals.aws === max ? 'aws' : 'gcp'
       const confidence = Math.min(95, Math.max(50, Math.round((max / 15) * 100)))
@@ -150,9 +236,9 @@ export default function AdvisorPage() {
       setJourney({
         recommendedProvider: PROVIDER_INFO[winner].name,
         providerColor: PROVIDER_INFO[winner].color,
-        monthlyBudget: QUESTIONS[4].options.find(o => o.value === newAnswers[4])?.label ?? newAnswers[4],
-        teamSize: QUESTIONS[2].options.find(o => o.value === newAnswers[2])?.label ?? newAnswers[2],
-        workload: QUESTIONS[0].options.find(o => o.value === newAnswers[0])?.label ?? newAnswers[0],
+        monthlyBudget: BASE_QUESTIONS[4].options.find(o => o.value === newAnswerMap['5'])?.label ?? (newAnswerMap['5'] ?? ''),
+        teamSize: BASE_QUESTIONS[2].options.find(o => o.value === newAnswerMap['3'])?.label ?? (newAnswerMap['3'] ?? ''),
+        workload: BASE_QUESTIONS[0].options.find(o => o.value === newAnswerMap['1'])?.label ?? (newAnswerMap['1'] ?? ''),
         confidence,
       })
     }
@@ -160,9 +246,11 @@ export default function AdvisorPage() {
 
   function reset() {
     setStep(0)
-    setAnswers([])
+    setAnswerMap({})
     setSelected(null)
     setResult(null)
+    setQuestionQueue(BASE_QUESTIONS)
+    setBonusScores({ aws: 0, azure: 0, gcp: 0 })
   }
 
   return (
@@ -187,7 +275,7 @@ export default function AdvisorPage() {
           >
             {/* Progress bar */}
             <div className="flex gap-1.5 mb-8">
-              {QUESTIONS.map((_, i) => (
+              {questionQueue.map((_, i) => (
                 <div
                   key={i}
                   className="flex-1 h-1 rounded-full transition-all duration-300"
@@ -198,9 +286,16 @@ export default function AdvisorPage() {
               ))}
             </div>
 
-            <p className="text-xs mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Question {step + 1} of {QUESTIONS.length}
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                Question {step + 1} of {questionQueue.length}
+              </p>
+              {question.isDynamic && (
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
+                  Personalized follow-up
+                </span>
+              )}
+            </div>
             <h2 className="text-xl font-semibold text-white mb-6">{question.question}</h2>
 
             <div className="space-y-3 mb-8">
@@ -226,7 +321,7 @@ export default function AdvisorPage() {
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01]"
               style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
             >
-              {step === QUESTIONS.length - 1 ? 'Get My Recommendation' : 'Next'}
+              {step === questionQueue.length - 1 ? 'Get My Recommendation' : 'Next'}
               <ChevronRight size={16} />
             </button>
           </div>
@@ -270,14 +365,14 @@ export default function AdvisorPage() {
                         <span className="font-medium" style={{ color: PROVIDER_INFO[provider].color }}>
                           {provider.toUpperCase()}
                         </span>
-                        <span style={{ color: 'var(--text-secondary)' }}>{score}/15</span>
+                        <span style={{ color: 'var(--text-secondary)' }}>{score} pts</span>
                       </div>
                       <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: PROVIDER_INFO[provider].color }}
                           initial={{ width: 0 }}
-                          animate={{ width: `${(score / 15) * 100}%` }}
+                          animate={{ width: `${(score / Math.max(...Object.values(result.scores))) * 100}%` }}
                           transition={{ duration: 0.8, ease: 'easeOut' }}
                         />
                       </div>

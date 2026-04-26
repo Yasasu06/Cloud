@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/migration', label: 'Migration', special: false },
   { href: '/executive', label: 'Executive', special: false },
   { href: '/intelligence', label: 'Intelligence', special: false },
+  { href: '/multicloud', label: 'Multi-Cloud', special: false },
   { href: '/others', label: 'Alternatives', special: false },
   { href: '/start', label: 'Start Here →', special: true },
 ]

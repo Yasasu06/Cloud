@@ -181,10 +181,9 @@ body {
 
 .ticker-wrap {
   overflow: hidden;
-  background: rgba(99,102,241,0.1);
-  border-top: 1px solid rgba(99,102,241,0.2);
-  border-bottom: 1px solid rgba(99,102,241,0.2);
+  background: linear-gradient(90deg, #4f46e5, #6366f1, #4f46e5);
   padding: 10px 0;
+  border-bottom: 1px solid rgba(99,102,241,0.4);
 }
 
 .ticker-content {
@@ -197,11 +196,12 @@ body {
   padding: 0 48px;
   white-space: nowrap;
   font-size: 13px;
-  color: #a0a0b0;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
 }
 
 .ticker-item span {
-  color: #6366f1;
-  font-weight: 600;
+  color: white;
+  font-weight: 700;
   margin-right: 8px;
 }

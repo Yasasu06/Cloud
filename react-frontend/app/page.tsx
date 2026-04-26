@@ -1,7 +1,6 @@
 'use client'
 
 import HeroSection from '@/components/HeroSection'
-import MarketPulse from '@/components/MarketPulse'
 import ProviderCard from '@/components/ProviderCard'
 import AiGrowthChart from '@/components/AiGrowthChart'
 import { PROVIDERS, WHY_FEATURES } from '@/lib/data'
@@ -22,8 +21,76 @@ export default function HomePage() {
       <HeroSection />
 
       {/* Section 2: Market Pulse */}
-      <div id="market-data">
-        <MarketPulse />
+      <div id="market-data" style={{ padding: '60px 24px', textAlign: 'center' }}>
+        <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>MARKET PULSE</p>
+        <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>The numbers that define the cloud era</h2>
+        <p style={{ color: '#a0a0b0', marginBottom: 40, fontSize: 15 }}>Hover over any number to understand what it means for you.</p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16, maxWidth: 900, margin: '0 auto' }}>
+          {[
+            { value: '$855B', label: 'Cloud Market Size', color: '#6366f1', change: '+19% from 2025', tooltip: 'The total amount spent on cloud computing globally in 2026. To put this in perspective — this is bigger than the entire GDP of Switzerland. If you are not on cloud yet, your competitors probably are.' },
+            { value: '19%', label: 'Annual Growth Rate', color: '#0078D4', change: 'CAGR through 2029', tooltip: 'The cloud market grows 19% every single year. Most mature industries grow 2-3%. This means cloud spending will nearly double every 4 years. Choosing the right provider now matters more than ever.' },
+            { value: '47%', label: 'AI Cloud Growth', color: '#34A853', change: 'Year over year 2026', tooltip: 'The AI portion of cloud is growing at 47% per year — more than twice the overall cloud growth rate. Azure leads this race through its OpenAI partnership. If your project involves AI, this number directly affects which provider you should choose.' },
+            { value: '89%', label: 'Multi-cloud Adoption', color: '#FF9900', change: 'Of enterprises in 2026', tooltip: '89% of large enterprises use more than one cloud provider. They use AWS for some workloads, Azure for others, GCP for AI. This does not mean you should start with multiple clouds — begin with one, expand when you have a specific reason.' },
+          ].map((metric, i) => (
+            <div
+              key={i}
+              className="card-hover"
+              style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, border: '1px solid #ffffff08', position: 'relative', cursor: 'default' }}
+              onMouseEnter={e => {
+                const tooltip = e.currentTarget.querySelector('.metric-tooltip') as HTMLElement
+                if (tooltip) { tooltip.style.opacity = '1'; tooltip.style.visibility = 'visible' }
+              }}
+              onMouseLeave={e => {
+                const tooltip = e.currentTarget.querySelector('.metric-tooltip') as HTMLElement
+                if (tooltip) { tooltip.style.opacity = '0'; tooltip.style.visibility = 'hidden' }
+              }}
+            >
+              <div style={{ fontSize: 36, fontWeight: 800, color: metric.color, marginBottom: 8 }}>{metric.value}</div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{metric.label}</div>
+              <div style={{ color: '#a0a0b0', fontSize: 12 }}>{metric.change}</div>
+              <div className="metric-tooltip" style={{
+                position: 'absolute', bottom: 'calc(100% + 12px)', left: '50%', transform: 'translateX(-50%)',
+                background: '#0a0a0f', border: `1px solid ${metric.color}`, borderRadius: 12, padding: 16,
+                width: 260, fontSize: 13, lineHeight: 1.6, color: '#e0e0e0',
+                opacity: 0, visibility: 'hidden', transition: 'opacity 0.2s ease', zIndex: 100,
+                textAlign: 'left', boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+              }}>
+                <div style={{ color: metric.color, fontWeight: 700, marginBottom: 8, fontSize: 14 }}>What this means for you:</div>
+                {metric.tooltip}
+                <div style={{
+                  position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)',
+                  width: 12, height: 12, background: '#0a0a0f',
+                  border: `1px solid ${metric.color}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg',
+                }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 2b: Who is this for? */}
+      <div style={{ padding: '60px 24px', borderTop: '1px solid #ffffff08' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+          <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>WHO IS THIS FOR?</p>
+          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 40 }}>Built for everyone making cloud decisions</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 }}>
+            {[
+              { icon: '👨‍💻', persona: 'Developer', desc: 'Starting a personal project or side business and need the cheapest reliable option', link: '/start', cta: 'Start Here →', color: '#22c55e' },
+              { icon: '🚀', persona: 'Founder', desc: 'Building a startup and need to choose a cloud that scales without breaking the bank', link: '/advisor', cta: 'Get Advice →', color: '#6366f1' },
+              { icon: '🏢', persona: 'IT Manager', desc: 'Evaluating providers for your organization and need compliance and cost data', link: '/executive', cta: 'Get Report →', color: '#0078D4' },
+              { icon: '☁️', persona: 'Multi-cloud User', desc: 'Already using multiple clouds and need help deciding which workload goes where', link: '/multicloud', cta: 'Optimize Now →', color: '#FF9900' },
+            ].map(p => (
+              <a key={p.persona} href={p.link} style={{ textDecoration: 'none' }}>
+                <div className="card-hover" style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, border: '1px solid #ffffff08', height: '100%', cursor: 'pointer' }}>
+                  <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon}</div>
+                  <div style={{ fontWeight: 700, marginBottom: 8, color: 'white' }}>{p.persona}</div>
+                  <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{p.desc}</p>
+                  <div style={{ color: p.color, fontSize: 13, fontWeight: 600 }}>{p.cta}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Section 3: Provider Cards */}
