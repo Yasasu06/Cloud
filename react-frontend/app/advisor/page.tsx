@@ -169,6 +169,13 @@ export default function AdvisorPage() {
     setSelected(value)
   }
 
+  function handleBack() {
+    if (step === 0) return
+    const prevQ = questionQueue[step - 1]
+    setSelected(answerMap[String(prevQ.id)] ?? null)
+    setStep(step - 1)
+  }
+
   function handleNext() {
     if (!selected) return
 
@@ -273,28 +280,36 @@ export default function AdvisorPage() {
             className="rounded-2xl p-8"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
           >
-            {/* Progress bar */}
-            <div className="flex gap-1.5 mb-8">
-              {questionQueue.map((_, i) => (
-                <div
-                  key={i}
-                  className="flex-1 h-1 rounded-full transition-all duration-300"
-                  style={{
-                    background: i < step ? 'var(--accent)' : i === step ? '#818cf8' : 'rgba(255,255,255,0.1)',
-                  }}
-                />
-              ))}
-            </div>
+            {/* Back button */}
+            {step > 0 && (
+              <button
+                onClick={handleBack}
+                style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                ← Back
+              </button>
+            )}
 
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                Question {step + 1} of {questionQueue.length}
-              </p>
-              {question.isDynamic && (
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b' }}>
-                  Personalized follow-up
+            {/* Progress */}
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ color: '#a0a0b0', fontSize: 13 }}>
+                  Question {step + 1} of {questionQueue.length}
+                  {question.isDynamic && <span style={{ color: '#f59e0b', marginLeft: 8 }}>• Personalized</span>}
                 </span>
-              )}
+                <span style={{ color: '#6366f1', fontSize: 13, fontWeight: 600 }}>
+                  {Math.round(((step + 1) / questionQueue.length) * 100)}% complete
+                </span>
+              </div>
+              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 6 }}>
+                <div style={{
+                  background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                  height: '100%',
+                  borderRadius: 4,
+                  width: `${((step + 1) / questionQueue.length) * 100}%`,
+                  transition: 'width 0.3s ease',
+                }} />
+              </div>
             </div>
             <h2 className="text-xl font-semibold text-white mb-6">{question.question}</h2>
 

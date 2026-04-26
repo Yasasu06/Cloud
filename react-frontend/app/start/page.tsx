@@ -116,6 +116,16 @@ export default function StartPage() {
         {/* Step 1 — What to build */}
         {step === 1 && (
           <div>
+            <button onClick={() => setStep(0)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
+                <span>Step {step} of 3</span>
+                <span>{Math.round((step / 3) * 100)}% complete</span>
+              </div>
+              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
+              </div>
+            </div>
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               What are you trying to build?
             </h2>
@@ -149,6 +159,16 @@ export default function StartPage() {
         {/* Step 2 — Team size */}
         {step === 2 && (
           <div>
+            <button onClick={() => setStep(1)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
+                <span>Step {step} of 3</span>
+                <span>{Math.round((step / 3) * 100)}% complete</span>
+              </div>
+              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
+              </div>
+            </div>
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               How big is your team?
             </h2>
@@ -181,6 +201,16 @@ export default function StartPage() {
         {/* Step 3 — Budget */}
         {step === 3 && (
           <div>
+            <button onClick={() => setStep(2)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
+                <span>Step {step} of 3</span>
+                <span>{Math.round((step / 3) * 100)}% complete</span>
+              </div>
+              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
+                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
+              </div>
+            </div>
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               What&apos;s your monthly cloud budget?
             </h2>
@@ -279,31 +309,6 @@ export default function StartPage() {
           </div>
         )}
 
-        {/* Back / progress */}
-        {step > 0 && step < 4 && (
-          <div
-            style={{
-              marginTop: 32,
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <button
-              onClick={() => setStep(step - 1)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#a0a0b0',
-                cursor: 'pointer',
-                fontSize: 14,
-              }}
-            >
-              ← Back
-            </button>
-            <span style={{ color: '#a0a0b0', fontSize: 13 }}>Step {step} of 3</span>
-          </div>
-        )}
       </div>
     </div>
   )

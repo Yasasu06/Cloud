@@ -119,6 +119,12 @@ export default function MultiCloudPage() {
 
         {analyzed && results.length > 0 && (
           <div>
+            <button
+              onClick={() => setAnalyzed(false)}
+              style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              ← Modify Selection
+            </button>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
               <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 24, borderTop: '3px solid #6366f1' }}>
                 <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>PRIMARY CLOUD RECOMMENDATION</div>
