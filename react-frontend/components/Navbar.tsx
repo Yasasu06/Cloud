@@ -6,12 +6,14 @@ import { usePathname } from 'next/navigation'
 import { Cloud, Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/advisor', label: 'Cloud Advisor' },
-  { href: '/simulator', label: 'Simulator' },
-  { href: '/migration', label: 'Migration' },
-  { href: '/cost-shock', label: 'Cost Shock' },
-  { href: '/intelligence', label: 'Intelligence' },
+  { href: '/', label: 'Home', special: false },
+  { href: '/advisor', label: 'Cloud Advisor', special: false },
+  { href: '/simulator', label: 'Simulator', special: false },
+  { href: '/migration', label: 'Migration', special: false },
+  { href: '/cost-shock', label: 'Cost Shock', special: false },
+  { href: '/intelligence', label: 'Intelligence', special: false },
+  { href: '/others', label: 'Alternatives', special: false },
+  { href: '/start', label: 'Start Here →', special: true },
 ]
 
 export default function Navbar() {
@@ -56,6 +58,21 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href
+              if (link.special) {
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="px-3 py-1.5 rounded-md text-sm font-semibold transition-colors duration-200"
+                    style={{
+                      color: '#22c55e',
+                      background: isActive ? 'rgba(34,197,94,0.12)' : 'transparent',
+                    }}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              }
               return (
                 <Link
                   key={link.href}
@@ -119,8 +136,12 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="block px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 style={{
-                  color: isActive ? '#6366f1' : '#a0a0b0',
-                  background: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
+                  color: link.special ? '#22c55e' : isActive ? '#6366f1' : '#a0a0b0',
+                  background: isActive
+                    ? link.special
+                      ? 'rgba(34,197,94,0.1)'
+                      : 'rgba(99,102,241,0.1)'
+                    : 'transparent',
                 }}
               >
                 {link.label}
