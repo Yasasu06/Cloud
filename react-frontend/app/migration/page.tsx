@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, AlertCircle, Info } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const PROVIDERS = ['AWS', 'Azure', 'GCP']
 
@@ -87,6 +88,7 @@ function ComplexityGauge({ value }: { value: number }) {
 }
 
 export default function MigrationPage() {
+  const router = useRouter()
   const [from, setFrom] = useState('AWS')
   const [to, setTo] = useState('Azure')
 
@@ -208,6 +210,29 @@ export default function MigrationPage() {
                   ))}
                 </ul>
               </div>
+            </div>
+
+            {/* Next Step banner */}
+            <div style={{
+              marginTop: 24,
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              borderRadius: 16,
+              padding: 24,
+              border: '1px solid #ffffff15',
+            }}>
+              <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>YOUR JOURNEY IS COMPLETE</div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+                Want expert guidance on your specific situation?
+              </h3>
+              <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
+                Chat with our AI consultant — describe your exact setup and get a personalized migration plan.
+              </p>
+              <button
+                onClick={() => router.push('/chat')}
+                style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
+              >
+                Talk to AI Consultant →
+              </button>
             </div>
           </div>
         ) : null}

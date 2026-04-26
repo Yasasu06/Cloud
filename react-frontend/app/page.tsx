@@ -6,6 +6,7 @@ import ProviderCard from '@/components/ProviderCard'
 import AiGrowthChart from '@/components/AiGrowthChart'
 import { PROVIDERS, WHY_FEATURES } from '@/lib/data'
 import { Shield, TrendingUp, RefreshCw, LucideIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Shield,
@@ -14,6 +15,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
 }
 
 export default function HomePage() {
+  const router = useRouter()
   return (
     <>
       {/* Section 1: Hero */}
@@ -96,6 +98,28 @@ export default function HomePage() {
               )
             })}
           </div>
+        </div>
+      </section>
+
+      {/* Journey CTA */}
+      <section style={{ borderTop: '1px solid #ffffff10', background: 'var(--bg-secondary)' }}>
+        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
+          <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            YOUR JOURNEY STARTS HERE
+          </p>
+          <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16, color: 'white' }}>
+            Not sure where to begin?
+          </h2>
+          <p style={{ color: '#a0a0b0', marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
+            Answer 3 quick questions and we will tell you exactly which cloud
+            fits your situation — no jargon, no confusion.
+          </p>
+          <button
+            onClick={() => router.push('/start')}
+            style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: 12, padding: '16px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
+          >
+            Start My Cloud Journey →
+          </button>
         </div>
       </section>
 

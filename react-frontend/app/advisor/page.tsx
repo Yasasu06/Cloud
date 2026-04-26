@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronRight, CheckCircle2, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useJourney } from '@/lib/journeyContext'
 
 const QUESTIONS = [
   {
@@ -110,6 +112,8 @@ const PROVIDER_INFO: Record<string, { color: string; name: string; tagline: stri
 }
 
 export default function AdvisorPage() {
+  const { setJourney } = useJourney()
+  const router = useRouter()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<string[]>([])
   const [selected, setSelected] = useState<string | null>(null)
@@ -129,7 +133,6 @@ export default function AdvisorPage() {
       setSelected(null)
       setStep(step + 1)
     } else {
-      // Compute scores
       const totals = { aws: 0, azure: 0, gcp: 0 }
       newAnswers.forEach((ans, idx) => {
         const key = SCORE_KEYS[idx]
@@ -144,6 +147,14 @@ export default function AdvisorPage() {
       const winner = totals.azure === max ? 'azure' : totals.aws === max ? 'aws' : 'gcp'
       const confidence = Math.min(95, Math.max(50, Math.round((max / 15) * 100)))
       setResult({ winner, confidence, scores: totals })
+      setJourney({
+        recommendedProvider: PROVIDER_INFO[winner].name,
+        providerColor: PROVIDER_INFO[winner].color,
+        monthlyBudget: QUESTIONS[4].options.find(o => o.value === newAnswers[4])?.label ?? newAnswers[4],
+        teamSize: QUESTIONS[2].options.find(o => o.value === newAnswers[2])?.label ?? newAnswers[2],
+        workload: QUESTIONS[0].options.find(o => o.value === newAnswers[0])?.label ?? newAnswers[0],
+        confidence,
+      })
     }
   }
 
@@ -289,6 +300,39 @@ export default function AdvisorPage() {
                 >
                   Model the Cost <ChevronRight size={14} />
                 </Link>
+              </div>
+
+              {/* Next Step banner */}
+              <div style={{
+                marginTop: 32,
+                background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+                borderRadius: 16,
+                padding: 24,
+                border: '1px solid #ffffff15',
+              }}>
+                <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>NEXT STEP</div>
+                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+                  See your cost projection for {PROVIDER_INFO[result.winner].name}
+                </h3>
+                <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
+                  Based on your profile, here is what your {PROVIDER_INFO[result.winner].name} bill could look
+                  like as you grow — and how it compares to the alternatives.
+                </p>
+                <button
+                  onClick={() => router.push('/cost-shock')}
+                  style={{
+                    background: PROVIDER_INFO[result.winner].color,
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 12,
+                    padding: '12px 28px',
+                    fontSize: 15,
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Calculate My Costs →
+                </button>
               </div>
             </motion.div>
           </AnimatePresence>

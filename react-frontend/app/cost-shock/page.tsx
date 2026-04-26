@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import { Zap, TrendingUp, AlertTriangle, DollarSign } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useJourney } from '@/lib/journeyContext'
 
 const PROVIDER_COLORS: Record<string, string> = {
   AWS: '#FF9900', Azure: '#0078D4', GCP: '#34A853',
@@ -19,11 +21,25 @@ function computeShock(base: number, multiplier: number) {
   }))
 }
 
+const JOURNEY_PROVIDER_MAP: Record<string, string> = {
+  'Amazon Web Services': 'AWS',
+  'Microsoft Azure': 'Azure',
+  'Google Cloud Platform': 'GCP',
+}
+
 export default function CostShockPage() {
+  const { journey } = useJourney()
+  const router = useRouter()
   const [base, setBase] = useState(10000)
   const [multiplier, setMultiplier] = useState(3)
   const [provider, setProvider] = useState('AWS')
   const [data, setData] = useState<{ month: string; cost: number }[] | null>(null)
+
+  useEffect(() => {
+    if (!journey?.recommendedProvider) return
+    const mapped = JOURNEY_PROVIDER_MAP[journey.recommendedProvider]
+    if (mapped) setProvider(mapped)
+  }, [journey])
 
   const run = useCallback(() => {
     setData(computeShock(base, multiplier))
@@ -53,6 +69,31 @@ export default function CostShockPage() {
             Model worst-case cloud spend scenarios before they happen to your business.
           </p>
         </div>
+
+        {journey && (
+          <div style={{
+            background: '#1a1a2e',
+            borderRadius: 12,
+            padding: '16px 20px',
+            marginBottom: 24,
+            borderLeft: `4px solid ${journey.providerColor}`,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 8,
+          }}>
+            <div>
+              <div style={{ fontSize: 13, color: '#a0a0b0' }}>FROM YOUR CLOUD ADVISOR RESULT</div>
+              <div style={{ fontWeight: 700, marginTop: 4, color: 'white' }}>
+                {journey.recommendedProvider} recommended · {journey.confidence}% match
+              </div>
+            </div>
+            <div style={{ color: '#a0a0b0', fontSize: 13 }}>
+              {journey.teamSize} · {journey.workload}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div
@@ -180,6 +221,7 @@ export default function CostShockPage() {
         </div>
 
         {data && (
+          <>
           <div
             className="rounded-2xl p-6"
             style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
@@ -199,6 +241,38 @@ export default function CostShockPage() {
               </BarChart>
             </ResponsiveContainer>
           </div>
+
+          {/* Next Step banner */}
+          <div style={{
+            marginTop: 24,
+            background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+            borderRadius: 16,
+            padding: 24,
+            border: '1px solid #ffffff15',
+          }}>
+            <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>NEXT STEP</div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
+              Planning a migration or starting fresh?
+            </h3>
+            <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
+              See how complex your migration would be and get a step by step timeline.
+            </p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => router.push('/migration')}
+                style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Analyze My Migration →
+              </button>
+              <button
+                onClick={() => router.push('/chat')}
+                style={{ background: 'transparent', color: 'white', border: '1px solid #ffffff30', borderRadius: 12, padding: '12px 24px', fontSize: 14, cursor: 'pointer' }}
+              >
+                Ask AI Consultant
+              </button>
+            </div>
+          </div>
+          </>
         )}
       </div>
     </div>

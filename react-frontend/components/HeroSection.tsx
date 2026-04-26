@@ -136,7 +136,7 @@ export default function HeroSection() {
           </Link>
 
           <Link
-            href="#market-data"
+            href="/simulator"
             className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-base font-semibold text-white transition-all duration-200 hover:bg-white/10"
             style={{
               border: '1px solid rgba(255,255,255,0.2)',

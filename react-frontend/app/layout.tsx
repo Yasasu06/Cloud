@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
+import { JourneyProvider } from '@/lib/journeyContext'
 
 export const metadata: Metadata = {
   title: 'Cloud Intelligence Platform',
@@ -21,7 +22,9 @@ export default function RootLayout({
       </head>
       <body>
         <Navbar />
-        <main>{children}</main>
+        <JourneyProvider>
+          <main>{children}</main>
+        </JourneyProvider>
       </body>
     </html>
   )
