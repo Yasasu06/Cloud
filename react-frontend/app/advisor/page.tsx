@@ -261,7 +261,15 @@ export default function AdvisorPage() {
   }
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-16" style={{ background: 'var(--bg-primary)' }}>
+    <div className="min-h-screen pt-24 px-4 pb-16" style={{ background: 'var(--bg-primary)', position: 'relative' }}>
+      {!result && (
+        <button
+          onClick={reset}
+          style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 13, textDecoration: 'underline', position: 'absolute', top: 110, right: 24 }}
+        >
+          Start Over
+        </button>
+      )}
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)' }}>
@@ -284,7 +292,7 @@ export default function AdvisorPage() {
             {step > 0 && (
               <button
                 onClick={handleBack}
-                style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}
+                style={{ background: 'transparent', border: '1px solid #ffffff30', borderRadius: 8, padding: '10px 20px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, width: 'fit-content' }}
               >
                 ← Back
               </button>

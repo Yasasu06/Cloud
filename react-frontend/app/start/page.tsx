@@ -72,6 +72,43 @@ function getRecommendation(build: string, team: string, budget: string): Rec {
   }
 }
 
+const backBtnStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: '1px solid #ffffff30',
+  borderRadius: 8,
+  padding: '10px 20px',
+  color: '#a0a0b0',
+  cursor: 'pointer',
+  fontSize: 14,
+  marginBottom: 24,
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  width: 'fit-content',
+}
+
+function ProgressBar({ step }: { step: number }) {
+  return (
+    <div style={{ marginBottom: 32 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+        <span style={{ color: '#a0a0b0', fontSize: 13 }}>Step {step} of 3</span>
+        <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 600 }}>
+          {Math.round((step / 3) * 100)}% complete
+        </span>
+      </div>
+      <div style={{ background: '#1a1a2e', borderRadius: 4, height: 6 }}>
+        <div style={{
+          background: '#22c55e',
+          height: '100%',
+          borderRadius: 4,
+          width: `${(step / 3) * 100}%`,
+          transition: 'width 0.3s ease',
+        }} />
+      </div>
+    </div>
+  )
+}
+
 export default function StartPage() {
   const [step, setStep] = useState(0)
   const [build, setBuild] = useState('')
@@ -80,8 +117,21 @@ export default function StartPage() {
 
   const rec = step === 4 ? getRecommendation(build, team, budget) : null
 
+  function startOver() {
+    setStep(0)
+    setBuild('')
+    setTeam('')
+    setBudget('')
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white', position: 'relative' }}>
+      {step > 0 && step < 4 && (
+        <button onClick={startOver} style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 13, textDecoration: 'underline', position: 'absolute', top: 110, right: 24 }}>
+          Start Over
+        </button>
+      )}
+
       <div style={{ maxWidth: 700, margin: '0 auto', padding: '100px 24px 60px' }}>
 
         {/* Step 0 — Landing */}
@@ -97,16 +147,7 @@ export default function StartPage() {
             </p>
             <button
               onClick={() => setStep(1)}
-              style={{
-                background: '#22c55e',
-                color: 'white',
-                border: 'none',
-                borderRadius: 12,
-                padding: '16px 40px',
-                fontSize: 18,
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
+              style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: 12, padding: '16px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
             >
               Start My Cloud Journey →
             </button>
@@ -116,16 +157,8 @@ export default function StartPage() {
         {/* Step 1 — What to build */}
         {step === 1 && (
           <div>
-            <button onClick={() => setStep(0)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
-                <span>Step {step} of 3</span>
-                <span>{Math.round((step / 3) * 100)}% complete</span>
-              </div>
-              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
-              </div>
-            </div>
+            <button onClick={() => setStep(s => s - 1)} style={backBtnStyle}>← Back</button>
+            <ProgressBar step={step} />
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               What are you trying to build?
             </h2>
@@ -159,16 +192,8 @@ export default function StartPage() {
         {/* Step 2 — Team size */}
         {step === 2 && (
           <div>
-            <button onClick={() => setStep(1)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
-                <span>Step {step} of 3</span>
-                <span>{Math.round((step / 3) * 100)}% complete</span>
-              </div>
-              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
-              </div>
-            </div>
+            <button onClick={() => setStep(s => s - 1)} style={backBtnStyle}>← Back</button>
+            <ProgressBar step={step} />
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               How big is your team?
             </h2>
@@ -180,16 +205,7 @@ export default function StartPage() {
                 <button
                   key={opt}
                   onClick={() => { setTeam(opt); setStep(3) }}
-                  style={{
-                    background: '#1a1a2e',
-                    border: '2px solid #ffffff15',
-                    borderRadius: 12,
-                    padding: '18px 24px',
-                    cursor: 'pointer',
-                    color: 'white',
-                    textAlign: 'left',
-                    fontSize: 16,
-                  }}
+                  style={{ background: '#1a1a2e', border: '2px solid #ffffff15', borderRadius: 12, padding: '18px 24px', cursor: 'pointer', color: 'white', textAlign: 'left', fontSize: 16 }}
                 >
                   {opt}
                 </button>
@@ -201,16 +217,8 @@ export default function StartPage() {
         {/* Step 3 — Budget */}
         {step === 3 && (
           <div>
-            <button onClick={() => setStep(2)} style={{ background: 'transparent', border: '1px solid #ffffff20', borderRadius: 8, padding: '8px 16px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>← Back</button>
-            <div style={{ marginBottom: 32 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, color: '#a0a0b0', fontSize: 13 }}>
-                <span>Step {step} of 3</span>
-                <span>{Math.round((step / 3) * 100)}% complete</span>
-              </div>
-              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 4, overflow: 'hidden' }}>
-                <div style={{ background: '#22c55e', height: '100%', width: `${(step / 3) * 100}%`, borderRadius: 4, transition: 'width 0.3s ease' }} />
-              </div>
-            </div>
+            <button onClick={() => setStep(s => s - 1)} style={backBtnStyle}>← Back</button>
+            <ProgressBar step={step} />
             <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
               What&apos;s your monthly cloud budget?
             </h2>
@@ -222,16 +230,7 @@ export default function StartPage() {
                 <button
                   key={opt}
                   onClick={() => { setBudget(opt); setStep(4) }}
-                  style={{
-                    background: '#1a1a2e',
-                    border: '2px solid #ffffff15',
-                    borderRadius: 12,
-                    padding: '18px 24px',
-                    cursor: 'pointer',
-                    color: 'white',
-                    textAlign: 'left',
-                    fontSize: 16,
-                  }}
+                  style={{ background: '#1a1a2e', border: '2px solid #ffffff15', borderRadius: 12, padding: '18px 24px', cursor: 'pointer', color: 'white', textAlign: 'left', fontSize: 16 }}
                 >
                   {opt}
                 </button>
@@ -243,66 +242,25 @@ export default function StartPage() {
         {/* Step 4 — Results */}
         {step === 4 && rec && (
           <div>
-            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>
-              Your Perfect Match
-            </h2>
-            <div
-              style={{
-                background: '#1a1a2e',
-                borderRadius: 16,
-                padding: 32,
-                borderLeft: `6px solid ${rec.color}`,
-                marginBottom: 24,
-              }}
-            >
-              <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>
-                RECOMMENDED PROVIDER
-              </div>
-              <div style={{ fontSize: 32, fontWeight: 800, color: rec.color, marginBottom: 12 }}>
-                {rec.provider}
-              </div>
+            <h2 style={{ fontSize: 28, fontWeight: 700, marginBottom: 24 }}>Your Perfect Match</h2>
+            <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 32, borderLeft: `6px solid ${rec.color}`, marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>RECOMMENDED PROVIDER</div>
+              <div style={{ fontSize: 32, fontWeight: 800, color: rec.color, marginBottom: 12 }}>{rec.provider}</div>
               <p style={{ color: '#e0e0e0', fontSize: 16 }}>{rec.reason}</p>
             </div>
-
-            <div
-              style={{
-                background: '#12121a',
-                borderRadius: 12,
-                padding: 20,
-                marginBottom: 24,
-              }}
-            >
+            <div style={{ background: '#12121a', borderRadius: 12, padding: 20, marginBottom: 24 }}>
               <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>RUNNER UP</div>
               <p style={{ color: '#e0e0e0' }}>{rec.second}</p>
             </div>
-
-            <div
-              style={{
-                background: '#1a1a2e',
-                borderRadius: 12,
-                padding: 20,
-                marginBottom: 32,
-              }}
-            >
-              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>
-                Your answers:
-              </div>
+            <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, marginBottom: 32 }}>
+              <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>Your answers:</div>
               <p style={{ color: '#a0a0b0', fontSize: 14 }}>Building: {build}</p>
               <p style={{ color: '#a0a0b0', fontSize: 14 }}>Team: {team}</p>
               <p style={{ color: '#a0a0b0', fontSize: 14 }}>Budget: {budget}</p>
             </div>
-
             <button
-              onClick={() => { setStep(0); setBuild(''); setTeam(''); setBudget('') }}
-              style={{
-                background: 'transparent',
-                border: '2px solid #ffffff30',
-                borderRadius: 12,
-                padding: '14px 32px',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: 16,
-              }}
+              onClick={startOver}
+              style={{ background: 'transparent', border: '2px solid #ffffff30', borderRadius: 12, padding: '14px 32px', color: 'white', cursor: 'pointer', fontSize: 16 }}
             >
               ← Start Over
             </button>
