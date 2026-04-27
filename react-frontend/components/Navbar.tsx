@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '/advisor', label: 'Discover' },
   { href: '/planner', label: 'Plan' },
   { href: '/executive', label: 'Report' },
+  { href: '/pricing', label: 'Pricing' },
 ]
 
 export default function Navbar() {
@@ -78,6 +79,13 @@ export default function Navbar() {
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-3">
             <Link
+              href="/auth"
+              className="hidden sm:block px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+              style={{ color: '#a0a0b0' }}
+            >
+              Sign In
+            </Link>
+            <Link
               href="/chat"
               className="hidden sm:block px-4 py-2 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-105"
               style={{ background: '#6366f1' }}
@@ -122,6 +130,14 @@ export default function Navbar() {
               </Link>
             )
           })}
+          <Link
+            href="/auth"
+            onClick={() => setMenuOpen(false)}
+            className="block px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            style={{ color: '#a0a0b0', background: 'transparent' }}
+          >
+            Sign In
+          </Link>
           <Link
             href="/chat"
             onClick={() => setMenuOpen(false)}
