@@ -6,15 +6,10 @@ import { usePathname } from 'next/navigation'
 import { Cloud, Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home', special: false },
-  { href: '/advisor', label: 'Cloud Advisor', special: false },
-  { href: '/planner', label: 'Planner', special: false },
-  { href: '/migration', label: 'Migration', special: false },
-  { href: '/executive', label: 'Executive', special: false },
-  { href: '/intelligence', label: 'Intelligence', special: false },
-  { href: '/multicloud', label: 'Multi-Cloud', special: false },
-  { href: '/others', label: 'Alternatives', special: false },
-  { href: '/start', label: 'Start Here →', special: true },
+  { href: '/', label: 'Home' },
+  { href: '/advisor', label: 'Discover' },
+  { href: '/planner', label: 'Plan' },
+  { href: '/executive', label: 'Report' },
 ]
 
 export default function Navbar() {
@@ -59,21 +54,6 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href
-              if (link.special) {
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="px-3 py-1.5 rounded-md text-sm font-semibold transition-colors duration-200"
-                    style={{
-                      color: '#22c55e',
-                      background: isActive ? 'rgba(34,197,94,0.12)' : 'transparent',
-                    }}
-                  >
-                    {link.label}
-                  </Link>
-                )
-              }
               return (
                 <Link
                   key={link.href}
@@ -103,16 +83,6 @@ export default function Navbar() {
               style={{ background: '#6366f1' }}
             >
               Ask AI
-            </Link>
-            <Link
-              href="/advisor"
-              className="hidden sm:block px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              style={{
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-                boxShadow: '0 0 20px rgba(99,102,241,0.3)',
-              }}
-            >
-              Try Free
             </Link>
 
             <button
@@ -144,12 +114,8 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="block px-3 py-2 rounded-md text-sm font-medium transition-colors"
                 style={{
-                  color: link.special ? '#22c55e' : isActive ? '#6366f1' : '#a0a0b0',
-                  background: isActive
-                    ? link.special
-                      ? 'rgba(34,197,94,0.1)'
-                      : 'rgba(99,102,241,0.1)'
-                    : 'transparent',
+                  color: isActive ? '#ffffff' : '#a0a0b0',
+                  background: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
                 }}
               >
                 {link.label}
@@ -157,12 +123,12 @@ export default function Navbar() {
             )
           })}
           <Link
-            href="/advisor"
+            href="/chat"
             onClick={() => setMenuOpen(false)}
             className="block px-3 py-2 rounded-md text-sm font-semibold text-white text-center mt-2"
-            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+            style={{ background: '#6366f1' }}
           >
-            Try Free
+            Ask AI
           </Link>
         </div>
       )}

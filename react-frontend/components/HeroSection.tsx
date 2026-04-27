@@ -119,35 +119,31 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.35 }}
-          style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center', marginTop: 40 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, marginTop: 40 }}
         >
-          <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 8 }}>Where do you want to start?</p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, maxWidth: 700, width: '100%' }}>
-            {[
-              { icon: '🌱', title: 'Never used cloud?', desc: 'Start from zero — we guide you step by step', link: '/start', color: '#22c55e', label: 'Begin Here →' },
-              { icon: '⚡', title: 'Help me choose', desc: 'Answer 5 questions, get a personalized recommendation', link: '/advisor', color: '#6366f1', label: 'Get Advice →' },
-              { icon: '☁️', title: 'Already on cloud?', desc: 'Optimize your multi-cloud setup and cut costs', link: '/multicloud', color: '#FF9900', label: 'Optimize Now →' },
-            ].map(path => (
-              <a key={path.title} href={path.link} style={{ textDecoration: 'none' }}>
-                <div className="card-hover" style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  backdropFilter: 'blur(12px)',
-                  border: `1px solid ${path.color}30`,
-                  borderRadius: 16,
-                  padding: 24,
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                }}>
-                  <div style={{ fontSize: 32, marginBottom: 12 }}>{path.icon}</div>
-                  <div style={{ fontWeight: 700, color: 'white', marginBottom: 8, fontSize: 15 }}>{path.title}</div>
-                  <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.5, marginBottom: 16 }}>{path.desc}</p>
-                  <div style={{ color: path.color, fontSize: 13, fontWeight: 700, padding: '8px 16px', background: `${path.color}15`, borderRadius: 8, display: 'inline-block' }}>
-                    {path.label}
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
+          <a href="/advisor" style={{ textDecoration: 'none' }}>
+            <button
+              style={{
+                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                color: 'white',
+                border: 'none',
+                borderRadius: 14,
+                padding: '16px 48px',
+                fontSize: 18,
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 0 32px rgba(99,102,241,0.4)',
+              }}
+            >
+              Find My Cloud →
+            </button>
+          </a>
+          <a
+            href="/chat"
+            style={{ color: '#a0a0b0', fontSize: 14, textDecoration: 'none' }}
+          >
+            Or ask our AI directly →
+          </a>
         </motion.div>
 
         {/* Scroll indicator */}

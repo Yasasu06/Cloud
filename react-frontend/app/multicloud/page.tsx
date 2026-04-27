@@ -194,6 +194,35 @@ export default function MultiCloudPage() {
                 </button>
               </div>
             </div>
+
+            <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <a
+                href="/others"
+                style={{
+                  color: '#a0a0b0',
+                  fontSize: 14,
+                  textDecoration: 'none',
+                  padding: '10px 18px',
+                  border: '1px solid #ffffff20',
+                  borderRadius: 10,
+                }}
+              >
+                Explore Alternative Providers →
+              </a>
+              <a
+                href="/migration"
+                style={{
+                  color: '#a0a0b0',
+                  fontSize: 14,
+                  textDecoration: 'none',
+                  padding: '10px 18px',
+                  border: '1px solid #ffffff20',
+                  borderRadius: 10,
+                }}
+              >
+                Analyze Migration Complexity →
+              </a>
+            </div>
           </div>
         )}
       </div>

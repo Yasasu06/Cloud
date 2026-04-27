@@ -53,6 +53,85 @@ export default function RootLayout({
         <LiveTicker />
         <JourneyProvider>
           <main>{children}</main>
+          <footer style={{
+            borderTop: '1px solid #ffffff08',
+            padding: '40px 24px',
+            background: '#0a0a0f',
+          }}>
+            <div style={{
+              maxWidth: 900,
+              margin: '0 auto',
+              display: 'grid',
+              gridTemplateColumns: '2fr 1fr 1fr 1fr',
+              gap: 40,
+            }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12, color: 'white' }}>
+                  ☁️ Cloud Intelligence
+                </div>
+                <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
+                  The definitive vendor-neutral cloud intelligence platform.
+                  Built for founders, developers, and IT leaders making
+                  cloud decisions.
+                </p>
+                <p style={{ color: '#666', fontSize: 12 }}>
+                  © 2026 Cloud Intelligence Platform. All rights reserved.
+                </p>
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>PLATFORM</div>
+                {[
+                  { label: 'Cloud Advisor', href: '/advisor' },
+                  { label: 'Cost Planner', href: '/planner' },
+                  { label: 'Migration Tool', href: '/migration' },
+                  { label: 'Multi-Cloud', href: '/multicloud' },
+                  { label: 'Alternatives', href: '/others' },
+                ].map(l => (
+                  <a key={l.href} href={l.href} style={{
+                    display: 'block',
+                    color: '#a0a0b0',
+                    fontSize: 14,
+                    marginBottom: 8,
+                    textDecoration: 'none',
+                  }}>{l.label}</a>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>RESOURCES</div>
+                {[
+                  { label: 'Intelligence Feed', href: '/intelligence' },
+                  { label: 'Executive Report', href: '/executive' },
+                  { label: 'Ask AI', href: '/chat' },
+                  { label: 'Start Here', href: '/start' },
+                ].map(l => (
+                  <a key={l.href} href={l.href} style={{
+                    display: 'block',
+                    color: '#a0a0b0',
+                    fontSize: 14,
+                    marginBottom: 8,
+                    textDecoration: 'none',
+                  }}>{l.label}</a>
+                ))}
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>COMPANY</div>
+                {[
+                  { label: 'About', href: '#' },
+                  { label: 'Privacy Policy', href: '#' },
+                  { label: 'Terms of Service', href: '#' },
+                  { label: 'Contact Us', href: '#' },
+                ].map(l => (
+                  <a key={l.href} href={l.href} style={{
+                    display: 'block',
+                    color: '#a0a0b0',
+                    fontSize: 14,
+                    marginBottom: 8,
+                    textDecoration: 'none',
+                  }}>{l.label}</a>
+                ))}
+              </div>
+            </div>
+          </footer>
         </JourneyProvider>
       </body>
     </html>

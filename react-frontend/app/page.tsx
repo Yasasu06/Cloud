@@ -2,26 +2,108 @@
 
 import HeroSection from '@/components/HeroSection'
 import ProviderCard from '@/components/ProviderCard'
-import AiGrowthChart from '@/components/AiGrowthChart'
-import { PROVIDERS, WHY_FEATURES } from '@/lib/data'
-import { Shield, TrendingUp, RefreshCw, LucideIcon } from 'lucide-react'
+import { PROVIDERS } from '@/lib/data'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Shield,
-  TrendingUp,
-  RefreshCw,
-}
+const CHAT_SUGGESTIONS = [
+  "Which cloud is cheapest for a startup?",
+  "AWS vs Azure for enterprise?",
+  "Best cloud for AI/ML workloads?",
+  "How do I reduce my cloud bill?",
+]
 
 export default function HomePage() {
   const router = useRouter()
+  const [chatInput, setChatInput] = useState('')
+
+  function handleChatSubmit(text?: string) {
+    const q = text || chatInput.trim()
+    if (!q) return
+    router.push(`/chat?q=${encodeURIComponent(q)}`)
+  }
+
   return (
     <>
       {/* Section 1: Hero */}
       <HeroSection />
 
-      {/* Section 2: Market Pulse */}
-      <div id="market-data" style={{ padding: '60px 24px', textAlign: 'center' }}>
+      {/* Section 2: Inline chat teaser */}
+      <div style={{ padding: '64px 24px', borderTop: '1px solid #ffffff08', textAlign: 'center' }}>
+        <div style={{ maxWidth: 640, margin: '0 auto' }}>
+          <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>
+            ASK ANYTHING
+          </p>
+          <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>
+            Have a quick cloud question?
+          </h2>
+          <p style={{ color: '#a0a0b0', marginBottom: 28, fontSize: 15 }}>
+            Get an expert answer in seconds — no signup required.
+          </p>
+          <div style={{
+            display: 'flex',
+            gap: 10,
+            background: '#1a1a2e',
+            borderRadius: 14,
+            padding: '8px 8px 8px 16px',
+            border: '1px solid #ffffff10',
+            marginBottom: 16,
+          }}>
+            <input
+              value={chatInput}
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleChatSubmit()}
+              placeholder="Ask about pricing, migration, compliance…"
+              style={{
+                flex: 1,
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+                color: 'white',
+                fontSize: 15,
+              }}
+            />
+            <button
+              onClick={() => handleChatSubmit()}
+              disabled={!chatInput.trim()}
+              style={{
+                background: '#6366f1',
+                border: 'none',
+                borderRadius: 10,
+                padding: '10px 20px',
+                color: 'white',
+                cursor: 'pointer',
+                fontWeight: 600,
+                opacity: !chatInput.trim() ? 0.5 : 1,
+              }}
+            >
+              Ask →
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+            {CHAT_SUGGESTIONS.map(q => (
+              <button
+                key={q}
+                onClick={() => handleChatSubmit(q)}
+                style={{
+                  background: '#1a1a2e',
+                  border: '1px solid #ffffff15',
+                  borderRadius: 20,
+                  padding: '6px 14px',
+                  color: '#a0a0b0',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                }}
+              >
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3: Market Pulse */}
+      <div id="market-data" style={{ padding: '60px 24px', textAlign: 'center', borderTop: '1px solid #ffffff08' }}>
         <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>MARKET PULSE</p>
         <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>The numbers that define the cloud era</h2>
         <p style={{ color: '#a0a0b0', marginBottom: 40, fontSize: 15 }}>Hover over any number to understand what it means for you.</p>
@@ -68,109 +150,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Section 2b: Who is this for? */}
-      <div style={{ padding: '60px 24px', borderTop: '1px solid #ffffff08' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>WHO IS THIS FOR?</p>
-          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 40 }}>Built for everyone making cloud decisions</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16 }}>
-            {[
-              { icon: '👨‍💻', persona: 'Developer', desc: 'Starting a personal project or side business and need the cheapest reliable option', link: '/start', cta: 'Start Here →', color: '#22c55e' },
-              { icon: '🚀', persona: 'Founder', desc: 'Building a startup and need to choose a cloud that scales without breaking the bank', link: '/advisor', cta: 'Get Advice →', color: '#6366f1' },
-              { icon: '🏢', persona: 'IT Manager', desc: 'Evaluating providers for your organization and need compliance and cost data', link: '/executive', cta: 'Get Report →', color: '#0078D4' },
-              { icon: '☁️', persona: 'Multi-cloud User', desc: 'Already using multiple clouds and need help deciding which workload goes where', link: '/multicloud', cta: 'Optimize Now →', color: '#FF9900' },
-            ].map(p => (
-              <a key={p.persona} href={p.link} style={{ textDecoration: 'none' }}>
-                <div className="card-hover" style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, border: '1px solid #ffffff08', height: '100%', cursor: 'pointer' }}>
-                  <div style={{ fontSize: 36, marginBottom: 12 }}>{p.icon}</div>
-                  <div style={{ fontWeight: 700, marginBottom: 8, color: 'white' }}>{p.persona}</div>
-                  <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>{p.desc}</p>
-                  <div style={{ color: p.color, fontSize: 13, fontWeight: 600 }}>{p.cta}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Section 3: Provider Cards */}
-      <section className="py-20 px-4" style={{ background: 'var(--bg-primary)' }}>
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <p
-              className="text-xs font-semibold uppercase tracking-widest mb-3"
-              style={{ color: 'var(--accent)' }}
-            >
-              The Big Three
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Cloud providers at a glance
-            </h2>
-            <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-              Q4 2025 figures from official earnings calls and SEC filings.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PROVIDERS.map((provider) => (
-              <div key={provider.key} className="card-hover">
-                <ProviderCard name={provider.name} color={provider.color}
-                  marketShare={provider.marketShare} revenue={provider.revenue}
-                  growth={provider.growth} tag={provider.tag} description={provider.description} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: AI Growth Chart */}
-      <AiGrowthChart />
-
-      {/* Section 5: Why This Tool */}
-      <section className="py-20 px-4" style={{ background: 'var(--bg-primary)' }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
-            <p
-              className="text-xs font-semibold uppercase tracking-widest mb-3"
-              style={{ color: 'var(--accent)' }}
-            >
-              Why This Platform
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Built for serious cloud decisions
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {WHY_FEATURES.map((feature) => {
-              const Icon = ICON_MAP[feature.icon]
-              return (
-                <div
-                  key={feature.title}
-                  className="rounded-2xl p-6 text-center card-hover"
-                  style={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                  }}
-                >
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4"
-                    style={{ background: 'rgba(99,102,241,0.15)' }}
-                  >
-                    {Icon && <Icon size={22} style={{ color: 'var(--accent)' }} />}
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-2">{feature.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                    {feature.description}
-                  </p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
+      {/* Section 4: How It Works */}
       <section style={{
         padding: '80px 24px',
         borderTop: '1px solid #ffffff08',
@@ -210,43 +190,77 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Journey CTA */}
-      <section style={{ borderTop: '1px solid #ffffff10', background: 'var(--bg-secondary)' }}>
-        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-          <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            YOUR JOURNEY STARTS HERE
-          </p>
-          <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16, color: 'white' }}>
-            Not sure where to begin?
-          </h2>
-          <p style={{ color: '#a0a0b0', marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>
-            Answer 3 quick questions and we will tell you exactly which cloud
-            fits your situation — no jargon, no confusion.
-          </p>
-          <button
-            onClick={() => router.push('/start')}
-            className="btn-primary"
-            style={{ background: '#22c55e', color: 'white', border: 'none', borderRadius: 12, padding: '16px 40px', fontSize: 18, fontWeight: 700, cursor: 'pointer' }}
-          >
-            Start My Cloud Journey →
-          </button>
+      {/* Section 5: Provider Cards */}
+      <section className="py-20 px-4" style={{ background: 'var(--bg-primary)' }}>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p
+              className="text-xs font-semibold uppercase tracking-widest mb-3"
+              style={{ color: 'var(--accent)' }}
+            >
+              The Big Three
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Cloud providers at a glance
+            </h2>
+            <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+              Q4 2025 figures from official earnings calls and SEC filings.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {PROVIDERS.map((provider) => (
+              <div key={provider.key} className="card-hover">
+                <ProviderCard name={provider.name} color={provider.color}
+                  marketShare={provider.marketShare} revenue={provider.revenue}
+                  growth={provider.growth} tag={provider.tag} description={provider.description} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer
-        className="py-8 px-4 text-center text-sm border-t"
-        style={{
-          background: 'var(--bg-secondary)',
-          borderColor: 'var(--border)',
-          color: 'var(--text-secondary)',
-        }}
-      >
-        <p>
-          Cloud Intelligence Platform · Data sourced from SEC filings &amp; earnings calls ·
-          Updated Q4 2025
+      {/* Section 6: Bottom CTA */}
+      <section style={{ borderTop: '1px solid #ffffff10', padding: '80px 24px', textAlign: 'center' }}>
+        <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          READY TO DECIDE?
         </p>
-      </footer>
+        <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16, color: 'white' }}>
+          Get your personalized cloud recommendation
+        </h2>
+        <p style={{ color: '#a0a0b0', marginBottom: 32, maxWidth: 480, margin: '0 auto 32px' }}>
+          Answer 5 quick questions and get a recommendation tailored to your team, budget, and workload.
+        </p>
+        <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <a href="/advisor" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 12,
+              padding: '14px 36px',
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: 'pointer',
+            }}>
+              Find My Cloud →
+            </button>
+          </a>
+          <a href="/chat" style={{ textDecoration: 'none' }}>
+            <button style={{
+              background: 'transparent',
+              color: 'white',
+              border: '1px solid #ffffff30',
+              borderRadius: 12,
+              padding: '14px 36px',
+              fontSize: 16,
+              cursor: 'pointer',
+            }}>
+              Ask the AI
+            </button>
+          </a>
+        </div>
+      </section>
     </>
   )
 }

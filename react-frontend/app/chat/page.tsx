@@ -31,6 +31,14 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const q = params.get('q')
+    if (q && messages.length === 1) {
+      sendMessage(q)
+    }
+  }, [])
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
