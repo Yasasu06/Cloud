@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import LiveTicker from '@/components/LiveTicker'
 import { JourneyProvider } from '@/lib/journeyContext'
 import { TooltipProvider } from '@/components/ui/tooltip'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
@@ -46,10 +49,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body>
+      <body className={inter.className}>
         <Navbar />
         <LiveTicker />
         <JourneyProvider>
