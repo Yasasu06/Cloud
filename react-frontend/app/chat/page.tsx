@@ -62,14 +62,19 @@ export default function ChatPage() {
           ],
         }),
       })
+      console.log('Response status:', response.status)
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
       const data = await response.json()
+      console.log('Response data:', JSON.stringify(data))
       const reply = data.choices?.[0]?.message?.content ||
         'Sorry, I could not get a response. Please try again.'
       setMessages([...newMessages, { role: 'assistant', content: reply }])
-    } catch {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : JSON.stringify(err)
+      console.error('Groq API error:', err)
       setMessages([...newMessages, {
         role: 'assistant',
-        content: 'Connection error. Please try again.',
+        content: `Error: ${message}. Check console for details.`,
       }])
     } finally {
       setLoading(false)
