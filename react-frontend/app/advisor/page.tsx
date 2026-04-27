@@ -6,6 +6,7 @@ import { ChevronRight, CheckCircle2, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
+import { supabase } from '@/lib/supabase'
 
 interface Question {
   id: number | string
@@ -153,6 +154,26 @@ const PROVIDER_INFO: Record<string, { color: string; name: string; tagline: stri
   gcp: { color: '#34A853', name: 'Google Cloud Platform', tagline: 'Best-in-class AI/ML and data analytics capabilities.' },
 }
 
+async function saveRecommendation(
+  provider: string,
+  confidence: number,
+  workload: string,
+  teamSize: string,
+  budget: string
+) {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) return
+
+  await supabase.from('saved_recommendations').insert({
+    user_id: session.user.id,
+    provider,
+    confidence,
+    workload,
+    team_size: teamSize,
+    budget,
+  })
+}
+
 export default function AdvisorPage() {
   const { setJourney } = useJourney()
   const router = useRouter()
@@ -248,6 +269,13 @@ export default function AdvisorPage() {
         workload: BASE_QUESTIONS[0].options.find(o => o.value === newAnswerMap['1'])?.label ?? (newAnswerMap['1'] ?? ''),
         confidence,
       })
+      saveRecommendation(
+        PROVIDER_INFO[winner].name,
+        confidence,
+        BASE_QUESTIONS[0].options.find(o => o.value === newAnswerMap['1'])?.label ?? '',
+        BASE_QUESTIONS[2].options.find(o => o.value === newAnswerMap['3'])?.label ?? '',
+        BASE_QUESTIONS[4].options.find(o => o.value === newAnswerMap['5'])?.label ?? '',
+      )
     }
   }
 

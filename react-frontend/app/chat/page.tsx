@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -42,9 +43,54 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  async function checkAndIncrementQueries(): Promise<boolean> {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return true
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('plan, ai_queries_today, queries_reset_date')
+      .eq('id', session.user.id)
+      .single()
+
+    if (!profile) return true
+
+    const today = new Date().toISOString().split('T')[0]
+    if (profile.queries_reset_date !== today) {
+      await supabase.from('profiles').update({
+        ai_queries_today: 0,
+        queries_reset_date: today,
+      }).eq('id', session.user.id)
+      return true
+    }
+
+    if (profile.plan === 'free' && profile.ai_queries_today >= 3) {
+      return false
+    }
+
+    await supabase.from('profiles').update({
+      ai_queries_today: profile.ai_queries_today + 1,
+    }).eq('id', session.user.id)
+
+    return true
+  }
+
   async function sendMessage(text?: string) {
     const userText = text || input.trim()
     if (!userText || loading) return
+
+    const allowed = await checkAndIncrementQueries()
+    if (!allowed) {
+      setMessages([...messages,
+        { role: 'user', content: userText },
+        {
+          role: 'assistant',
+          content: "You've reached your daily limit of 3 free AI queries. Upgrade to Pro for unlimited access → [cloudintelligence.io/pricing](/pricing)",
+        },
+      ])
+      setInput('')
+      return
+    }
 
     const newMessages: Message[] = [
       ...messages,
