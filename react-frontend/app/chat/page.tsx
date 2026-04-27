@@ -54,7 +54,7 @@ export default function ChatPage() {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'llama3-8b-8192',
+          model: 'llama-3.3-70b-versatile',
           max_tokens: 1000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
@@ -62,19 +62,14 @@ export default function ChatPage() {
           ],
         }),
       })
-      console.log('Response status:', response.status)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
       const data = await response.json()
-      console.log('Response data:', JSON.stringify(data))
       const reply = data.choices?.[0]?.message?.content ||
         'Sorry, I could not get a response. Please try again.'
       setMessages([...newMessages, { role: 'assistant', content: reply }])
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : JSON.stringify(err)
-      console.error('Groq API error:', err)
+    } catch {
       setMessages([...newMessages, {
         role: 'assistant',
-        content: `Error: ${message}. Check console for details.`,
+        content: 'Connection error. Please try again.',
       }])
     } finally {
       setLoading(false)
