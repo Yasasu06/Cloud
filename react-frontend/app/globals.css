@@ -124,9 +124,9 @@
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, #0a0a0f, #0f0f1a, #1a0a2e, #0a1a2e, #12121a);
+  background: linear-gradient(-45deg, #0a0a0f, #0d0d1f, #0a0a1a, #0f0a1f);
   background-size: 400% 400%;
-  animation: gradient 12s ease infinite;
+  animation: gradientShift 15s ease infinite;
 }
 
 .float-1 { animation: float 6s ease-in-out infinite; }
@@ -158,4 +158,39 @@
   color: white;
   font-weight: 700;
   margin-right: 8px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.page-transition {
+  animation: pageFadeIn 0.3s ease forwards;
+}
+
+@media (max-width: 768px) {
+  .navbar-links { display: none; }
+
+  [style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 2fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+  [style*="grid-template-columns: 1fr 2fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  h1 { font-size: clamp(24px, 6vw, 40px) !important; }
+  h2 { font-size: clamp(20px, 5vw, 32px) !important; }
 }

@@ -58,6 +58,21 @@ export default function IntelligencePage() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '100px 24px 60px' }}>
+        <div style={{
+          background: 'rgba(245,158,11,0.1)',
+          border: '1px solid rgba(245,158,11,0.3)',
+          borderRadius: 8,
+          padding: '12px 16px',
+          marginBottom: 24,
+          display: 'flex',
+          gap: 12,
+          alignItems: 'center',
+        }}>
+          <span style={{ fontSize: 16 }}>📋</span>
+          <p style={{ color: '#f59e0b', fontSize: 13, margin: 0 }}>
+            <strong>Curated Intelligence Feed</strong> — These headlines are manually curated and updated weekly. For live cloud news, follow AWS Blog, Azure Updates, and Google Cloud Blog directly.
+          </p>
+        </div>
         <div style={{ marginBottom: 32 }}>
           <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 8 }}>📰 Cloud Intelligence Feed</h1>
           <p style={{ color: '#a0a0b0' }}>

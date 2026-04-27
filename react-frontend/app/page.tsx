@@ -27,6 +27,18 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Vendor neutrality strip */}
+      <div style={{
+        background: 'rgba(34,197,94,0.05)',
+        borderBottom: '1px solid rgba(34,197,94,0.15)',
+        padding: '10px 24px',
+        textAlign: 'center',
+        fontSize: 13,
+        color: '#22c55e',
+      }}>
+        ✓ 100% Vendor Neutral — No AWS, Azure, or GCP sponsorship. Our recommendations are unbiased by design.
+      </div>
+
       {/* Section 1: Hero */}
       <HeroSection />
 
@@ -50,6 +62,7 @@ export default function HomePage() {
           </p>
           <div style={{
             display: 'flex',
+            flexWrap: 'wrap',
             gap: 10,
             background: '#1a1a2e',
             borderRadius: 14,
@@ -166,9 +179,22 @@ export default function HomePage() {
         <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 16 }}>
           From confusion to confident decision in 3 steps
         </h2>
-        <p style={{ color: '#a0a0b0', marginBottom: 48, maxWidth: 500, margin: '0 auto 48px' }}>
+        <p style={{ color: '#a0a0b0', marginBottom: 48, maxWidth: 500, margin: '0 auto 32px' }}>
           No jargon. No bias. Just clear guidance based on your actual situation.
         </p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginBottom: 48, flexWrap: 'wrap' }}>
+          {[
+            { icon: '🚫', text: 'No vendor sponsorships' },
+            { icon: '⚡', text: 'AI-powered in seconds' },
+            { icon: '💰', text: 'Free to start' },
+            { icon: '🌍', text: 'Covers 9+ providers' },
+          ].map(item => (
+            <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a0a0b0', fontSize: 14 }}>
+              <span>{item.icon}</span>
+              <span>{item.text}</span>
+            </div>
+          ))}
+        </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 32, maxWidth: 800, margin: '0 auto' }}>
           {[
             { step: '01', title: 'Tell us about yourself', desc: 'Answer 5 quick questions about your team, workload, and budget. Takes 60 seconds.', icon: '🎯' },
@@ -236,7 +262,7 @@ export default function HomePage() {
           Get your personalized cloud recommendation
         </h2>
         <p style={{ color: '#a0a0b0', marginBottom: 32, maxWidth: 480, margin: '0 auto 32px' }}>
-          Answer 5 quick questions and get a recommendation tailored to your team, budget, and workload.
+          Built for founders, developers, and IT managers who need clear cloud answers without the consultant price tag.
         </p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
           <a href="/intent" style={{ textDecoration: 'none' }}>

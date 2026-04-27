@@ -149,6 +149,14 @@ const SCORES: Record<string, Record<string, { aws: number; azure: number; gcp: n
 
 const SCORE_KEYS = ['workload', 'compliance', 'size', 'stack', 'budget']
 
+const QUESTION_HELPERS: Record<string, string> = {
+  '1': 'Pick the category that best describes what your app or system does. Not sure? Pick "Web & Mobile Applications" — it covers most use cases.',
+  '2': 'HIPAA = US healthcare data. GDPR = European user data. FedRAMP = US government systems. SOC 2 = general enterprise security. Not sure? Select "None" and ask our AI consultant later.',
+  '3': 'This helps us match you to the right scale of platform. A solo developer needs different tools than a 500-person enterprise.',
+  '5': 'This is your expected monthly cloud infrastructure spend — not your total IT budget. Not sure? Start with a lower range, you can always scale up.',
+  'microsoftEcosystem': "If your team uses Outlook, Teams, Office 365, or Windows servers, you're in the Microsoft ecosystem. Azure integrates much more smoothly in that case.",
+}
+
 const PROVIDER_INFO: Record<string, { color: string; name: string; tagline: string }> = {
   aws: { color: '#FF9900', name: 'Amazon Web Services', tagline: 'Broadest service catalog, best for startups and enterprise alike.' },
   azure: { color: '#0078D4', name: 'Microsoft Azure', tagline: 'Best for enterprises and Microsoft-heavy environments.' },
@@ -349,7 +357,12 @@ export default function AdvisorPage() {
                 }} />
               </div>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-6">{question.question}</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">{question.question}</h2>
+            {QUESTION_HELPERS[String(question.id)] && (
+              <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 24 }}>
+                {QUESTION_HELPERS[String(question.id)]}
+              </p>
+            )}
 
             <div className="space-y-3 mb-8">
               {question.options.map((opt) => (

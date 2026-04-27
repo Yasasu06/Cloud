@@ -237,6 +237,7 @@ export default function RepatriationPage() {
 
             <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, marginBottom: 24 }}>
               <h3 style={{ fontWeight: 700, marginBottom: 20 }}>Cumulative Cost Comparison — 36 Months</h3>
+              <div style={{ minHeight: 250 }}>
               <ResponsiveContainer width="100%" height={350}>
                 <LineChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
@@ -277,6 +278,7 @@ export default function RepatriationPage() {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              </div>
             </div>
 
             <div style={{

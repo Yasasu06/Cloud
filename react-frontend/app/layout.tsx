@@ -58,7 +58,7 @@ export default function RootLayout({
         <JourneyProvider>
           <TooltipProvider>
           <PostHogProvider>
-          <main>{children}</main>
+          <main><div className="page-transition">{children}</div></main>
           <footer style={{
             borderTop: '1px solid #ffffff08',
             padding: '40px 24px',

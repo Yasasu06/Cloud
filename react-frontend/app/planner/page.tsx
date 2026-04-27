@@ -173,6 +173,7 @@ export default function PlannerPage() {
               </span>
             </div>
 
+            <div style={{ minHeight: 250 }}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={MARKET_FORECAST_DATA}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
@@ -188,6 +189,7 @@ export default function PlannerPage() {
                 <Line type="monotone" dataKey="GCP" stroke="#34A853" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 32 }}>
               {FORECAST_INSIGHTS.map((p) => (
@@ -275,6 +277,7 @@ export default function PlannerPage() {
                   </div>
                 </div>
 
+                <div style={{ minHeight: 250 }}>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={costData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
@@ -287,6 +290,7 @@ export default function PlannerPage() {
                     <Bar dataKey="cost" fill={providerColor} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
 
                 <div style={{ marginTop: 24, background: '#1a1a2e', borderRadius: 12, padding: 20, borderLeft: '4px solid #f59e0b' }}>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>💡 Cost Planning Insight</div>

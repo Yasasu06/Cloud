@@ -127,6 +127,56 @@ export default function OthersPage() {
     <div className="min-h-screen pt-24 px-4 pb-20" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-5xl mx-auto">
 
+        {/* Cheapest option section */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1a1a2e, #0f2027)',
+          borderRadius: 16,
+          padding: 32,
+          marginBottom: 40,
+          border: '1px solid #22c55e30',
+        }}>
+          <div style={{ fontSize: 13, color: '#22c55e', fontWeight: 600, letterSpacing: 2, marginBottom: 12 }}>
+            💰 CHEAPEST CLOUD FOR YOUR USE CASE
+          </div>
+          <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>Not everyone needs AWS.</h2>
+          <p style={{ color: '#a0a0b0', marginBottom: 24, fontSize: 15 }}>
+            The Big 3 are built for scale. If you&apos;re a developer, startup, or small business — these alternatives will save you 60-80% without sacrificing reliability.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
+            {[
+              { use: 'Personal projects', winner: 'Oracle Cloud', reason: 'Always-free tier: 4 ARM cores, 24GB RAM, forever', saving: '100% free' },
+              { use: 'Small web apps', winner: 'DigitalOcean', reason: 'Simplest setup, $4/month, no surprise bills', saving: '70% cheaper than AWS' },
+              { use: 'European startups', winner: 'Hetzner', reason: 'GDPR-native, green energy, €3.29/month', saving: '80% cheaper than Azure' },
+              { use: 'Game servers', winner: 'Vultr', reason: '$2.50/month entry, 17 global locations', saving: '75% cheaper than AWS' },
+              { use: 'Edge & CDN', winner: 'Cloudflare', reason: 'Free CDN, Workers free tier, 285 locations', saving: 'Free tier available' },
+              { use: 'Developer VPS', winner: 'Linode', reason: '$5/month, Linux-native, transparent pricing', saving: '65% cheaper than GCP' },
+            ].map(item => (
+              <div key={item.use} style={{
+                background: '#0a0a0f',
+                borderRadius: 12,
+                padding: 16,
+                borderLeft: '3px solid #22c55e',
+              }}>
+                <div style={{ fontSize: 11, color: '#666', marginBottom: 4 }}>BEST FOR</div>
+                <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.use}</div>
+                <div style={{ color: '#22c55e', fontWeight: 600, fontSize: 14, marginBottom: 4 }}>{item.winner}</div>
+                <div style={{ color: '#a0a0b0', fontSize: 12, marginBottom: 8 }}>{item.reason}</div>
+                <div style={{
+                  background: 'rgba(34,197,94,0.1)',
+                  color: '#22c55e',
+                  fontSize: 11,
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: 4,
+                  display: 'inline-block',
+                }}>
+                  {item.saving}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Header */}
         <div className="text-center mb-12">
           <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: 'var(--accent)' }}>
