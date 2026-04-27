@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/posthog'
 
 interface Question {
   id: number | string
@@ -276,6 +277,7 @@ export default function AdvisorPage() {
         BASE_QUESTIONS[2].options.find(o => o.value === newAnswerMap['3'])?.label ?? '',
         BASE_QUESTIONS[4].options.find(o => o.value === newAnswerMap['5'])?.label ?? '',
       )
+      trackEvent('recommendation_completed', { provider: PROVIDER_INFO[winner].name, confidence })
     }
   }
 

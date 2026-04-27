@@ -6,12 +6,13 @@ import { PROVIDERS } from '@/lib/data'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { motion } from 'framer-motion'
 
 const CHAT_SUGGESTIONS = [
-  "Which cloud is cheapest for a startup?",
-  "AWS vs Azure for enterprise?",
-  "Best cloud for AI/ML workloads?",
-  "How do I reduce my cloud bill?",
+  'Which cloud is cheapest for a startup?',
+  'AWS vs Azure for enterprise?',
+  'Best cloud for AI/ML workloads?',
+  'How do I reduce my cloud bill?',
 ]
 
 export default function HomePage() {
@@ -21,7 +22,7 @@ export default function HomePage() {
   function handleChatSubmit(text?: string) {
     const q = text || chatInput.trim()
     if (!q) return
-    router.push(`/chat?q=${encodeURIComponent(q)}`)
+    router.push(`/intent?q=${encodeURIComponent(q)}`)
   }
 
   return (
@@ -29,17 +30,23 @@ export default function HomePage() {
       {/* Section 1: Hero */}
       <HeroSection />
 
-      {/* Section 2: Inline chat teaser */}
-      <div style={{ padding: '64px 24px', borderTop: '1px solid #ffffff08', textAlign: 'center' }}>
+      {/* Section 2: Inline intent teaser */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        style={{ padding: '64px 24px', borderTop: '1px solid #ffffff08', textAlign: 'center' }}
+      >
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>
-            ASK ANYTHING
+            AI-POWERED ANALYSIS
           </p>
           <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>
-            Have a quick cloud question?
+            Describe your project. Get your cloud blueprint.
           </h2>
           <p style={{ color: '#a0a0b0', marginBottom: 28, fontSize: 15 }}>
-            Get an expert answer in seconds — no signup required.
+            No forms, no jargon — just tell us what you&apos;re building.
           </p>
           <div style={{
             display: 'flex',
@@ -54,7 +61,7 @@ export default function HomePage() {
               value={chatInput}
               onChange={e => setChatInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleChatSubmit()}
-              placeholder="Ask about pricing, migration, compliance…"
+              placeholder="e.g. I want to build a healthcare app for 500 doctors in Europe..."
               style={{
                 flex: 1,
                 background: 'transparent',
@@ -76,9 +83,10 @@ export default function HomePage() {
                 cursor: 'pointer',
                 fontWeight: 600,
                 opacity: !chatInput.trim() ? 0.5 : 1,
+                whiteSpace: 'nowrap',
               }}
             >
-              Ask →
+              Analyze My Project →
             </button>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
@@ -101,10 +109,17 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Section 3: Market Pulse */}
-      <div id="market-data" style={{ padding: '60px 24px', textAlign: 'center', borderTop: '1px solid #ffffff08' }}>
+      <motion.div
+        id="market-data"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+        style={{ padding: '60px 24px', textAlign: 'center', borderTop: '1px solid #ffffff08' }}
+      >
         <p style={{ color: '#6366f1', fontSize: 13, fontWeight: 600, marginBottom: 12, letterSpacing: 2 }}>MARKET PULSE</p>
         <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>The numbers that define the cloud era</h2>
         <p style={{ color: '#a0a0b0', marginBottom: 40, fontSize: 15 }}>Hover over any number to understand what it means for you.</p>
@@ -136,7 +151,7 @@ export default function HomePage() {
             </Tooltip>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Section 4: How It Works */}
       <section style={{
@@ -179,30 +194,34 @@ export default function HomePage() {
       </section>
 
       {/* Section 5: Provider Cards */}
-      <section className="py-20 px-4" style={{ background: 'var(--bg-primary)' }}>
+      <section className="py-20 px-4" style={{ background: '#0a0a0f' }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
-            <p
-              className="text-xs font-semibold uppercase tracking-widest mb-3"
-              style={{ color: 'var(--accent)' }}
-            >
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-[#6366f1]">
               The Big Three
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
               Cloud providers at a glance
             </h2>
-            <p className="text-base max-w-xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
+            <p className="text-base max-w-xl mx-auto text-[#a0a0b0]">
               Q4 2025 figures from official earnings calls and SEC filings.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PROVIDERS.map((provider) => (
-              <div key={provider.key} className="card-hover">
+            {PROVIDERS.map((provider, index) => (
+              <motion.div
+                key={provider.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="card-hover"
+              >
                 <ProviderCard name={provider.name} color={provider.color}
                   marketShare={provider.marketShare} revenue={provider.revenue}
                   growth={provider.growth} tag={provider.tag} description={provider.description} />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -220,7 +239,7 @@ export default function HomePage() {
           Answer 5 quick questions and get a recommendation tailored to your team, budget, and workload.
         </p>
         <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a href="/advisor" style={{ textDecoration: 'none' }}>
+          <a href="/intent" style={{ textDecoration: 'none' }}>
             <button style={{
               background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
               color: 'white',
@@ -231,7 +250,7 @@ export default function HomePage() {
               fontWeight: 700,
               cursor: 'pointer',
             }}>
-              Find My Cloud →
+              Analyze My Project →
             </button>
           </a>
           <a href="/chat" style={{ textDecoration: 'none' }}>

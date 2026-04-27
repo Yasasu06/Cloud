@@ -6,6 +6,8 @@ import LiveTicker from '@/components/LiveTicker'
 import { JourneyProvider } from '@/lib/journeyContext'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
+import PostHogProvider from '@/components/PostHogProvider'
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
@@ -55,6 +57,7 @@ export default function RootLayout({
         <LiveTicker />
         <JourneyProvider>
           <TooltipProvider>
+          <PostHogProvider>
           <main>{children}</main>
           <footer style={{
             borderTop: '1px solid #ffffff08',
@@ -135,6 +138,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+          </PostHogProvider>
           </TooltipProvider>
         </JourneyProvider>
       </body>
