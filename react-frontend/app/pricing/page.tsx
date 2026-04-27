@@ -1,6 +1,9 @@
 'use client'
 import { PLANS } from '@/lib/stripe'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 
 export default function PricingPage() {
   const router = useRouter()
@@ -22,61 +25,41 @@ export default function PricingPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24 }}>
           {Object.entries(PLANS).map(([key, plan]) => (
-            <div key={key} style={{
-              background: key === 'pro' ? 'linear-gradient(135deg, #1e1b4b, #1a1a2e)' : '#1a1a2e',
-              borderRadius: 20,
-              padding: 32,
-              border: key === 'pro' ? '2px solid #6366f1' : '1px solid #ffffff08',
-              position: 'relative',
-            }}>
+            <Card key={key} className={`relative ${key === 'pro'
+              ? 'bg-gradient-to-b from-[#1e1b4b] to-[#1a1a2e] border-[#6366f1] border-2'
+              : 'bg-[#1a1a2e] border-[#ffffff08]'}`}>
               {key === 'pro' && (
-                <div style={{
-                  position: 'absolute',
-                  top: -12,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: '#6366f1',
-                  color: 'white',
-                  padding: '4px 16px',
-                  borderRadius: 20,
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}>
-                  MOST POPULAR
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-[#6366f1] text-white px-4">MOST POPULAR</Badge>
                 </div>
               )}
-              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{plan.name}</div>
-              <div style={{ marginBottom: 24 }}>
-                <span style={{ fontSize: 40, fontWeight: 800 }}>${plan.price}</span>
-                {plan.price > 0 && (
-                  <span style={{ color: '#a0a0b0' }}>/month</span>
-                )}
-              </div>
-              <div style={{ marginBottom: 32 }}>
+              <CardHeader>
+                <CardTitle className="text-white">{plan.name}</CardTitle>
+                <CardDescription>
+                  <span className="text-4xl font-black text-white">${plan.price}</span>
+                  {plan.price > 0 && <span className="text-[#a0a0b0]">/month</span>}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 {plan.features.map(f => (
-                  <div key={f} style={{ display: 'flex', gap: 8, marginBottom: 12, fontSize: 14, color: '#e0e0e0' }}>
-                    <span style={{ color: '#22c55e', flexShrink: 0 }}>✓</span>
+                  <div key={f} className="flex gap-2 text-sm text-[#e0e0e0]">
+                    <span className="text-green-400 flex-shrink-0">✓</span>
                     {f}
                   </div>
                 ))}
-              </div>
-              <button
-                onClick={() => router.push(plan.price === 0 ? '/auth' : '/auth?plan=' + key)}
-                style={{
-                  width: '100%',
-                  background: key === 'pro' ? '#6366f1' : 'transparent',
-                  color: 'white',
-                  border: key === 'pro' ? 'none' : '1px solid #ffffff30',
-                  borderRadius: 12,
-                  padding: '14px',
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                {plan.price === 0 ? 'Get Started Free' : `Get ${plan.name}`}
-              </button>
-            </div>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  onClick={() => router.push(plan.price === 0 ? '/auth' : '/auth?plan=' + key)}
+                  className={`w-full font-semibold ${key === 'pro'
+                    ? 'bg-[#6366f1] hover:bg-[#4f46e5] text-white'
+                    : 'bg-transparent border border-[#ffffff30] text-white hover:bg-[#ffffff10]'}`}
+                  variant={key === 'pro' ? 'default' : 'outline'}
+                >
+                  {plan.price === 0 ? 'Get Started Free' : `Get ${plan.name}`}
+                </Button>
+              </CardFooter>
+            </Card>
           ))}
         </div>
 

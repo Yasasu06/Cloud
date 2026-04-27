@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { PLANS } from '@/lib/stripe'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { User } from '@supabase/supabase-js'
 
 interface Recommendation {
@@ -84,31 +88,51 @@ export default function DashboardPage() {
             <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>Welcome back 👋</h1>
             <p style={{ color: '#a0a0b0' }}>{(profile?.full_name as string) || user?.email}</p>
           </div>
-          <button onClick={handleSignOut} style={{
-            background: 'transparent',
-            border: '1px solid #ffffff20',
-            borderRadius: 8,
-            padding: '8px 20px',
-            color: '#a0a0b0',
-            cursor: 'pointer',
-            fontSize: 14,
-          }}>
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            className="border-[#ffffff20] text-[#a0a0b0] bg-transparent hover:bg-[#ffffff10] hover:text-white"
+          >
             Sign Out
-          </button>
+          </Button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 40 }}>
-          {[
-            { label: 'Current Plan', value: plan.name, color: '#6366f1', sub: plan.price === 0 ? 'Free forever' : `$${plan.price}/month` },
-            { label: 'AI Queries Today', value: queriesDisplay, color: '#22c55e', sub: queriesLimit === -1 ? 'Unlimited' : `${queriesLimit - queriesUsed} remaining` },
-            { label: 'Saved Reports', value: recommendations.length.toString(), color: '#FF9900', sub: 'Total recommendations' },
-          ].map(stat => (
-            <div key={stat.label} style={{ background: '#1a1a2e', borderRadius: 12, padding: 24, borderTop: `3px solid ${stat.color}` }}>
-              <div style={{ color: '#a0a0b0', fontSize: 12, marginBottom: 8 }}>{stat.label}</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: stat.color, marginBottom: 4 }}>{stat.value}</div>
-              <div style={{ color: '#666', fontSize: 12 }}>{stat.sub}</div>
-            </div>
-          ))}
+          <Card className="bg-[#1a1a2e] border-t-[3px] border-t-[#6366f1] border-x-0 border-b-0 rounded-xl">
+            <CardContent className="pt-6">
+              <div className="text-xs text-[#a0a0b0] mb-2">CURRENT PLAN</div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-black text-[#6366f1]">{plan.name}</span>
+                <Badge className="bg-[#6366f1]/20 text-[#6366f1] border-[#6366f1]/30">
+                  {plan.price === 0 ? 'Free' : 'Active'}
+                </Badge>
+              </div>
+              <div className="text-xs text-[#666] mt-1">
+                {plan.price === 0 ? 'Free forever' : `$${plan.price}/month`}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#1a1a2e] border-t-[3px] border-t-[#22c55e] border-x-0 border-b-0 rounded-xl">
+            <CardContent className="pt-6">
+              <div className="text-xs text-[#a0a0b0] mb-2">AI QUERIES TODAY</div>
+              <div className="text-2xl font-black text-[#22c55e] mb-2">{queriesDisplay}</div>
+              {queriesLimit !== -1 && (
+                <Progress
+                  value={(queriesUsed / queriesLimit) * 100}
+                  className="h-2 bg-[#ffffff10]"
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="bg-[#1a1a2e] border-t-[3px] border-t-[#FF9900] border-x-0 border-b-0 rounded-xl">
+            <CardContent className="pt-6">
+              <div className="text-xs text-[#a0a0b0] mb-2">SAVED REPORTS</div>
+              <div className="text-2xl font-black text-[#FF9900]">{recommendations.length}</div>
+              <div className="text-xs text-[#666] mt-1">Total recommendations</div>
+            </CardContent>
+          </Card>
         </div>
 
         {profile?.plan === 'free' && (
@@ -126,69 +150,73 @@ export default function DashboardPage() {
                   Unlimited AI queries, saved reports, deployment roadmaps and more.
                 </p>
               </div>
-              <button
+              <Button
                 onClick={() => router.push('/pricing')}
-                style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                className="bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold whitespace-nowrap"
               >
                 Upgrade — $19/mo →
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
-        <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 32, border: '1px solid #ffffff08' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700 }}>Saved Recommendations</h2>
-            <button
-              onClick={() => router.push('/advisor')}
-              style={{ background: 'transparent', border: '1px solid #6366f1', borderRadius: 8, padding: '8px 16px', color: '#6366f1', cursor: 'pointer', fontSize: 13 }}
-            >
-              + New Recommendation
-            </button>
-          </div>
-
-          {recommendations.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0', color: '#666' }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
-              <p style={{ marginBottom: 16 }}>No saved recommendations yet.</p>
-              <button
+        <Card className="bg-[#1a1a2e] border-[#ffffff08]">
+          <CardHeader>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <CardTitle className="text-white text-xl">Saved Recommendations</CardTitle>
+              <Button
                 onClick={() => router.push('/advisor')}
-                style={{ background: '#6366f1', border: 'none', borderRadius: 8, padding: '10px 24px', color: 'white', cursor: 'pointer', fontSize: 14 }}
+                variant="outline"
+                className="border-[#6366f1] text-[#6366f1] bg-transparent hover:bg-[#6366f1]/10 text-sm"
               >
-                Get Your First Recommendation →
-              </button>
+                + New Recommendation
+              </Button>
             </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {recommendations.map(rec => (
-                <div key={rec.id} style={{
-                  background: '#12121a',
-                  borderRadius: 12,
-                  padding: '16px 20px',
-                  borderLeft: `4px solid ${PROVIDER_COLORS[rec.provider] ?? '#6366f1'}`,
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 2fr 1fr',
-                  gap: 16,
-                  alignItems: 'center',
-                }}>
-                  <div>
-                    <div style={{ color: PROVIDER_COLORS[rec.provider] ?? '#6366f1', fontWeight: 800, fontSize: 20, marginBottom: 4 }}>
-                      {rec.provider}
+          </CardHeader>
+          <CardContent>
+            {recommendations.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '40px 0', color: '#666' }}>
+                <div style={{ fontSize: 40, marginBottom: 16 }}>📋</div>
+                <p style={{ marginBottom: 16 }}>No saved recommendations yet.</p>
+                <Button
+                  onClick={() => router.push('/advisor')}
+                  className="bg-[#6366f1] hover:bg-[#4f46e5] text-white"
+                >
+                  Get Your First Recommendation →
+                </Button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {recommendations.map(rec => (
+                  <div key={rec.id} style={{
+                    background: '#12121a',
+                    borderRadius: 12,
+                    padding: '16px 20px',
+                    borderLeft: `4px solid ${PROVIDER_COLORS[rec.provider] ?? '#6366f1'}`,
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 2fr 1fr',
+                    gap: 16,
+                    alignItems: 'center',
+                  }}>
+                    <div>
+                      <div style={{ color: PROVIDER_COLORS[rec.provider] ?? '#6366f1', fontWeight: 800, fontSize: 20, marginBottom: 4 }}>
+                        {rec.provider}
+                      </div>
+                      <div style={{ color: '#22c55e', fontSize: 13 }}>{rec.confidence}% match</div>
                     </div>
-                    <div style={{ color: '#22c55e', fontSize: 13 }}>{rec.confidence}% match</div>
+                    <div>
+                      <div style={{ fontSize: 13, color: '#e0e0e0', marginBottom: 4 }}>{rec.workload || 'General workload'}</div>
+                      <div style={{ fontSize: 12, color: '#666' }}>{rec.team_size} · {rec.budget}</div>
+                    </div>
+                    <div style={{ textAlign: 'right', color: '#666', fontSize: 12 }}>
+                      {new Date(rec.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 13, color: '#e0e0e0', marginBottom: 4 }}>{rec.workload || 'General workload'}</div>
-                    <div style={{ fontSize: 12, color: '#666' }}>{rec.team_size} · {rec.budget}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', color: '#666', fontSize: 12 }}>
-                    {new Date(rec.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

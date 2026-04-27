@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import LiveTicker from '@/components/LiveTicker'
 import { JourneyProvider } from '@/lib/journeyContext'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 export const metadata: Metadata = {
   title: {
@@ -52,6 +53,7 @@ export default function RootLayout({
         <Navbar />
         <LiveTicker />
         <JourneyProvider>
+          <TooltipProvider>
           <main>{children}</main>
           <footer style={{
             borderTop: '1px solid #ffffff08',
@@ -132,6 +134,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+          </TooltipProvider>
         </JourneyProvider>
       </body>
     </html>

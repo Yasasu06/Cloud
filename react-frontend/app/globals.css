@@ -13,8 +13,24 @@
   --bg-card: #1a1a2e;
   --text-primary: #ffffff;
   --text-secondary: #a0a0b0;
-  --accent: #6366f1;
-  --border: rgba(255, 255, 255, 0.08);
+
+  /* shadcn/ui CSS variables (dark theme) */
+  --background: 240 10% 4%;
+  --foreground: 0 0% 100%;
+  --card: 236 37% 14%;
+  --card-foreground: 0 0% 100%;
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 10% 10%;
+  --secondary-foreground: 0 0% 63%;
+  --muted: 240 10% 10%;
+  --muted-foreground: 0 0% 63%;
+  --accent: 239 84% 67%;
+  --accent-foreground: 0 0% 100%;
+  --border: 240 10% 8%;
+  --input: 236 37% 14%;
+  --ring: 239 84% 67%;
+  --radius: 0.5rem;
 }
 
 * {

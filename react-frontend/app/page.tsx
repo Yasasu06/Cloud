@@ -5,6 +5,7 @@ import ProviderCard from '@/components/ProviderCard'
 import { PROVIDERS } from '@/lib/data'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const CHAT_SUGGESTIONS = [
   "Which cloud is cheapest for a startup?",
@@ -114,38 +115,25 @@ export default function HomePage() {
             { value: '47%', label: 'AI Cloud Growth', color: '#34A853', change: 'Year over year 2026', tooltip: 'The AI portion of cloud is growing at 47% per year — more than twice the overall cloud growth rate. Azure leads this race through its OpenAI partnership. If your project involves AI, this number directly affects which provider you should choose.' },
             { value: '89%', label: 'Multi-cloud Adoption', color: '#FF9900', change: 'Of enterprises in 2026', tooltip: '89% of large enterprises use more than one cloud provider. They use AWS for some workloads, Azure for others, GCP for AI. This does not mean you should start with multiple clouds — begin with one, expand when you have a specific reason.' },
           ].map((metric, i) => (
-            <div
-              key={i}
-              className="card-hover"
-              style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, border: '1px solid #ffffff08', position: 'relative', cursor: 'default' }}
-              onMouseEnter={e => {
-                const tooltip = e.currentTarget.querySelector('.metric-tooltip') as HTMLElement
-                if (tooltip) { tooltip.style.opacity = '1'; tooltip.style.visibility = 'visible' }
-              }}
-              onMouseLeave={e => {
-                const tooltip = e.currentTarget.querySelector('.metric-tooltip') as HTMLElement
-                if (tooltip) { tooltip.style.opacity = '0'; tooltip.style.visibility = 'hidden' }
-              }}
-            >
-              <div style={{ fontSize: 36, fontWeight: 800, color: metric.color, marginBottom: 8 }}>{metric.value}</div>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>{metric.label}</div>
-              <div style={{ color: '#a0a0b0', fontSize: 12 }}>{metric.change}</div>
-              <div className="metric-tooltip" style={{
-                position: 'absolute', bottom: 'calc(100% + 12px)', left: '50%', transform: 'translateX(-50%)',
-                background: '#0a0a0f', border: `1px solid ${metric.color}`, borderRadius: 12, padding: 16,
-                width: 260, fontSize: 13, lineHeight: 1.6, color: '#e0e0e0',
-                opacity: 0, visibility: 'hidden', transition: 'opacity 0.2s ease', zIndex: 100,
-                textAlign: 'left', boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-              }}>
-                <div style={{ color: metric.color, fontWeight: 700, marginBottom: 8, fontSize: 14 }}>What this means for you:</div>
-                {metric.tooltip}
-                <div style={{
-                  position: 'absolute', bottom: -6, left: '50%', transform: 'translateX(-50%)',
-                  width: 12, height: 12, background: '#0a0a0f',
-                  border: `1px solid ${metric.color}`, borderTop: 'none', borderLeft: 'none', rotate: '45deg',
-                }} />
-              </div>
-            </div>
+            <Tooltip key={i}>
+              <TooltipTrigger asChild>
+                <div
+                  className="card-hover"
+                  style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, border: '1px solid #ffffff08', cursor: 'default' }}
+                >
+                  <div style={{ fontSize: 36, fontWeight: 800, color: metric.color, marginBottom: 8 }}>{metric.value}</div>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>{metric.label}</div>
+                  <div style={{ color: '#a0a0b0', fontSize: 12 }}>{metric.change}</div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent
+                className="max-w-[260px] bg-[#0a0a0f] text-[#e0e0e0] p-4"
+                style={{ border: `1px solid ${metric.color}` }}
+              >
+                <p className="font-bold mb-2" style={{ color: metric.color }}>What this means for you:</p>
+                <p className="text-sm leading-relaxed">{metric.tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       </div>

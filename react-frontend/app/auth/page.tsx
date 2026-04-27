@@ -2,6 +2,10 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -23,17 +27,12 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: { full_name: name },
-          },
+          options: { data: { full_name: name } },
         })
         if (error) throw error
         setSuccess('Account created! Check your email to confirm.')
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         router.push('/dashboard')
       }
@@ -44,19 +43,6 @@ export default function AuthPage() {
     }
   }
 
-  const inputStyle = {
-    width: '100%',
-    background: '#1a1a2e',
-    border: '1px solid #ffffff15',
-    borderRadius: 8,
-    padding: '12px 16px',
-    color: 'white',
-    fontSize: 15,
-    outline: 'none',
-    marginBottom: 16,
-    boxSizing: 'border-box' as const,
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
       <div style={{ maxWidth: 420, margin: '0 auto', padding: '120px 24px 60px' }}>
@@ -65,109 +51,84 @@ export default function AuthPage() {
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>
             {mode === 'login' ? 'Welcome back' : 'Create your account'}
           </h1>
-          <p style={{ color: '#a0a0b0' }}>
-            {mode === 'login'
-              ? 'Sign in to access your saved recommendations'
-              : 'Start making smarter cloud decisions today'}
-          </p>
         </div>
 
-        <div style={{
-          background: '#1a1a2e',
-          borderRadius: 16,
-          padding: 32,
-          border: '1px solid #ffffff08',
-        }}>
-          {mode === 'signup' && (
-            <input
-              type="text"
-              placeholder="Full name"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              style={inputStyle}
-            />
-          )}
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            style={inputStyle}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleAuth()}
-            style={inputStyle}
-          />
-
-          {error && (
-            <div style={{
-              background: '#ef444420',
-              border: '1px solid #ef4444',
-              borderRadius: 8,
-              padding: '12px 16px',
-              color: '#ef4444',
-              fontSize: 14,
-              marginBottom: 16,
-            }}>
-              {error}
+        <Card className="bg-[#1a1a2e] border-[#ffffff08]">
+          <CardHeader className="text-center">
+            <CardTitle className="text-white text-2xl">
+              {mode === 'login' ? 'Welcome back' : 'Create your account'}
+            </CardTitle>
+            <CardDescription className="text-[#a0a0b0]">
+              {mode === 'login'
+                ? 'Sign in to access your saved recommendations'
+                : 'Start making smarter cloud decisions today'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {mode === 'signup' && (
+              <div className="space-y-2">
+                <Label className="text-[#a0a0b0]">Full name</Label>
+                <Input
+                  type="text"
+                  placeholder="John Smith"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="bg-[#0a0a0f] border-[#ffffff15] text-white"
+                />
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label className="text-[#a0a0b0]">Email address</Label>
+              <Input
+                type="email"
+                placeholder="john@company.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="bg-[#0a0a0f] border-[#ffffff15] text-white"
+              />
             </div>
-          )}
-
-          {success && (
-            <div style={{
-              background: '#22c55e20',
-              border: '1px solid #22c55e',
-              borderRadius: 8,
-              padding: '12px 16px',
-              color: '#22c55e',
-              fontSize: 14,
-              marginBottom: 16,
-            }}>
-              {success}
+            <div className="space-y-2">
+              <Label className="text-[#a0a0b0]">Password</Label>
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAuth()}
+                className="bg-[#0a0a0f] border-[#ffffff15] text-white"
+              />
             </div>
-          )}
 
-          <button
-            onClick={handleAuth}
-            disabled={loading}
-            style={{
-              width: '100%',
-              background: '#6366f1',
-              color: 'white',
-              border: 'none',
-              borderRadius: 12,
-              padding: '14px',
-              fontSize: 16,
-              fontWeight: 700,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              opacity: loading ? 0.7 : 1,
-              marginBottom: 16,
-            }}
-          >
-            {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
-          </button>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500 rounded-lg p-3 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-green-500/10 border border-green-500 rounded-lg p-3 text-green-400 text-sm">
+                {success}
+              </div>
+            )}
 
-          <div style={{ textAlign: 'center', color: '#a0a0b0', fontSize: 14 }}>
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError('') }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#6366f1',
-                cursor: 'pointer',
-                fontSize: 14,
-                fontWeight: 600,
-              }}
+            <Button
+              onClick={handleAuth}
+              disabled={loading}
+              className="w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold"
             >
-              {mode === 'login' ? 'Sign up free' : 'Sign in'}
-            </button>
-          </div>
-        </div>
+              {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+            </Button>
+
+            <div className="text-center text-[#a0a0b0] text-sm">
+              {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+              <button
+                onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError('') }}
+                className="text-[#6366f1] font-semibold hover:underline bg-transparent border-none cursor-pointer"
+              >
+                {mode === 'login' ? 'Sign up free' : 'Sign in'}
+              </button>
+            </div>
+          </CardContent>
+        </Card>
 
         <p style={{ textAlign: 'center', color: '#666', fontSize: 12, marginTop: 24 }}>
           By continuing you agree to our Terms of Service and Privacy Policy.
