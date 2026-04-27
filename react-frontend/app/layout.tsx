@@ -89,6 +89,8 @@ export default function RootLayout({
                 {[
                   { label: 'Cloud Advisor', href: '/advisor' },
                   { label: 'Cost Planner', href: '/planner' },
+                  { label: 'Deployment Roadmap', href: '/roadmap' },
+                  { label: 'Exit Analyzer', href: '/repatriation' },
                   { label: 'Migration Tool', href: '/migration' },
                   { label: 'Multi-Cloud', href: '/multicloud' },
                   { label: 'Alternatives', href: '/others' },

@@ -9,6 +9,8 @@ const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/intent', label: 'AI Analyze' },
   { href: '/planner', label: 'Plan' },
+  { href: '/roadmap', label: 'Roadmap' },
+  { href: '/repatriation', label: 'Exit Analyzer' },
   { href: '/executive', label: 'Report' },
   { href: '/pricing', label: 'Pricing' },
 ]
