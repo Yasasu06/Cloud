@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 
@@ -10,7 +9,6 @@ interface LastRec {
 }
 
 export default function HomePage() {
-  const router = useRouter()
   const [input, setInput] = useState('')
   const [lastRec, setLastRec] = useState<LastRec | null>(null)
 
@@ -32,7 +30,7 @@ export default function HomePage() {
 
   function handleSubmit() {
     if (input.trim()) {
-      router.push(`/intent?q=${encodeURIComponent(input)}`)
+      window.location.href = `/intent?q=${encodeURIComponent(input)}`
     }
   }
 
@@ -344,33 +342,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* BOTTOM CTA */}
-      <section style={{ padding: '80px 24px', textAlign: 'center', borderTop: '1px solid #ffffff08' }}>
-        <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, marginBottom: 16 }}>
-          Stop guessing. Start saving.
-        </h2>
-        <p style={{ color: '#a0a0b0', marginBottom: 32, fontSize: 16 }}>
-          Describe your cloud situation and get your personalized analysis free.
-        </p>
-        <button
-          onClick={() => router.push('/intent')}
-          style={{
-            background: '#6366f1',
-            color: 'white',
-            border: 'none',
-            borderRadius: 12,
-            padding: '16px 48px',
-            fontSize: 18,
-            fontWeight: 700,
-            cursor: 'pointer',
-          }}
-        >
-          Analyze My Cloud Situation →
-        </button>
-        <p style={{ color: '#666', fontSize: 13, marginTop: 12 }}>
-          Free · No signup required · Results in 30 seconds
-        </p>
-      </section>
     </div>
   )
 }
