@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 import {
-  LineChart, Line, BarChart, Bar,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 
 const PROVIDER_COLORS: Record<string, string> = {
@@ -24,26 +24,6 @@ const PROVIDER_NAME_TO_KEY: Record<string, string> = {
   'Google Cloud Platform': 'GCP',
 }
 
-const MARKET_FORECAST_DATA = [
-  { quarter: 'Q1 2024', AWS: 25.0, Azure: 35.1, GCP: 9.4 },
-  { quarter: 'Q2 2024', AWS: 26.3, Azure: 36.8, GCP: 10.3 },
-  { quarter: 'Q3 2024', AWS: 27.5, Azure: 38.9, GCP: 11.4 },
-  { quarter: 'Q4 2024', AWS: 28.8, Azure: 40.9, GCP: 11.4 },
-  { quarter: 'Q1 2025', AWS: 29.3, Azure: 42.4, GCP: 12.3 },
-  { quarter: 'Q2 2025', AWS: 30.5, Azure: 44.5, GCP: 13.1 },
-  { quarter: 'Q3 2025', AWS: 32.0, Azure: 47.3, GCP: 14.1 },
-  { quarter: 'Q4 2025', AWS: 33.8, Azure: 49.4, GCP: 14.9 },
-  { quarter: 'Q1 2026*', AWS: 35.2, Azure: 52.1, GCP: 15.9 },
-  { quarter: 'Q2 2026*', AWS: 36.8, Azure: 55.2, GCP: 17.0 },
-  { quarter: 'Q3 2026*', AWS: 38.5, Azure: 58.6, GCP: 18.2 },
-  { quarter: 'Q4 2026*', AWS: 40.3, Azure: 62.3, GCP: 19.5 },
-]
-
-const FORECAST_INSIGHTS = [
-  { name: 'AWS', color: '#FF9900', insight: 'Slowing growth but maintaining massive scale. Still the safe enterprise choice.' },
-  { name: 'Azure', color: '#0078D4', insight: 'Fastest growing major provider. AI momentum from OpenAI partnership driving acceleration.' },
-  { name: 'GCP', color: '#34A853', insight: 'Strong AI/ML growth. Gemini integration accelerating enterprise adoption.' },
-]
 
 interface CostPoint {
   month: string
@@ -62,19 +42,17 @@ function generateCostData(baseSpend: number, growthMultiplier: number, provider:
 export default function PlannerPage() {
   const { journey } = useJourney()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<'forecast' | 'costs'>('forecast')
-
   const [spend, setSpend] = useState(5000)
   const [growth, setGrowth] = useState(5)
   const [provider, setProvider] = useState('AWS')
   const [calculated, setCalculated] = useState(false)
   const [costData, setCostData] = useState<CostPoint[]>([])
+  const [aiInsight, setAiInsight] = useState('')
 
   useEffect(() => {
     if (!journey?.recommendedProvider) return
     const key = PROVIDER_NAME_TO_KEY[journey.recommendedProvider] || journey.recommendedProvider
     if (PROVIDER_COLORS[key]) setProvider(key)
-    setActiveTab('costs')
   }, [journey])
 
   function calculate() {
@@ -90,28 +68,14 @@ export default function PlannerPage() {
     : null
   const journeyColor = journeyKey ? (PROVIDER_COLORS[journeyKey] || '#6366f1') : '#6366f1'
 
-  function tabStyle(tab: string): React.CSSProperties {
-    return {
-      padding: '12px 32px',
-      border: 'none',
-      borderRadius: 10,
-      cursor: 'pointer',
-      fontWeight: 600,
-      fontSize: 15,
-      background: activeTab === tab ? '#6366f1' : 'transparent',
-      color: activeTab === tab ? 'white' : '#a0a0b0',
-      transition: 'all 0.2s',
-    }
-  }
-
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '100px 24px 60px' }}>
 
         <div style={{ marginBottom: 32 }}>
-          <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 8 }}>📊 Cloud Planner</h1>
+          <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 8 }}>💰 Cost Planner</h1>
           <p style={{ color: '#a0a0b0', fontSize: 16 }}>
-            Market forecasts and personal cost projections — in one place.
+            See exactly what your cloud bill looks like as you grow — and where you can optimize right now.
           </p>
         </div>
 
@@ -141,70 +105,7 @@ export default function PlannerPage() {
           </div>
         )}
 
-        {/* Tab switcher */}
-        <div style={{
-          display: 'flex',
-          background: '#12121a',
-          borderRadius: 12,
-          padding: 4,
-          marginBottom: 40,
-          width: 'fit-content',
-        }}>
-          <button style={tabStyle('forecast')} onClick={() => setActiveTab('forecast')}>
-            🌍 Market Forecast
-          </button>
-          <button style={tabStyle('costs')} onClick={() => setActiveTab('costs')}>
-            💰 My Cost Planner
-          </button>
-        </div>
-
-        {/* ── FORECAST TAB ── */}
-        {activeTab === 'forecast' && (
-          <div>
-            <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>
-              Cloud Revenue Forecast — 2024 to 2026
-            </h2>
-            <p style={{ color: '#a0a0b0', marginBottom: 8 }}>
-              Quarterly revenue ($B) based on historical data and growth projections. * = projected.
-            </p>
-            <div style={{ background: '#12121a', borderRadius: 8, padding: '8px 0', marginBottom: 24, display: 'inline-block' }}>
-              <span style={{ color: '#f59e0b', fontSize: 13, padding: '4px 12px' }}>
-                ⚡ Azure is projected to maintain its lead over AWS through 2026
-              </span>
-            </div>
-
-            <div style={{ minHeight: 250 }}>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={MARKET_FORECAST_DATA}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                <XAxis dataKey="quarter" stroke="#a0a0b0" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#a0a0b0" tick={{ fontSize: 11 }} />
-                <Tooltip
-                  contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
-                  formatter={(value: number) => [`$${value}B`, '']}
-                />
-                <Legend />
-                <Line type="monotone" dataKey="AWS" stroke="#FF9900" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="Azure" stroke="#0078D4" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="GCP" stroke="#34A853" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginTop: 32 }}>
-              {FORECAST_INSIGHTS.map((p) => (
-                <div key={p.name} style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, borderTop: `3px solid ${p.color}` }}>
-                  <div style={{ fontWeight: 700, marginBottom: 8, color: p.color }}>{p.name}</div>
-                  <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6 }}>{p.insight}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── COSTS TAB ── */}
-        {activeTab === 'costs' && (
-          <div>
+        <div>
             <h2 style={{ fontSize: 22, fontWeight: 700, marginBottom: 24 }}>
               What happens to your bill as you grow?
             </h2>
@@ -292,6 +193,55 @@ export default function PlannerPage() {
                 </ResponsiveContainer>
                 </div>
 
+                <div style={{ marginTop: 24 }}>
+                  <button
+                    onClick={async () => {
+                      setAiInsight('loading')
+                      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
+                        },
+                        body: JSON.stringify({
+                          model: 'llama-3.3-70b-versatile',
+                          max_tokens: 300,
+                          messages: [{
+                            role: 'user',
+                            content: `A company spends $${spend}/month on ${provider} cloud and is projected to grow ${growth}x over 12 months, reaching $${finalCost}/month. In 3 plain English sentences: 1) Is this growth rate typical or alarming? 2) What is the most important cost optimization they should do right now? 3) At what spend level should they consider reserved instances or committed use discounts?`,
+                          }],
+                        }),
+                      })
+                      const data = await res.json()
+                      setAiInsight(data.choices?.[0]?.message?.content || '')
+                    }}
+                    style={{
+                      background: '#6366f1',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: 12,
+                      padding: '12px 24px',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      marginBottom: 16,
+                    }}
+                  >
+                    🤖 Get AI Cost Insight →
+                  </button>
+
+                  {aiInsight && aiInsight !== 'loading' && (
+                    <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, borderLeft: '4px solid #6366f1' }}>
+                      <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 600, marginBottom: 8 }}>AI COST ANALYSIS</div>
+                      <p style={{ color: '#e0e0e0', fontSize: 14, lineHeight: 1.7 }}>{aiInsight}</p>
+                    </div>
+                  )}
+
+                  {aiInsight === 'loading' && (
+                    <p style={{ color: '#a0a0b0', fontSize: 14 }}>Analyzing your cost trajectory...</p>
+                  )}
+                </div>
+
                 <div style={{ marginTop: 24, background: '#1a1a2e', borderRadius: 12, padding: 20, borderLeft: '4px solid #f59e0b' }}>
                   <div style={{ fontWeight: 600, marginBottom: 8 }}>💡 Cost Planning Insight</div>
                   <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6 }}>
@@ -328,7 +278,6 @@ export default function PlannerPage() {
               </div>
             )}
           </div>
-        )}
       </div>
     </div>
   )

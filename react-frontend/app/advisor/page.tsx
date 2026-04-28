@@ -1,531 +1,542 @@
 'use client'
-
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronRight, CheckCircle2, RotateCcw } from 'lucide-react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 
-interface Question {
-  id: number | string
-  question: string
-  options: { label: string; value: string }[]
-  isDynamic?: boolean
-}
-
-const BASE_QUESTIONS: Question[] = [
-  {
-    id: 1,
-    question: 'What best describes your primary workload?',
-    options: [
-      { label: 'Web & Mobile Applications', value: 'web' },
-      { label: 'Data Analytics & Big Data', value: 'data' },
-      { label: 'AI / Machine Learning', value: 'ai' },
-      { label: 'Enterprise / ERP / SAP', value: 'enterprise' },
-      { label: 'DevOps / CI/CD Pipelines', value: 'devops' },
-    ],
-  },
-  {
-    id: 2,
-    question: 'What are your compliance requirements?',
-    options: [
-      { label: 'None / Minimal', value: 'none' },
-      { label: 'SOC2 / ISO 27001', value: 'soc2' },
-      { label: 'HIPAA (Healthcare)', value: 'hipaa' },
-      { label: 'FedRAMP / Government', value: 'fedramp' },
-      { label: 'GDPR (Europe)', value: 'gdpr' },
-    ],
-  },
-  {
-    id: 3,
-    question: 'How large is your engineering team?',
-    options: [
-      { label: 'Solo / 1–5 engineers', value: 'solo' },
-      { label: 'Small team (6–25)', value: 'small' },
-      { label: 'Mid-size (26–100)', value: 'mid' },
-      { label: 'Large (100–500)', value: 'large' },
-      { label: 'Enterprise (500+)', value: 'enterprise' },
-    ],
-  },
-  {
-    id: 4,
-    question: 'What is your existing technology stack?',
-    options: [
-      { label: 'Microsoft / .NET / Windows', value: 'microsoft' },
-      { label: 'Open source / Linux / Python', value: 'oss' },
-      { label: 'Google Workspace / Firebase', value: 'google' },
-      { label: 'AWS-native already', value: 'aws' },
-      { label: 'Vendor agnostic / Mixed', value: 'agnostic' },
-    ],
-  },
-  {
-    id: 5,
-    question: 'What is your monthly cloud budget?',
-    options: [
-      { label: 'Under $1,000', value: 'micro' },
-      { label: '$1,000 – $10,000', value: 'small' },
-      { label: '$10,000 – $50,000', value: 'mid' },
-      { label: '$50,000 – $500,000', value: 'large' },
-      { label: 'Over $500,000', value: 'enterprise' },
-    ],
-  },
+const INDUSTRIES = [
+  { id: 'healthcare', label: '🏥 Healthcare / Medical', compliance: ['HIPAA', 'HITECH'] },
+  { id: 'fintech', label: '🏦 Finance / Fintech', compliance: ['PCI DSS', 'SOX'] },
+  { id: 'saas', label: '💻 SaaS / Software', compliance: ['SOC 2'] },
+  { id: 'ecommerce', label: '🛍️ E-commerce / Retail', compliance: ['PCI DSS'] },
+  { id: 'gaming', label: '🎮 Gaming', compliance: [] },
+  { id: 'ai_ml', label: '🤖 AI / Machine Learning', compliance: [] },
+  { id: 'government', label: '🏛️ Government / Public Sector', compliance: ['FedRAMP'] },
+  { id: 'education', label: '🎓 Education', compliance: ['FERPA'] },
+  { id: 'startup', label: '🚀 Early Stage Startup', compliance: [] },
+  { id: 'enterprise', label: '🏢 Enterprise / Large Business', compliance: [] },
 ]
 
-const DYNAMIC_QUESTIONS: Record<string, Question> = {
-  microsoftEcosystem: {
-    id: 'microsoftEcosystem',
-    isDynamic: true,
-    question: 'Does your organization currently use Microsoft 365 or Azure AD?',
-    options: [
-      { label: 'Yes, heavily integrated', value: 'heavy' },
-      { label: 'Somewhat', value: 'somewhat' },
-      { label: 'No, we are independent', value: 'no' },
-    ],
-  },
-  aiType: {
-    id: 'aiType',
-    isDynamic: true,
-    question: 'What type of AI work are you doing?',
-    options: [
-      { label: 'Training large models', value: 'training' },
-      { label: 'Running inference/APIs', value: 'inference' },
-      { label: 'Building AI apps on existing models', value: 'apps' },
-      { label: 'Just experimenting', value: 'experimenting' },
-    ],
-  },
-  healthcareData: {
-    id: 'healthcareData',
-    isDynamic: true,
-    question: 'What type of healthcare data are you handling?',
-    options: [
-      { label: 'Patient records (PHI)', value: 'phi' },
-      { label: 'Insurance claims', value: 'insurance' },
-      { label: 'Medical devices/IoT', value: 'iot' },
-      { label: 'Research data only', value: 'research' },
-    ],
-  },
+const CLOUD_PROVIDERS = ['AWS', 'Azure', 'Google Cloud', 'Not on cloud yet', 'Multiple clouds']
+
+const SPEND_RANGES = [
+  { id: 'free', label: '$0 — Using free tiers only' },
+  { id: 'under500', label: 'Under $500/month' },
+  { id: '500_2k', label: '$500 – $2,000/month' },
+  { id: '2k_10k', label: '$2,000 – $10,000/month' },
+  { id: '10k_50k', label: '$10,000 – $50,000/month' },
+  { id: 'over50k', label: 'Over $50,000/month' },
+]
+
+const TEAM_SIZES = [
+  { id: 'solo', label: 'Just me' },
+  { id: 'small', label: '2–10 people' },
+  { id: 'medium', label: '11–50 people' },
+  { id: 'large', label: '51–200 people' },
+  { id: 'enterprise', label: '200+ people' },
+]
+
+const MAIN_PROBLEMS = [
+  { id: 'bill_shock', label: "😱 Unexpected bill spikes I can't explain" },
+  { id: 'waste', label: "🗑️ Pretty sure I'm wasting money but don't know where" },
+  { id: 'choosing', label: '🤔 Not sure which cloud to use for my project' },
+  { id: 'migration', label: '🔄 Want to switch or add a cloud provider' },
+  { id: 'compliance', label: '🛡️ Need to meet compliance requirements' },
+  { id: 'scaling', label: '📈 Costs growing faster than my revenue' },
+  { id: 'starting', label: '🌱 Just getting started with cloud' },
+  { id: 'optimization', label: '⚡ Want to optimize what I already have' },
+]
+
+interface Answers {
+  industry: string
+  currentCloud: string
+  monthlySpend: string
+  teamSize: string
+  mainProblem: string
 }
 
-const SCORES: Record<string, Record<string, { aws: number; azure: number; gcp: number }>> = {
-  workload: {
-    web: { aws: 3, azure: 2, gcp: 1 },
-    data: { aws: 2, azure: 2, gcp: 3 },
-    ai: { aws: 2, azure: 3, gcp: 3 },
-    enterprise: { aws: 1, azure: 3, gcp: 1 },
-    devops: { aws: 3, azure: 2, gcp: 2 },
-  },
-  compliance: {
-    none: { aws: 2, azure: 2, gcp: 2 },
-    soc2: { aws: 2, azure: 2, gcp: 2 },
-    hipaa: { aws: 3, azure: 3, gcp: 1 },
-    fedramp: { aws: 3, azure: 2, gcp: 1 },
-    gdpr: { aws: 2, azure: 3, gcp: 2 },
-  },
-  size: {
-    solo: { aws: 2, azure: 1, gcp: 3 },
-    small: { aws: 3, azure: 2, gcp: 2 },
-    mid: { aws: 3, azure: 2, gcp: 2 },
-    large: { aws: 2, azure: 3, gcp: 2 },
-    enterprise: { aws: 2, azure: 3, gcp: 1 },
-  },
-  stack: {
-    microsoft: { aws: 1, azure: 3, gcp: 1 },
-    oss: { aws: 3, azure: 2, gcp: 3 },
-    google: { aws: 1, azure: 1, gcp: 3 },
-    aws: { aws: 3, azure: 1, gcp: 1 },
-    agnostic: { aws: 2, azure: 2, gcp: 2 },
-  },
-  budget: {
-    micro: { aws: 2, azure: 1, gcp: 3 },
-    small: { aws: 3, azure: 2, gcp: 2 },
-    mid: { aws: 3, azure: 3, gcp: 2 },
-    large: { aws: 2, azure: 3, gcp: 2 },
-    enterprise: { aws: 2, azure: 3, gcp: 2 },
-  },
+interface RecommendationResult {
+  provider: string
+  confidence: number
+  headline: string
+  reasons: string[]
+  services: string[]
+  monthlyEstimate: string
+  compliance: string[]
+  warning: string
+  nextStep: string
 }
 
-const SCORE_KEYS = ['workload', 'compliance', 'size', 'stack', 'budget']
-
-const QUESTION_HELPERS: Record<string, string> = {
-  '1': 'Pick the category that best describes what your app or system does. Not sure? Pick "Web & Mobile Applications" — it covers most use cases.',
-  '2': 'HIPAA = US healthcare data. GDPR = European user data. FedRAMP = US government systems. SOC 2 = general enterprise security. Not sure? Select "None" and ask our AI consultant later.',
-  '3': 'This helps us match you to the right scale of platform. A solo developer needs different tools than a 500-person enterprise.',
-  '5': 'This is your expected monthly cloud infrastructure spend — not your total IT budget. Not sure? Start with a lower range, you can always scale up.',
-  'microsoftEcosystem': "If your team uses Outlook, Teams, Office 365, or Windows servers, you're in the Microsoft ecosystem. Azure integrates much more smoothly in that case.",
+function getProviderColor(provider: string): string {
+  const colors: Record<string, string> = {
+    AWS: '#FF9900',
+    Azure: '#0078D4',
+    GCP: '#34A853',
+    'Google Cloud': '#34A853',
+    DigitalOcean: '#0080FF',
+    'Oracle Cloud': '#F80000',
+  }
+  return colors[provider] || '#6366f1'
 }
 
-const PROVIDER_INFO: Record<string, { color: string; name: string; tagline: string }> = {
-  aws: { color: '#FF9900', name: 'Amazon Web Services', tagline: 'Broadest service catalog, best for startups and enterprise alike.' },
-  azure: { color: '#0078D4', name: 'Microsoft Azure', tagline: 'Best for enterprises and Microsoft-heavy environments.' },
-  gcp: { color: '#34A853', name: 'Google Cloud Platform', tagline: 'Best-in-class AI/ML and data analytics capabilities.' },
-}
-
-async function saveRecommendation(
-  provider: string,
-  confidence: number,
-  workload: string,
-  teamSize: string,
-  budget: string
-) {
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session) return
-
-  await supabase.from('saved_recommendations').insert({
-    user_id: session.user.id,
-    provider,
-    confidence,
-    workload,
-    team_size: teamSize,
-    budget,
-  })
+const EMPTY_ANSWERS: Answers = {
+  industry: '',
+  currentCloud: '',
+  monthlySpend: '',
+  teamSize: '',
+  mainProblem: '',
 }
 
 export default function AdvisorPage() {
-  const { setJourney } = useJourney()
   const router = useRouter()
-  const [questionQueue, setQuestionQueue] = useState<Question[]>(BASE_QUESTIONS)
+  const { setJourney } = useJourney()
   const [step, setStep] = useState(0)
-  const [answerMap, setAnswerMap] = useState<Record<string, string>>({})
-  const [selected, setSelected] = useState<string | null>(null)
-  const [bonusScores, setBonusScores] = useState({ aws: 0, azure: 0, gcp: 0 })
-  const [result, setResult] = useState<{ winner: string; confidence: number; scores: Record<string, number> } | null>(null)
+  const [answers, setAnswers] = useState<Answers>(EMPTY_ANSWERS)
+  const [result, setResult] = useState<RecommendationResult | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  const question = questionQueue[step]
+  const totalSteps = 5
+  const progress = Math.round(((step + 1) / totalSteps) * 100)
 
-  function handleSelect(value: string) {
-    setSelected(value)
-  }
-
-  function handleBack() {
-    if (step === 0) return
-    const prevQ = questionQueue[step - 1]
-    setSelected(answerMap[String(prevQ.id)] ?? null)
-    setStep(step - 1)
-  }
-
-  function handleNext() {
-    if (!selected) return
-
-    const currentQ = questionQueue[step]
-    const newAnswerMap = { ...answerMap, [String(currentQ.id)]: selected }
-    let newBonus = { ...bonusScores }
-    let newQueue = [...questionQueue]
-
-    // Score dynamic questions
-    if (currentQ.isDynamic) {
-      if (currentQ.id === 'microsoftEcosystem') {
-        if (selected === 'heavy') newBonus.azure += 3
-        if (selected === 'somewhat') newBonus.azure += 1
-      } else if (currentQ.id === 'aiType') {
-        if (selected === 'training') newBonus.gcp += 3
-        if (selected === 'inference') { newBonus.azure += 2; newBonus.aws += 1 }
-        if (selected === 'apps') newBonus.azure += 2
-        if (selected === 'experimenting') newBonus.gcp += 1
-      } else if (currentQ.id === 'healthcareData') {
-        if (selected === 'phi') newBonus.azure += 2
-        if (selected === 'iot') newBonus.azure += 2
-        if (selected === 'research') newBonus.gcp += 1
-      }
-      setBonusScores(newBonus)
-    }
-
-    // Insert dynamic questions after workload (Q1)
-    if (currentQ.id === 1) {
-      if (selected === 'enterprise') {
-        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.microsoftEcosystem, ...newQueue.slice(step + 1)]
-      }
-      if (selected === 'ai') {
-        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.aiType, ...newQueue.slice(step + 1)]
-      }
-      setQuestionQueue(newQueue)
-    }
-
-    // Insert dynamic questions after compliance (Q2)
-    if (currentQ.id === 2) {
-      if (selected === 'hipaa') {
-        newQueue = [...newQueue.slice(0, step + 1), DYNAMIC_QUESTIONS.healthcareData, ...newQueue.slice(step + 1)]
-        setQuestionQueue(newQueue)
-      }
-    }
-
-    if (step < newQueue.length - 1) {
-      setAnswerMap(newAnswerMap)
-      setSelected(null)
-      setStep(step + 1)
-    } else {
-      // Calculate final scores from base questions + bonuses
-      const totals = { aws: newBonus.aws, azure: newBonus.azure, gcp: newBonus.gcp }
-      SCORE_KEYS.forEach((key, idx) => {
-        const ans = newAnswerMap[String(idx + 1)]
-        if (ans) {
-          const s = SCORES[key][ans]
-          if (s) { totals.aws += s.aws; totals.azure += s.azure; totals.gcp += s.gcp }
-        }
-      })
-
-      const max = Math.max(totals.aws, totals.azure, totals.gcp)
-      const winner = totals.azure === max ? 'azure' : totals.aws === max ? 'aws' : 'gcp'
-      const confidence = Math.min(95, Math.max(50, Math.round((max / 15) * 100)))
-      setResult({ winner, confidence, scores: totals })
-      setJourney({
-        recommendedProvider: PROVIDER_INFO[winner].name,
-        providerColor: PROVIDER_INFO[winner].color,
-        monthlyBudget: BASE_QUESTIONS[4].options.find(o => o.value === newAnswerMap['5'])?.label ?? (newAnswerMap['5'] ?? ''),
-        teamSize: BASE_QUESTIONS[2].options.find(o => o.value === newAnswerMap['3'])?.label ?? (newAnswerMap['3'] ?? ''),
-        workload: BASE_QUESTIONS[0].options.find(o => o.value === newAnswerMap['1'])?.label ?? (newAnswerMap['1'] ?? ''),
-        confidence,
-      })
-      saveRecommendation(
-        PROVIDER_INFO[winner].name,
-        confidence,
-        BASE_QUESTIONS[0].options.find(o => o.value === newAnswerMap['1'])?.label ?? '',
-        BASE_QUESTIONS[2].options.find(o => o.value === newAnswerMap['3'])?.label ?? '',
-        BASE_QUESTIONS[4].options.find(o => o.value === newAnswerMap['5'])?.label ?? '',
-      )
-      trackEvent('recommendation_completed', { provider: PROVIDER_INFO[winner].name, confidence })
-    }
+  function selectAnswer(field: keyof Answers, value: string) {
+    setAnswers(prev => ({ ...prev, [field]: value }))
   }
 
   function reset() {
-    setStep(0)
-    setAnswerMap({})
-    setSelected(null)
     setResult(null)
-    setQuestionQueue(BASE_QUESTIONS)
-    setBonusScores({ aws: 0, azure: 0, gcp: 0 })
+    setStep(0)
+    setAnswers(EMPTY_ANSWERS)
+  }
+
+  async function generateRecommendation(finalAnswers: Answers) {
+    setLoading(true)
+
+    const industry = INDUSTRIES.find(i => i.id === finalAnswers.industry)
+    const compliance = industry?.compliance || []
+
+    const prompt = `Based on these answers, give a specific cloud recommendation:
+
+Industry: ${industry?.label || finalAnswers.industry}
+Current cloud: ${finalAnswers.currentCloud}
+Monthly spend: ${finalAnswers.monthlySpend}
+Team size: ${finalAnswers.teamSize}
+Main problem: ${finalAnswers.mainProblem}
+Compliance needs: ${compliance.join(', ') || 'None identified'}
+
+Respond with ONLY a JSON object in this exact format, no other text:
+{
+  "provider": "AWS" or "Azure" or "GCP" or "DigitalOcean" or "Oracle Cloud",
+  "confidence": number between 60-95,
+  "headline": "one sentence explaining the recommendation",
+  "reasons": ["specific reason 1", "specific reason 2", "specific reason 3"],
+  "services": ["specific service 1 with cost estimate", "specific service 2", "specific service 3"],
+  "monthlyEstimate": "realistic monthly cost range like $400-$800/month",
+  "compliance": ["compliance item 1 if applicable"],
+  "warning": "one honest warning about this choice",
+  "nextStep": "the single most important thing to do first"
+}`
+
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 800,
+          messages: [
+            {
+              role: 'system',
+              content: 'You are a cloud architect. Always respond with valid JSON only. No markdown, no explanation, just the JSON object.',
+            },
+            { role: 'user', content: prompt },
+          ],
+        }),
+      })
+      const data = await res.json()
+      const text = data.choices?.[0]?.message?.content || '{}'
+      const parsed: RecommendationResult = JSON.parse(text.replace(/```json|```/g, '').trim())
+      setResult(parsed)
+
+      setJourney({
+        recommendedProvider: parsed.provider,
+        providerColor: getProviderColor(parsed.provider),
+        monthlyBudget: finalAnswers.monthlySpend,
+        teamSize: finalAnswers.teamSize,
+        workload: finalAnswers.industry,
+        confidence: parsed.confidence,
+      })
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        await supabase.from('saved_recommendations').insert({
+          user_id: session.user.id,
+          provider: parsed.provider,
+          confidence: parsed.confidence,
+          workload: finalAnswers.industry,
+          team_size: finalAnswers.teamSize,
+          budget: finalAnswers.monthlySpend,
+        })
+      }
+
+      trackEvent('recommendation_completed', {
+        provider: parsed.provider,
+        confidence: parsed.confidence,
+        industry: finalAnswers.industry,
+      })
+    } catch {
+      setResult({
+        provider: 'AWS',
+        confidence: 75,
+        headline: 'AWS is the safe default choice for most use cases',
+        reasons: ['Largest ecosystem', 'Most documentation', 'Best free tier'],
+        services: ['EC2 for compute', 'S3 for storage', 'RDS for database'],
+        monthlyEstimate: '$200–$500/month to start',
+        compliance: [],
+        warning: 'Costs can grow quickly — set up billing alerts immediately',
+        nextStep: 'Create an AWS account and enable Cost Explorer',
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const cardStyle = (selected: boolean): React.CSSProperties => ({
+    background: selected ? '#1e3a5f' : '#1a1a2e',
+    border: `2px solid ${selected ? '#6366f1' : '#ffffff10'}`,
+    borderRadius: 12,
+    padding: '16px 20px',
+    cursor: 'pointer',
+    color: selected ? 'white' : '#a0a0b0',
+    textAlign: 'left',
+    fontSize: 14,
+    fontWeight: selected ? 600 : 400,
+    transition: 'all 0.15s',
+    width: '100%',
+  })
+
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: '#0a0a0f',
+        color: 'white',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 16,
+      }}>
+        <div style={{ fontSize: 40 }}>🤔</div>
+        <p style={{ color: '#a0a0b0', fontSize: 18 }}>Analyzing your situation...</p>
+        <p style={{ color: '#666', fontSize: 14 }}>Getting you a specific recommendation</p>
+      </div>
+    )
+  }
+
+  if (result) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 60px' }}>
+
+          <div style={{ marginBottom: 32 }}>
+            <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>YOUR CLOUD RECOMMENDATION</div>
+            <div style={{
+              background: '#1a1a2e',
+              borderRadius: 20,
+              padding: 32,
+              borderLeft: `6px solid ${getProviderColor(result.provider)}`,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 40, fontWeight: 900, color: getProviderColor(result.provider), marginBottom: 8 }}>
+                    {result.provider}
+                  </div>
+                  <div style={{ color: '#22c55e', fontSize: 14, fontWeight: 600 }}>
+                    {result.confidence}% match for your situation
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(34,197,94,0.1)',
+                  border: '1px solid rgba(34,197,94,0.3)',
+                  borderRadius: 12,
+                  padding: '8px 16px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ color: '#22c55e', fontWeight: 700, fontSize: 16 }}>{result.monthlyEstimate}</div>
+                  <div style={{ color: '#666', fontSize: 11 }}>estimated start</div>
+                </div>
+              </div>
+              <p style={{ color: '#e0e0e0', fontSize: 16, lineHeight: 1.6, marginBottom: 0 }}>{result.headline}</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+            <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+              <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, marginBottom: 12 }}>WHY THIS FITS YOU</div>
+              {result.reasons?.map((r, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, fontSize: 14, color: '#e0e0e0' }}>
+                  <span style={{ color: '#22c55e', flexShrink: 0 }}>✓</span>
+                  {r}
+                </div>
+              ))}
+            </div>
+            <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+              <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, marginBottom: 12 }}>SERVICES YOU WILL USE</div>
+              {result.services?.map((s, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, fontSize: 14, color: '#e0e0e0' }}>
+                  <span style={{ color: '#FF9900', flexShrink: 0 }}>→</span>
+                  {s}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {result.compliance?.length > 0 && (
+            <div style={{
+              background: 'rgba(99,102,241,0.1)',
+              border: '1px solid rgba(99,102,241,0.3)',
+              borderRadius: 12,
+              padding: 20,
+              marginBottom: 16,
+            }}>
+              <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 600, marginBottom: 8 }}>
+                COMPLIANCE REQUIREMENTS FOR YOUR INDUSTRY
+              </div>
+              {result.compliance.map((c, i) => (
+                <div key={i} style={{ color: '#e0e0e0', fontSize: 14, marginBottom: 4 }}>✓ {c}</div>
+              ))}
+            </div>
+          )}
+
+          <div style={{
+            background: 'rgba(245,158,11,0.1)',
+            border: '1px solid rgba(245,158,11,0.3)',
+            borderRadius: 12,
+            padding: 20,
+            marginBottom: 24,
+          }}>
+            <div style={{ fontSize: 13, color: '#f59e0b', fontWeight: 600, marginBottom: 8 }}>⚠️ HONEST WARNING</div>
+            <p style={{ color: '#e0e0e0', fontSize: 14, lineHeight: 1.6 }}>{result.warning}</p>
+          </div>
+
+          <div style={{
+            background: '#1a1a2e',
+            borderRadius: 16,
+            padding: 24,
+            marginBottom: 32,
+            borderLeft: '4px solid #22c55e',
+          }}>
+            <div style={{ fontSize: 13, color: '#22c55e', fontWeight: 600, marginBottom: 8 }}>YOUR FIRST STEP</div>
+            <p style={{ color: '#e0e0e0', fontSize: 15, lineHeight: 1.6 }}>{result.nextStep}</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => router.push('/planner')}
+              style={{
+                background: getProviderColor(result.provider),
+                color: 'white',
+                border: 'none',
+                borderRadius: 12,
+                padding: '14px 28px',
+                fontSize: 15,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Estimate My Costs →
+            </button>
+            <button
+              onClick={() => router.push('/roadmap')}
+              style={{ background: 'transparent', color: 'white', border: '1px solid #ffffff30', borderRadius: 12, padding: '14px 28px', fontSize: 15, cursor: 'pointer' }}
+            >
+              Get My 8-Week Plan
+            </button>
+            <button
+              onClick={() => router.push('/chat')}
+              style={{ background: 'transparent', color: 'white', border: '1px solid #ffffff30', borderRadius: 12, padding: '14px 28px', fontSize: 15, cursor: 'pointer' }}
+            >
+              Ask AI Questions
+            </button>
+            <button
+              onClick={reset}
+              style={{ background: 'transparent', color: '#666', border: '1px solid #ffffff15', borderRadius: 12, padding: '14px 28px', fontSize: 15, cursor: 'pointer' }}
+            >
+              Start Over
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-16" style={{ background: 'var(--bg-primary)', position: 'relative' }}>
-      {!result && (
-        <button
-          onClick={reset}
-          style={{ background: 'transparent', border: 'none', color: '#666', cursor: 'pointer', fontSize: 13, textDecoration: 'underline', position: 'absolute', top: 110, right: 24 }}
-        >
-          Start Over
-        </button>
-      )}
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)' }}>
-            Cloud Advisor
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
-            Find your perfect cloud
-          </h1>
-          <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
-            Answer 5 quick questions — get a data-driven recommendation in seconds.
-          </p>
+    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '100px 24px 60px' }}>
+
+        <div style={{ position: 'relative', marginBottom: 8 }}>
+          {step > 0 && (
+            <button
+              onClick={() => setStep(step - 1)}
+              style={{
+                background: 'transparent',
+                border: '1px solid #ffffff20',
+                borderRadius: 8,
+                padding: '8px 16px',
+                color: '#a0a0b0',
+                cursor: 'pointer',
+                fontSize: 14,
+                marginBottom: 16,
+              }}
+            >
+              ← Back
+            </button>
+          )}
+          <button
+            onClick={reset}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              background: 'transparent',
+              border: 'none',
+              color: '#666',
+              cursor: 'pointer',
+              fontSize: 13,
+              textDecoration: 'underline',
+            }}
+          >
+            Start Over
+          </button>
         </div>
 
-        {!result ? (
-          <div
-            className="rounded-2xl p-8"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-          >
-            {/* Back button */}
-            {step > 0 && (
-              <button
-                onClick={handleBack}
-                style={{ background: 'transparent', border: '1px solid #ffffff30', borderRadius: 8, padding: '10px 20px', color: '#a0a0b0', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, width: 'fit-content' }}
-              >
-                ← Back
-              </button>
-            )}
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ color: '#a0a0b0', fontSize: 13 }}>Question {step + 1} of {totalSteps}</span>
+            <span style={{ color: '#6366f1', fontSize: 13, fontWeight: 600 }}>{progress}% complete</span>
+          </div>
+          <div style={{ background: '#1a1a2e', borderRadius: 4, height: 6 }}>
+            <div style={{
+              background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+              height: '100%',
+              borderRadius: 4,
+              width: `${progress}%`,
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+        </div>
 
-            {/* Progress */}
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ color: '#a0a0b0', fontSize: 13 }}>
-                  Question {step + 1} of {questionQueue.length}
-                  {question.isDynamic && <span style={{ color: '#f59e0b', marginLeft: 8 }}>• Personalized</span>}
-                </span>
-                <span style={{ color: '#6366f1', fontSize: 13, fontWeight: 600 }}>
-                  {Math.round(((step + 1) / questionQueue.length) * 100)}% complete
-                </span>
-              </div>
-              <div style={{ background: '#1a1a2e', borderRadius: 4, height: 6 }}>
-                <div style={{
-                  background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
-                  height: '100%',
-                  borderRadius: 4,
-                  width: `${((step + 1) / questionQueue.length) * 100}%`,
-                  transition: 'width 0.3s ease',
-                }} />
-              </div>
-            </div>
-            <h2 className="text-xl font-semibold text-white mb-3">{question.question}</h2>
-            {QUESTION_HELPERS[String(question.id)] && (
-              <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 24 }}>
-                {QUESTION_HELPERS[String(question.id)]}
-              </p>
-            )}
-
-            <div className="space-y-3 mb-8">
-              {question.options.map((opt) => (
+        {step === 0 && (
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>What industry are you in?</h2>
+            <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28 }}>
+              This determines compliance requirements and the best architecture for your use case.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {INDUSTRIES.map(ind => (
                 <button
-                  key={opt.value}
-                  onClick={() => handleSelect(opt.value)}
-                  className="w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150"
-                  style={{
-                    background: selected === opt.value ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)',
-                    border: selected === opt.value ? '1px solid #6366f1' : '1px solid rgba(255,255,255,0.08)',
-                    color: selected === opt.value ? '#c7d2fe' : '#e2e8f0',
-                  }}
+                  key={ind.id}
+                  onClick={() => { selectAnswer('industry', ind.id); setStep(1) }}
+                  style={cardStyle(answers.industry === ind.id)}
                 >
-                  {opt.label}
+                  {ind.label}
+                  {ind.compliance.length > 0 && (
+                    <div style={{ fontSize: 11, color: '#6366f1', marginTop: 4 }}>
+                      Requires: {ind.compliance.join(', ')}
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
-
-            <button
-              onClick={handleNext}
-              disabled={!selected}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.01]"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-            >
-              {step === questionQueue.length - 1 ? 'Get My Recommendation' : 'Next'}
-              <ChevronRight size={16} />
-            </button>
           </div>
-        ) : (
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl p-8"
-              style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-            >
-              <div className="text-center mb-8">
-                <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: PROVIDER_INFO[result.winner].color }} />
-                <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--text-secondary)' }}>
-                  We Recommend
-                </p>
-                <h2 className="text-3xl font-black mb-2" style={{ color: PROVIDER_INFO[result.winner].color }}>
-                  {PROVIDER_INFO[result.winner].name}
-                </h2>
-                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  {PROVIDER_INFO[result.winner].tagline}
-                </p>
-                <span
-                  className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold"
-                  style={{
-                    background: `${PROVIDER_INFO[result.winner].color}20`,
-                    color: PROVIDER_INFO[result.winner].color,
-                  }}
-                >
-                  {result.confidence}% confidence match
-                </span>
-              </div>
+        )}
 
-              {/* Score bars */}
-              <div className="space-y-3 mb-8">
-                {Object.entries(result.scores)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([provider, score]) => (
-                    <div key={provider}>
-                      <div className="flex justify-between text-xs mb-1">
-                        <span className="font-medium" style={{ color: PROVIDER_INFO[provider].color }}>
-                          {provider.toUpperCase()}
-                        </span>
-                        <span style={{ color: 'var(--text-secondary)' }}>{score} pts</span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: PROVIDER_INFO[provider].color }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${(score / Math.max(...Object.values(result.scores))) * 100}%` }}
-                          transition={{ duration: 0.8, ease: 'easeOut' }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-              </div>
-
-              <div className="flex gap-3">
+        {step === 1 && (
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>Which cloud are you on right now?</h2>
+            <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28 }}>
+              If you&apos;re already on cloud, this helps us give you specific optimization advice. If not, we&apos;ll help you choose.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {CLOUD_PROVIDERS.map(provider => (
                 <button
-                  onClick={reset}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all"
-                  style={{ border: '1px solid var(--border)', color: 'var(--text-secondary)' }}
+                  key={provider}
+                  onClick={() => { selectAnswer('currentCloud', provider); setStep(2) }}
+                  style={cardStyle(answers.currentCloud === provider)}
                 >
-                  <RotateCcw size={14} /> Retake Quiz
+                  {provider}
                 </button>
-                <Link
-                  href="/planner"
-                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all hover:scale-[1.01]"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-                >
-                  Model the Cost <ChevronRight size={14} />
-                </Link>
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-              {/* Next Step banner */}
-              <div style={{
-                marginTop: 32,
-                background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-                borderRadius: 16,
-                padding: 24,
-                border: '1px solid #ffffff15',
-              }}>
-                <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>NEXT STEP</div>
-                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-                  See your cost projection for {PROVIDER_INFO[result.winner].name}
-                </h3>
-                <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
-                  Based on your profile, here is what your {PROVIDER_INFO[result.winner].name} bill could look
-                  like as you grow — and how it compares to the alternatives.
-                </p>
+        {step === 2 && (
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>What&apos;s your monthly cloud spend?</h2>
+            <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28 }}>
+              Be honest — there&apos;s no wrong answer. This helps us give you realistic cost optimization targets.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {SPEND_RANGES.map(range => (
                 <button
-                  onClick={() => router.push('/planner')}
-                  style={{
-                    background: PROVIDER_INFO[result.winner].color,
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: 12,
-                    padding: '12px 28px',
-                    fontSize: 15,
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                  }}
+                  key={range.id}
+                  onClick={() => { selectAnswer('monthlySpend', range.label); setStep(3) }}
+                  style={cardStyle(answers.monthlySpend === range.label)}
                 >
-                  Calculate My Costs →
+                  {range.label}
                 </button>
-              </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-              <div style={{ marginTop: 16, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <a
-                  href="/others"
-                  style={{
-                    color: '#a0a0b0',
-                    fontSize: 14,
-                    textDecoration: 'none',
-                    padding: '10px 18px',
-                    border: '1px solid #ffffff20',
-                    borderRadius: 10,
-                  }}
+        {step === 3 && (
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>How big is your team?</h2>
+            <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28 }}>
+              Team size affects which managed services make sense versus building your own infrastructure.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {TEAM_SIZES.map(size => (
+                <button
+                  key={size.id}
+                  onClick={() => { selectAnswer('teamSize', size.label); setStep(4) }}
+                  style={cardStyle(answers.teamSize === size.label)}
                 >
-                  Explore Alternative Providers →
-                </a>
-                <a
-                  href="/migration"
-                  style={{
-                    color: '#a0a0b0',
-                    fontSize: 14,
-                    textDecoration: 'none',
-                    padding: '10px 18px',
-                    border: '1px solid #ffffff20',
-                    borderRadius: 10,
+                  {size.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div>
+            <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 8 }}>What&apos;s your biggest cloud problem right now?</h2>
+            <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28 }}>
+              Be specific — this is what your recommendation will be focused on solving.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {MAIN_PROBLEMS.map(problem => (
+                <button
+                  key={problem.id}
+                  onClick={() => {
+                    const finalAnswers = { ...answers, mainProblem: problem.label }
+                    setAnswers(finalAnswers)
+                    generateRecommendation(finalAnswers)
                   }}
+                  style={cardStyle(answers.mainProblem === problem.label)}
                 >
-                  Analyze Migration Complexity →
-                </a>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                  {problem.label}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

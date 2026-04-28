@@ -20,16 +20,33 @@ const SUGGESTED_QUESTIONS = [
 const SYSTEM_PROMPT = `You are an expert cloud computing consultant specializing in AWS, Azure, Google Cloud Platform, and alternative providers like DigitalOcean, Hetzner, Vultr, and Oracle Cloud. You give direct, opinionated, practical advice based on real-world experience. You are independent and unbiased — you recommend whatever is genuinely best for the user's situation, not what's most popular. Keep answers concise but complete. Use markdown formatting with bold headings where helpful. Always ask follow-up questions if you need more context to give a better recommendation.`
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content:
-        "Hi! I'm your Cloud Intelligence consultant. I can help you choose the right cloud provider, optimize costs, plan migrations, and navigate compliance requirements. What's on your mind?",
-    },
-  ])
+  const [messages, setMessages] = useState<Message[]>([{
+    role: 'assistant',
+    content: "Hi! I'm your Cloud Intelligence consultant. I can help you understand your cloud bill, find waste, plan migrations, and navigate compliance. What's your biggest cloud challenge right now?",
+  }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [userContext, setUserContext] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    async function loadContext() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+      const { data } = await supabase
+        .from('saved_recommendations')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      if (data) {
+        const rec = data as { provider: string; confidence: number; workload: string; team_size: string; budget: string }
+        setUserContext(`The user's last cloud recommendation was ${rec.provider} with ${rec.confidence}% confidence. Their workload is ${rec.workload}, team size is ${rec.team_size}, and budget is ${rec.budget}.`)
+      }
+    }
+    loadContext()
+  }, [])
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -111,7 +128,7 @@ export default function ChatPage() {
           model: 'llama-3.3-70b-versatile',
           max_tokens: 1000,
           messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: SYSTEM_PROMPT + (userContext ? `\n\nUSER CONTEXT: ${userContext} Use this context to give personalized answers.` : '') },
             ...newMessages.map(m => ({ role: m.role, content: m.content })),
           ],
         }),
