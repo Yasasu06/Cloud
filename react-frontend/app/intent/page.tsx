@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 import { Button } from '@/components/ui/button'
@@ -63,12 +63,30 @@ export default function IntentPage() {
   const [done, setDone] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  async function analyzeIntent() {
-    if (!input.trim() || loading) return
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const q = params.get('q')
+      if (q && q.trim()) {
+        setInput(q)
+        setTimeout(() => {
+          analyzeIntentWithText(q)
+        }, 300)
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function analyzeIntentWithText(text: string) {
+    await analyzeIntent(text)
+  }
+
+  async function analyzeIntent(overrideText?: string) {
+    const userText = overrideText?.trim() || input.trim()
+    if (!userText || loading) return
     setLoading(true)
     setResponse('')
     setDone(false)
-    trackEvent('intent_analyzed', { input_length: input.length })
+    trackEvent('intent_analyzed', { input_length: userText.length })
 
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -85,7 +103,7 @@ export default function IntentPage() {
             { role: 'system', content: INTENT_SYSTEM_PROMPT },
             {
               role: 'user',
-              content: `Analyze this project and give me a complete cloud recommendation: ${input}`,
+              content: `Analyze this cloud situation and give me a complete FinOps analysis: ${userText}`,
             },
           ],
         }),
@@ -190,7 +208,7 @@ export default function IntentPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ color: '#666', fontSize: 13 }}>Press ⌘+Enter to analyze</span>
             <Button
-              onClick={analyzeIntent}
+              onClick={() => analyzeIntent()}
               disabled={loading || !input.trim()}
               className="bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold px-8"
             >
