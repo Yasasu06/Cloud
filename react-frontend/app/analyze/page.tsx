@@ -241,6 +241,8 @@ export default function AnalyzePage() {
     setDone(false)
     setSaved(false)
     setChartData(null)
+    console.log('Mode:', modeId)
+    console.log('System prompt end:', mode.systemPrompt.slice(-200))
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
     try {
@@ -281,6 +283,9 @@ export default function AnalyzePage() {
               const token = parsed.choices?.[0]?.delta?.content || ''
               fullText += token
               const dataMatch = fullText.match(/DATA_JSON:\s*({.*})/s)
+              console.log('Full response length:', fullText.length)
+              console.log('DATA_JSON found:', !!dataMatch)
+              if (dataMatch) console.log('Parsed data:', dataMatch[1].substring(0, 100))
               if (dataMatch) {
                 try { setChartData(JSON.parse(dataMatch[1])) } catch { /* partial JSON */ }
               }
