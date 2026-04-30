@@ -870,9 +870,11 @@ export default function AnalyzePage() {
           </div>
         )}
 
-        {done && (
-          <div style={{ color: 'yellow', padding: 16 }}>
-            Debug: chartData = {chartData ? JSON.stringify(Object.keys(chartData)) : 'null'}
+        {chartData !== undefined && (
+          <div style={{ color: 'yellow', padding: 16, marginTop: 16 }}>
+            Debug: {chartData ?
+              'Keys: ' + JSON.stringify(Object.keys(chartData))
+              : 'chartData is null'}
           </div>
         )}
       </div>
