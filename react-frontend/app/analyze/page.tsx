@@ -447,42 +447,6 @@ export default function AnalyzePage() {
           </div>
         )}
 
-        {/* Chart Dashboard */}
-        {done && (
-          <div style={{
-            marginTop: 32,
-            background: '#1a1a2e',
-            borderRadius: 16,
-            padding: 32,
-            border: '1px solid #6366f1',
-          }}>
-            <h3 style={{ color: 'white', marginBottom: 24, fontSize: 20, fontWeight: 700 }}>
-              📊 Cost Dashboard
-            </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 32 }}>
-              {[
-                { label: 'IDENTIFIED WASTE', value: '$2,240', color: '#ef4444' },
-                { label: 'POTENTIAL SAVING', value: '28%', color: '#22c55e' },
-                { label: 'RISK SCORE', value: '7/10', color: '#f59e0b' },
-              ].map((stat, i) => (
-                <div key={i} style={{
-                  background: '#0a0a0f',
-                  borderRadius: 12,
-                  padding: 24,
-                  textAlign: 'center',
-                  borderTop: `3px solid ${stat.color}`,
-                }}>
-                  <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>{stat.label}</div>
-                  <div style={{ fontSize: 32, fontWeight: 900, color: stat.color }}>{stat.value}</div>
-                </div>
-              ))}
-            </div>
-            <p style={{ color: '#a0a0b0', fontSize: 14 }}>
-              Charts based on your analysis. Dynamic data coming soon.
-            </p>
-          </div>
-        )}
-
         {/* Action row */}
         {done && (
           <div style={{
