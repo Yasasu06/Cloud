@@ -2,22 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 
 type Mode = 'finops' | 'architect' | 'migration'
-type SectionType = 'summary' | 'positive' | 'warning' | 'risk' | 'action' | 'neutral'
-
-interface SectionConfig {
-  header: string
-  type: SectionType
-}
-
-interface ParsedSection {
-  header: string
-  content: string
-  type: SectionType
-}
 
 interface ModeConfig {
   id: Mode
@@ -27,7 +17,6 @@ interface ModeConfig {
   placeholder: string
   color: string
   systemPrompt: string
-  sections: SectionConfig[]
 }
 
 const MODES: ModeConfig[] = [
@@ -35,214 +24,168 @@ const MODES: ModeConfig[] = [
     id: 'finops',
     icon: '💸',
     title: 'Explain My Cloud Bill',
-    subtitle: 'FinOps Analyst — find waste, explain costs, cut spend',
+    subtitle: "FinOps Analyst — find waste, explain costs, cut spend",
     placeholder: "e.g. We're on AWS, spending $12k/month, 5 engineers. Our bill doubled last quarter and we don't know why.",
     color: '#f59e0b',
-    systemPrompt: `You are a senior FinOps analyst with 15 years of experience cutting cloud waste. When someone describes their cloud situation, you give them the specific, actionable analysis a $300/hour consultant would give — in plain English.
+    systemPrompt: `You are a senior FinOps consultant. Analyze the user's cloud situation and give them a specific, actionable report. Use clear markdown formatting with headers, bullet points, and bold key numbers.
 
-ALWAYS structure your response with these exact section headers on their own line:
+Structure your response like this:
 
-📊 YOUR SITUATION SUMMARY
-Restate what you understand in 2 sentences. Show you understood their specific details.
+## Your Situation
+Brief summary of what you understood.
 
-💸 WHERE YOUR MONEY IS GOING
-Based on their cloud provider and spend level, identify the 3-4 most likely cost drivers. Name actual services (EC2, RDS, Data Transfer, NAT Gateway, etc.) with estimated costs.
+## Where Your Money Is Going
+The 3-4 most likely cost drivers at their spend level. Name real services with real dollar estimates.
 
-🗑️ WHAT YOU CAN PROBABLY ELIMINATE
-List 3-5 specific resources or configurations that are commonly wasted. For each: what it is, how to find it, estimated monthly savings.
+## What You Can Cut Right Now
+5 specific items they can eliminate or reduce. For each: **Service Name** - what it costs, how to find it, what to do.
 
-⚡ YOUR TOP 3 ACTIONS THIS WEEK
-Specific, ordered steps. For each: exact action, which console page to find it, time to complete, expected monthly saving.
+## Your Action Plan This Week
+Numbered steps with specific console navigation.
 
-⚠️ YOUR BIGGEST RISK
-One specific technical or financial risk. Be honest about what could go wrong.
+## Your Biggest Risk
+One specific warning.
 
-💰 COST AT SCALE
-If they mentioned growth — show what their bill looks like at 10x scale.
+## Expected Monthly Saving
+**$X - $Y/month** if they follow your recommendations.
 
-🏆 HONEST RECOMMENDATION
-Should they stay on their current provider or consider switching? Be direct.
-
-Rules: Use real service names. Give real dollar estimates. Never say "it depends" without explaining what it depends on. Maximum 500 words. Write for a non-technical founder.`,
-    sections: [
-      { header: '📊 YOUR SITUATION SUMMARY', type: 'summary' },
-      { header: '💸 WHERE YOUR MONEY IS GOING', type: 'neutral' },
-      { header: '🗑️ WHAT YOU CAN PROBABLY ELIMINATE', type: 'positive' },
-      { header: '⚡ YOUR TOP 3 ACTIONS THIS WEEK', type: 'action' },
-      { header: '⚠️ YOUR BIGGEST RISK', type: 'risk' },
-      { header: '💰 COST AT SCALE', type: 'warning' },
-      { header: '🏆 HONEST RECOMMENDATION', type: 'positive' },
-    ],
+Be specific. Use real AWS/Azure/GCP service names. Give real dollar amounts. Write for a smart non-technical founder. No filler words.`,
   },
   {
     id: 'architect',
     icon: '🏗️',
     title: 'Design My Architecture',
-    subtitle: 'Solutions Architect — pick the right stack for what you\'re building',
+    subtitle: "Solutions Architect — pick the right stack for what you're building",
     placeholder: "e.g. I want to build a healthcare app for 500 doctors in Europe that handles patient records and needs HIPAA/GDPR compliance.",
     color: '#6366f1',
-    systemPrompt: `You are a principal solutions architect at a top-tier cloud consultancy. When someone describes what they want to build, you design the right architecture for their actual needs — not what's trendy or over-engineered.
+    systemPrompt: `You are a senior cloud solutions architect. Design a cloud architecture for the user's project. Use clear markdown with headers and structured lists.
 
-ALWAYS structure your response with these exact section headers on their own line:
+Structure your response:
 
-🎯 WHAT YOU'RE ACTUALLY BUILDING
-Restate their project in concrete technical terms. What category of system is this?
+## Your Project
+One sentence confirming what you understood.
 
-☁️ RECOMMENDED CLOUD & STACK
-Which cloud provider and why. Be opinionated. Name the specific services.
+## Recommended Cloud Provider
+**[Provider Name]** — one clear reason why.
 
-🏛️ ARCHITECTURE BLUEPRINT
-The 4-6 core components of their system. For each: what it does, which service to use, rough monthly cost.
+## Your Architecture
+For each service:
+**Service Name** (~$X/month) — what it does in plain English
 
-🛡️ COMPLIANCE & SECURITY
-Any regulatory requirements (HIPAA, GDPR, SOC2, etc.) and specifically which cloud features satisfy them.
+## Total Monthly Cost
+**$X - $Y/month** at your described scale. What drives this higher or lower.
 
-⚠️ THE HARD PARTS
-The 2-3 genuinely difficult technical challenges they will face. Be honest.
+## Compliance Requirements
+Specific requirements for their industry if applicable.
 
-💰 REALISTIC COST ESTIMATE
-Monthly cost breakdown at launch and at 10x scale. Use real service pricing.
+## Your First 3 Steps
+1. Specific action with time estimate
+2. Specific action with time estimate
+3. Specific action with time estimate
 
-🚀 HOW TO START
-The first 3 steps to begin building this. Specific, ordered.
-
-Rules: Name real cloud services and their SKUs. Give real cost estimates. Warn about common mistakes for this type of project. Maximum 500 words. Write clearly for a smart non-architect founder.`,
-    sections: [
-      { header: "🎯 WHAT YOU'RE ACTUALLY BUILDING", type: 'summary' },
-      { header: '☁️ RECOMMENDED CLOUD & STACK', type: 'positive' },
-      { header: '🏛️ ARCHITECTURE BLUEPRINT', type: 'neutral' },
-      { header: '🛡️ COMPLIANCE & SECURITY', type: 'action' },
-      { header: '⚠️ THE HARD PARTS', type: 'warning' },
-      { header: '💰 REALISTIC COST ESTIMATE', type: 'neutral' },
-      { header: '🚀 HOW TO START', type: 'action' },
-    ],
+## One Thing That Usually Goes Wrong
+Honest warning specific to their project type.`,
   },
   {
     id: 'migration',
     icon: '🔄',
     title: 'Plan My Migration',
-    subtitle: 'Migration Engineer — move clouds without breaking production',
+    subtitle: "Migration Engineer — move clouds without breaking production",
     placeholder: "e.g. We're on AWS and want to move to Azure. $15k/month, 8 engineers, running 12 microservices and a PostgreSQL database.",
     color: '#22c55e',
-    systemPrompt: `You are a cloud migration engineer who has led 50+ enterprise cloud migrations. When someone describes a migration they need to do, you give them a realistic, specific plan — including the parts most consultants don't tell you about.
+    systemPrompt: `You are a senior cloud migration engineer. Create a migration plan for the user. Use clear markdown formatting.
 
-ALWAYS structure your response with these exact section headers on their own line:
+Structure your response:
 
-📋 MIGRATION SCOPE ASSESSMENT
-What exactly needs to move. Classify each component: lift-and-shift, re-platform, or refactor.
+## Migration Summary
+What you understood they want to migrate.
 
-⏱️ REALISTIC TIMELINE
-Week-by-week phases. Be honest about complexity. Don't compress timelines to sound good.
+## Complexity: [Easy/Medium/Hard/Very Hard]
+One sentence explaining the rating.
 
-💸 TOTAL MIGRATION COST
-Engineering hours, downtime risk, dual-running costs, and any licensing changes. Give real numbers.
+## Financial Analysis
+**Migration Cost:** $X - $Y one-time
+**Monthly Change:** Save/Cost $X after migration
+**Break Even:** X months
 
-🔴 YOUR HIGHEST RISKS
-The 3 things most likely to cause the migration to fail or overrun. Specific to their stack.
+## 8-Week Migration Plan
+**Week 1-2:** [specific tasks]
+**Week 3-4:** [specific tasks]
+**Week 5-6:** [specific tasks]
+**Week 7-8:** [specific tasks]
 
-✅ PRE-MIGRATION CHECKLIST
-The 5 things they must do before moving anything. Include dependency mapping and rollback plan.
+## Top 3 Risks
+**Risk 1:** What it is and how to prevent it
+**Risk 2:** What it is and how to prevent it
+**Risk 3:** What it is and how to prevent it
 
-🗺️ PHASE-BY-PHASE PLAN
-Phase 1 (Foundation), Phase 2 (Migrate), Phase 3 (Cutover), Phase 4 (Decommission). Specific tasks per phase.
-
-🏁 SHOULD YOU ACTUALLY MIGRATE?
-Honest cost-benefit: total migration cost vs annual savings. Include the break-even point.
-
-Rules: Name real services on both source and target clouds. Give real time and cost estimates. Warn about the hidden costs (dual running, re-training, tooling changes). Maximum 500 words.`,
-    sections: [
-      { header: '📋 MIGRATION SCOPE ASSESSMENT', type: 'summary' },
-      { header: '⏱️ REALISTIC TIMELINE', type: 'neutral' },
-      { header: '💸 TOTAL MIGRATION COST', type: 'warning' },
-      { header: '🔴 YOUR HIGHEST RISKS', type: 'risk' },
-      { header: '✅ PRE-MIGRATION CHECKLIST', type: 'action' },
-      { header: '🗺️ PHASE-BY-PHASE PLAN', type: 'neutral' },
-      { header: '🏁 SHOULD YOU ACTUALLY MIGRATE?', type: 'positive' },
-    ],
+## My Honest Recommendation
+Direct answer: should they migrate or not and why. If it does not make financial sense say so clearly.`,
   },
 ]
 
-function getSectionStyle(type: SectionType): { borderColor: string; labelColor: string } {
-  switch (type) {
-    case 'summary': return { borderColor: '#6366f1', labelColor: '#6366f1' }
-    case 'positive': return { borderColor: '#22c55e', labelColor: '#22c55e' }
-    case 'warning': return { borderColor: '#f59e0b', labelColor: '#f59e0b' }
-    case 'risk': return { borderColor: '#ef4444', labelColor: '#ef4444' }
-    case 'action': return { borderColor: '#06b6d4', labelColor: '#06b6d4' }
-    case 'neutral': return { borderColor: '#ffffff20', labelColor: '#a0a0b0' }
-  }
-}
-
-function parseSections(text: string, sectionConfigs: SectionConfig[]): ParsedSection[] {
-  const results: ParsedSection[] = []
-  const headers = sectionConfigs.map(s => s.header)
-
-  for (let i = 0; i < headers.length; i++) {
-    const header = headers[i]
-    const start = text.indexOf(header)
-    if (start === -1) continue
-
-    const contentStart = start + header.length
-    const nextHeaderIndex = headers.slice(i + 1).reduce((earliest, h) => {
-      const pos = text.indexOf(h, contentStart)
-      return pos !== -1 && pos < earliest ? pos : earliest
-    }, text.length)
-
-    const content = text.slice(contentStart, nextHeaderIndex).trim()
-    if (content) {
-      results.push({
-        header,
-        content,
-        type: sectionConfigs[i].type,
-      })
-    }
-  }
-
-  return results
-}
-
-function renderContent(text: string): React.ReactNode {
-  const clean = text
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/#{1,3} /g, '')
-
-  const lines = clean.split('\n').filter(l => l.trim())
-  const elements: React.ReactNode[] = []
-  let listItems: string[] = []
-
-  function flushList() {
-    if (listItems.length > 0) {
-      elements.push(
-        <ul key={`list-${elements.length}`} style={{ margin: '8px 0', paddingLeft: 20 }}>
-          {listItems.map((item, j) => (
-            <li key={j} style={{ color: '#d0d0e0', fontSize: 14, lineHeight: 1.7, marginBottom: 4 }}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      )
-      listItems = []
-    }
-  }
-
-  for (const line of lines) {
-    const stripped = line.replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '').trim()
-    if (/^[-•*]/.test(line.trim()) || /^\d+\./.test(line.trim())) {
-      listItems.push(stripped)
-    } else {
-      flushList()
-      elements.push(
-        <p key={`p-${elements.length}`} style={{ color: '#d0d0e0', fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
-          {stripped}
+const MarkdownResponse = ({ content }: { content: string }) => (
+  <ReactMarkdown
+    remarkPlugins={[remarkGfm]}
+    components={{
+      h1: ({ children }) => (
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 12, marginTop: 24, borderBottom: '1px solid #ffffff15', paddingBottom: 8 }}>
+          {children}
+        </h1>
+      ),
+      h2: ({ children }) => (
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: '#6366f1', marginBottom: 10, marginTop: 20 }}>
+          {children}
+        </h2>
+      ),
+      h3: ({ children }) => (
+        <h3 style={{ fontSize: 16, fontWeight: 600, color: '#a0a0b0', marginBottom: 8, marginTop: 16 }}>
+          {children}
+        </h3>
+      ),
+      p: ({ children }) => (
+        <p style={{ color: '#e0e0e0', lineHeight: 1.8, marginBottom: 12, fontSize: 15 }}>
+          {children}
         </p>
-      )
-    }
-  }
-  flushList()
-
-  return <>{elements}</>
-}
+      ),
+      strong: ({ children }) => (
+        <strong style={{ color: 'white', fontWeight: 700 }}>
+          {children}
+        </strong>
+      ),
+      ul: ({ children }) => (
+        <ul style={{ paddingLeft: 20, marginBottom: 16 }}>
+          {children}
+        </ul>
+      ),
+      ol: ({ children }) => (
+        <ol style={{ paddingLeft: 20, marginBottom: 16 }}>
+          {children}
+        </ol>
+      ),
+      li: ({ children }) => (
+        <li style={{ color: '#e0e0e0', marginBottom: 8, fontSize: 15, lineHeight: 1.7 }}>
+          {children}
+        </li>
+      ),
+      blockquote: ({ children }) => (
+        <div style={{ borderLeft: '4px solid #6366f1', paddingLeft: 16, margin: '16px 0', background: 'rgba(99,102,241,0.05)', borderRadius: '0 8px 8px 0', padding: '12px 16px' }}>
+          {children}
+        </div>
+      ),
+      code: ({ children }) => (
+        <code style={{ background: '#0a0a0f', padding: '2px 6px', borderRadius: 4, fontSize: 13, color: '#22c55e', fontFamily: 'monospace' }}>
+          {children}
+        </code>
+      ),
+      hr: () => (
+        <hr style={{ border: 'none', borderTop: '1px solid #ffffff10', margin: '20px 0' }} />
+      ),
+    }}
+  >
+    {content}
+  </ReactMarkdown>
+)
 
 export default function AnalyzePage() {
   const router = useRouter()
@@ -265,9 +208,6 @@ export default function AnalyzePage() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const activeMode = MODES.find(m => m.id === selectedMode)
-  const parsedSections = activeMode && done
-    ? parseSections(response, activeMode.sections)
-    : []
 
   async function analyze(modeId: Mode, overrideText?: string) {
     const mode = MODES.find(m => m.id === modeId)
@@ -471,21 +411,30 @@ export default function AnalyzePage() {
           </div>
         )}
 
-        {/* Streaming raw output (while loading, before sections are parseable) */}
-        {loading && response && (
+        {/* Response (streaming + done) */}
+        {(response || loading) && (
           <div style={{
             background: '#1a1a2e',
             borderRadius: 16,
-            padding: 24,
+            padding: 32,
             border: '1px solid #ffffff08',
-            marginBottom: 24,
+            marginBottom: done ? 0 : 24,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} />
-              <span style={{ color: '#a0a0b0', fontSize: 13 }}>Analyzing your situation...</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+              <div style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: loading ? '#6366f1' : '#22c55e',
+              }} />
+              <span style={{ color: '#a0a0b0', fontSize: 13 }}>
+                {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
+              </span>
             </div>
-            <div style={{ whiteSpace: 'pre-wrap', fontSize: 14, color: '#e0e0e0', lineHeight: 1.8 }}>
-              {response}
+
+            <MarkdownResponse content={response} />
+
+            {loading && (
               <span style={{
                 display: 'inline-block',
                 width: 2,
@@ -494,137 +443,66 @@ export default function AnalyzePage() {
                 marginLeft: 2,
                 verticalAlign: 'text-bottom',
               }} />
-            </div>
-          </div>
-        )}
-
-        {/* Parsed section cards */}
-        {done && parsedSections.length > 0 && (
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
-              <span style={{ color: '#a0a0b0', fontSize: 13 }}>Analysis complete{saved ? ' · Saved to your account' : ''}</span>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {parsedSections.map((section, i) => {
-                const style = getSectionStyle(section.type)
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      background: '#1a1a2e',
-                      borderRadius: 14,
-                      padding: '20px 24px',
-                      borderLeft: `4px solid ${style.borderColor}`,
-                      border: `1px solid ${style.borderColor}20`,
-                      borderLeftWidth: 4,
-                    }}
-                  >
-                    <div style={{
-                      fontSize: 11,
-                      fontWeight: 700,
-                      color: style.labelColor,
-                      letterSpacing: 1,
-                      marginBottom: 10,
-                    }}>
-                      {section.header}
-                    </div>
-                    {renderContent(section.content)}
-                  </div>
-                )
-              })}
-            </div>
-
-            {/* Fallback: if sections didn't parse, show raw */}
-            {parsedSections.length === 0 && (
-              <div style={{
-                background: '#1a1a2e',
-                borderRadius: 14,
-                padding: 24,
-                border: '1px solid #ffffff08',
-                whiteSpace: 'pre-wrap',
-                fontSize: 14,
-                color: '#e0e0e0',
-                lineHeight: 1.8,
-              }}>
-                {response}
-              </div>
             )}
-
-            {/* Action row */}
-            <div style={{
-              marginTop: 32,
-              paddingTop: 24,
-              borderTop: '1px solid #ffffff08',
-              display: 'flex',
-              gap: 12,
-              flexWrap: 'wrap',
-            }}>
-              <button
-                onClick={() => router.push('/advisor')}
-                style={{
-                  background: '#6366f1',
-                  border: 'none',
-                  borderRadius: 10,
-                  padding: '12px 24px',
-                  color: 'white',
-                  fontWeight: 700,
-                  fontSize: 14,
-                  cursor: 'pointer',
-                }}
-              >
-                Get Full Recommendation →
-              </button>
-              <button
-                onClick={() => router.push('/chat')}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #ffffff30',
-                  borderRadius: 10,
-                  padding: '12px 24px',
-                  color: 'white',
-                  fontSize: 14,
-                  cursor: 'pointer',
-                }}
-              >
-                Ask Follow-up Questions
-              </button>
-              <button
-                onClick={() => {
-                  reset()
-                  setSelectedMode(null)
-                }}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid #ffffff15',
-                  borderRadius: 10,
-                  padding: '12px 24px',
-                  color: '#a0a0b0',
-                  fontSize: 14,
-                  cursor: 'pointer',
-                }}
-              >
-                Start New Analysis
-              </button>
-            </div>
           </div>
         )}
 
-        {/* Raw fallback when done but no sections parsed */}
-        {done && parsedSections.length === 0 && response && (
+        {/* Action row */}
+        {done && (
           <div style={{
-            background: '#1a1a2e',
-            borderRadius: 14,
-            padding: 24,
-            border: '1px solid #ffffff08',
-            whiteSpace: 'pre-wrap',
-            fontSize: 14,
-            color: '#e0e0e0',
-            lineHeight: 1.8,
-            marginBottom: 24,
+            marginTop: 24,
+            paddingTop: 24,
+            borderTop: '1px solid #ffffff08',
+            display: 'flex',
+            gap: 12,
+            flexWrap: 'wrap',
           }}>
-            {response}
+            <button
+              onClick={() => router.push('/advisor')}
+              style={{
+                background: '#6366f1',
+                border: 'none',
+                borderRadius: 10,
+                padding: '12px 24px',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Get Full Recommendation →
+            </button>
+            <button
+              onClick={() => router.push('/chat')}
+              style={{
+                background: 'transparent',
+                border: '1px solid #ffffff30',
+                borderRadius: 10,
+                padding: '12px 24px',
+                color: 'white',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Ask Follow-up Questions
+            </button>
+            <button
+              onClick={() => {
+                reset()
+                setSelectedMode(null)
+              }}
+              style={{
+                background: 'transparent',
+                border: '1px solid #ffffff15',
+                borderRadius: 10,
+                padding: '12px 24px',
+                color: '#a0a0b0',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              Start New Analysis
+            </button>
           </div>
         )}
       </div>
