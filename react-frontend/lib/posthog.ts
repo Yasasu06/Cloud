@@ -1,6 +1,7 @@
 import posthog from 'posthog-js'
 
 export function initPostHog() {
+  if (process.env.NODE_ENV === 'development') return
   if (typeof window !== 'undefined') {
     posthog.init('phc_placeholder', {
       api_host: 'https://app.posthog.com',
