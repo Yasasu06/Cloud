@@ -215,44 +215,90 @@ export default function AnalyzePage() {
 
   const activeMode = MODES.find(m => m.id === selectedMode)
 
-  async function fetchChartData(userInput: string, modeId: Mode) {
-    const chartPrompt = modeId === 'finops'
-      ? `Based on this cloud situation: "${userInput}"
-Return ONLY a JSON object, no other text:
-{"costBreakdown":[{"service":"EC2","cost":3200},{"service":"RDS","cost":1800},{"service":"Data Transfer","cost":1200},{"service":"S3","cost":400},{"service":"Other","cost":400}],"wasteAmount":1840,"savingsPercent":23,"riskScore":7,"actionItems":[{"action":"Delete idle instances","saving":340},{"action":"Enable S3 Intelligent Tiering","saving":180},{"action":"Convert to Reserved Instances","saving":890}]}
-Replace the example numbers with realistic estimates based on their actual situation. Return only JSON.`
-      : modeId === 'architect'
-      ? `Based on this project: "${userInput}"
-Return ONLY a JSON object, no other text:
-{"provider":"AWS","providerScore":87,"alternativeScores":[{"name":"AWS","score":87},{"name":"Azure","score":72},{"name":"GCP","score":65}],"services":[{"name":"EC2","monthlyLow":200,"monthlyHigh":400},{"name":"RDS","monthlyLow":150,"monthlyHigh":300},{"name":"S3","monthlyLow":50,"monthlyHigh":100}],"totalMonthlyLow":430,"totalMonthlyHigh":880,"timeToLaunchWeeks":8}
-Replace with realistic numbers. Return only JSON.`
-      : `Based on this migration: "${userInput}"
-Return ONLY a JSON object, no other text:
-{"complexity":"Medium","complexityScore":6,"migrationCostLow":12000,"migrationCostHigh":28000,"monthlyDelta":-800,"breakEvenMonths":18,"weeklyPlan":[{"week":"1-2","completion":25},{"week":"3-4","completion":50},{"week":"5-6","completion":75},{"week":"7-8","completion":100}],"risks":[{"name":"Data loss","severity":8},{"name":"Downtime","severity":6},{"name":"Cost overrun","severity":5}]}
-Replace with realistic numbers. Return only JSON.`
+  function generateChartData(userInput: string, modeId: Mode | null) {
+    const inputLower = userInput.toLowerCase()
 
-    try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 500,
-          messages: [
-            { role: 'system', content: 'You are a data API. Return only valid JSON, no markdown, no explanation.' },
-            { role: 'user', content: chartPrompt },
-          ],
-        }),
+    if (modeId === 'finops') {
+      const spendMatch = userInput.match(/\$?([\d,]+)k?/i)
+      const baseSpend = spendMatch
+        ? parseInt(spendMatch[1].replace(',', '')) * (userInput.toLowerCase().includes('k') ? 1000 : 1)
+        : 8000
+
+      const waste = Math.round(baseSpend * 0.28)
+      const ec2 = Math.round(baseSpend * 0.38)
+      const rds = Math.round(baseSpend * 0.22)
+      const transfer = Math.round(baseSpend * 0.18)
+      const s3 = Math.round(baseSpend * 0.12)
+      const other = baseSpend - ec2 - rds - transfer - s3
+
+      setChartData({
+        costBreakdown: [
+          { service: 'EC2 Compute', cost: ec2 },
+          { service: 'RDS Database', cost: rds },
+          { service: 'Data Transfer', cost: transfer },
+          { service: 'S3 Storage', cost: s3 },
+          { service: 'Other', cost: other },
+        ],
+        wasteAmount: waste,
+        optimizedAmount: baseSpend - waste,
+        savingsPercent: 28,
+        riskScore: inputLower.includes('spike') ? 8 : 6,
+        actionItems: [
+          { action: 'Right-size EC2 instances', saving: Math.round(ec2 * 0.3) },
+          { action: 'Delete unused snapshots', saving: Math.round(baseSpend * 0.05) },
+          { action: 'Reserved instances', saving: Math.round(ec2 * 0.35) },
+        ],
       })
-      const data = await res.json()
-      const text = data.choices?.[0]?.message?.content || '{}'
-      const clean = text.replace(/```json|```/g, '').trim()
-      setChartData(JSON.parse(clean))
-    } catch (e) {
-      console.error('Chart data fetch failed:', e)
+    } else if (modeId === 'architect') {
+      const isAI = inputLower.includes('ai') || inputLower.includes('ml')
+      const isHealthcare = inputLower.includes('health') || inputLower.includes('hipaa')
+      const isEurope = inputLower.includes('europe') || inputLower.includes('gdpr')
+
+      const provider = isAI ? 'GCP' : isHealthcare || isEurope ? 'Azure' : 'AWS'
+      const scores = isAI
+        ? [{ name: 'GCP', score: 92 }, { name: 'Azure', score: 78 }, { name: 'AWS', score: 71 }]
+        : isHealthcare
+        ? [{ name: 'Azure', score: 90 }, { name: 'AWS', score: 82 }, { name: 'GCP', score: 68 }]
+        : [{ name: 'AWS', score: 88 }, { name: 'Azure', score: 74 }, { name: 'GCP', score: 69 }]
+
+      setChartData({
+        provider,
+        providerScore: scores[0].score,
+        alternativeScores: scores,
+        services: [
+          { name: 'Compute', monthlyLow: 200, monthlyHigh: 500 },
+          { name: 'Database', monthlyLow: 150, monthlyHigh: 350 },
+          { name: 'Storage', monthlyLow: 50, monthlyHigh: 120 },
+          { name: 'Network', monthlyLow: 80, monthlyHigh: 200 },
+          { name: 'Security', monthlyLow: 60, monthlyHigh: 150 },
+        ],
+        totalMonthlyLow: 540,
+        totalMonthlyHigh: 1320,
+        complexityScore: isHealthcare ? 8 : 6,
+        timeToLaunchWeeks: isHealthcare ? 12 : 8,
+      })
+    } else {
+      const isHard = inputLower.includes('50tb') || inputLower.includes('100tb') || inputLower.includes('enterprise')
+
+      setChartData({
+        complexity: isHard ? 'Hard' : 'Medium',
+        complexityScore: isHard ? 8 : 6,
+        migrationCostLow: isHard ? 25000 : 12000,
+        migrationCostHigh: isHard ? 60000 : 28000,
+        monthlyDelta: -800,
+        breakEvenMonths: isHard ? 24 : 14,
+        weeklyPlan: [
+          { week: 'Wk 1-2', completion: 25 },
+          { week: 'Wk 3-4', completion: 50 },
+          { week: 'Wk 5-6', completion: 75 },
+          { week: 'Wk 7-8', completion: 100 },
+        ],
+        risks: [
+          { name: 'Data loss', severity: 8 },
+          { name: 'Downtime', severity: isHard ? 7 : 5 },
+          { name: 'Cost overrun', severity: 6 },
+        ],
+      })
     }
   }
 
@@ -316,7 +362,7 @@ Replace with realistic numbers. Return only JSON.`
 
       setDone(true)
       trackEvent('analyze_completed', { mode: modeId })
-      fetchChartData(userText, modeId)
+      generateChartData(userText, modeId)
 
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
