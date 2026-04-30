@@ -129,7 +129,7 @@ export default function RootLayout({
                   { label: 'Terms of Service', href: '#' },
                   { label: 'Contact Us', href: '#' },
                 ].map(l => (
-                  <a key={l.href} href={l.href} style={{
+                  <a key={l.label} href={l.href} style={{
                     display: 'block',
                     color: '#a0a0b0',
                     fontSize: 14,
