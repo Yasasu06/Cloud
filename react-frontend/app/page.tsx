@@ -30,7 +30,7 @@ export default function HomePage() {
 
   function handleSubmit() {
     if (input.trim()) {
-      window.location.href = `/intent?q=${encodeURIComponent(input)}`
+      window.location.href = `/analyze?q=${encodeURIComponent(input)}`
     }
   }
 

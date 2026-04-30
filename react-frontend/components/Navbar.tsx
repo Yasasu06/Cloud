@@ -7,7 +7,7 @@ import { Cloud, Menu, X } from 'lucide-react'
 
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
-  { href: '/intent', label: 'AI Analyze' },
+  { href: '/analyze', label: 'AI Analyze' },
   { href: '/planner', label: 'Plan' },
   { href: '/roadmap', label: 'Roadmap' },
   { href: '/repatriation', label: 'Exit Analyzer' },
