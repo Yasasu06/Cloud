@@ -6,6 +6,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from 'recharts'
+import { motion } from 'framer-motion'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -49,7 +54,12 @@ One specific warning.
 ## Expected Monthly Saving
 **$X - $Y/month** if they follow your recommendations.
 
-Be specific. Use real AWS/Azure/GCP service names. Give real dollar amounts. Write for a smart non-technical founder. No filler words.`,
+Be specific. Use real AWS/Azure/GCP service names. Give real dollar amounts. Write for a smart non-technical founder. No filler words.
+
+After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
+Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
+DATA_JSON: {"costBreakdown":[{"service":"EC2","cost":3200},{"service":"RDS","cost":1800},{"service":"Data Transfer","cost":1200},{"service":"S3","cost":400},{"service":"Other","cost":400}],"wasteAmount":1840,"optimizedAmount":6160,"savingsPercent":23,"riskScore":7,"actionItems":[{"action":"Delete idle instances","saving":340,"effort":"Low"},{"action":"Enable S3 Intelligent Tiering","saving":180,"effort":"Low"},{"action":"Convert to Reserved Instances","saving":890,"effort":"Medium"}]}
+Replace the example numbers with realistic numbers based on the actual user's situation.`,
   },
   {
     id: 'architect',
@@ -84,7 +94,12 @@ Specific requirements for their industry if applicable.
 3. Specific action with time estimate
 
 ## One Thing That Usually Goes Wrong
-Honest warning specific to their project type.`,
+Honest warning specific to their project type.
+
+After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
+Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
+DATA_JSON: {"provider":"AWS","providerScore":87,"alternativeScores":[{"name":"AWS","score":87},{"name":"Azure","score":72},{"name":"GCP","score":65}],"services":[{"name":"EC2","monthlyLow":200,"monthlyHigh":400},{"name":"RDS","monthlyLow":150,"monthlyHigh":300},{"name":"S3","monthlyLow":50,"monthlyHigh":100},{"name":"CloudFront","monthlyLow":30,"monthlyHigh":80}],"totalMonthlyLow":430,"totalMonthlyHigh":880,"complexityScore":6,"timeToLaunchWeeks":8}
+Replace the example numbers with realistic numbers based on the actual user's situation.`,
   },
   {
     id: 'migration',
@@ -120,7 +135,12 @@ One sentence explaining the rating.
 **Risk 3:** What it is and how to prevent it
 
 ## My Honest Recommendation
-Direct answer: should they migrate or not and why. If it does not make financial sense say so clearly.`,
+Direct answer: should they migrate or not and why. If it does not make financial sense say so clearly.
+
+After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
+Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
+DATA_JSON: {"complexity":"Medium","complexityScore":6,"migrationCostLow":12000,"migrationCostHigh":28000,"monthlyDelta":-800,"breakEvenMonths":18,"riskScore":6,"weeklyPlan":[{"week":"1-2","completion":25},{"week":"3-4","completion":50},{"week":"5-6","completion":75},{"week":"7-8","completion":100}],"risks":[{"name":"Data loss","severity":8},{"name":"Downtime","severity":6},{"name":"Cost overrun","severity":5}]}
+Replace the example numbers with realistic numbers based on the actual user's situation.`,
   },
 ]
 
@@ -195,6 +215,7 @@ export default function AnalyzePage() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [chartData, setChartData] = useState<any>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -219,6 +240,7 @@ export default function AnalyzePage() {
     setResponse('')
     setDone(false)
     setSaved(false)
+    setChartData(null)
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
     try {
@@ -258,7 +280,12 @@ export default function AnalyzePage() {
               const parsed = JSON.parse(data)
               const token = parsed.choices?.[0]?.delta?.content || ''
               fullText += token
-              setResponse(fullText)
+              const dataMatch = fullText.match(/DATA_JSON:\s*({.*})/s)
+              if (dataMatch) {
+                try { setChartData(JSON.parse(dataMatch[1])) } catch { /* partial JSON */ }
+              }
+              const cleanText = fullText.replace(/DATA_JSON:.*$/ms, '').trim()
+              setResponse(cleanText)
             } catch {
               // partial chunk
             }
@@ -295,6 +322,7 @@ export default function AnalyzePage() {
     setDone(false)
     setSaved(false)
     setInput('')
+    setChartData(null)
   }
 
   return (
@@ -445,6 +473,273 @@ export default function AnalyzePage() {
               }} />
             )}
           </div>
+        )}
+
+        {/* Chart Dashboard */}
+        {chartData && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{ marginTop: 32 }}
+          >
+            {/* FINOPS DASHBOARD */}
+            {chartData.costBreakdown && (
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: 'white' }}>
+                  📊 Your Cost Dashboard
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 32 }}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #ef4444', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>IDENTIFIED WASTE</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: '#ef4444' }}>
+                      ${chartData.wasteAmount?.toLocaleString()}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666' }}>per month</div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #22c55e', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>POTENTIAL SAVING</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: '#22c55e' }}>
+                      {chartData.savingsPercent}%
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666' }}>of your monthly bill</div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #f59e0b', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>RISK SCORE</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: '#f59e0b' }}>
+                      {chartData.riskScore}/10
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666' }}>financial risk level</div>
+                  </motion.div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      COST BY SERVICE
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={chartData.costBreakdown}
+                          dataKey="cost"
+                          nameKey="service"
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          label={({ service, percent }: { service: string; percent: number }) =>
+                            `${service} ${(percent * 100).toFixed(0)}%`}
+                          labelLine={false}
+                        >
+                          {chartData.costBreakdown.map((_: any, i: number) => (
+                            <Cell key={i} fill={['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#0078D4'][i % 5]} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(v: any) => [`$${v.toLocaleString()}`, 'Cost']}
+                          contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      QUICK WIN SAVINGS
+                    </div>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={chartData.actionItems} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis type="number" stroke="#a0a0b0" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
+                        <YAxis type="category" dataKey="action" stroke="#a0a0b0" tick={{ fontSize: 10 }} width={140} />
+                        <Tooltip
+                          formatter={(v: any) => [`$${v}/month`, 'Saving']}
+                          contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
+                        />
+                        <Bar dataKey="saving" fill="#22c55e" radius={[0, 4, 4, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ARCHITECTURE DASHBOARD */}
+            {chartData.providerScore && (
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: 'white' }}>
+                  🏗️ Architecture Dashboard
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, marginBottom: 32 }}>
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #6366f1', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>RECOMMENDED</div>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: '#6366f1' }}>{chartData.provider}</div>
+                    <div style={{ fontSize: 20, color: '#22c55e', fontWeight: 700 }}>{chartData.providerScore}% match</div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #22c55e', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>MONTHLY COST</div>
+                    <div style={{ fontSize: 24, fontWeight: 900, color: '#22c55e' }}>
+                      ${chartData.totalMonthlyLow?.toLocaleString()} – ${chartData.totalMonthlyHigh?.toLocaleString()}
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.6 }}
+                    style={{ background: '#1a1a2e', borderRadius: 16, padding: 24, borderTop: '3px solid #f59e0b', textAlign: 'center' }}
+                  >
+                    <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>TIME TO LAUNCH</div>
+                    <div style={{ fontSize: 36, fontWeight: 900, color: '#f59e0b' }}>
+                      {chartData.timeToLaunchWeeks}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#666' }}>weeks</div>
+                  </motion.div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      PROVIDER COMPARISON
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={chartData.alternativeScores}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis dataKey="name" stroke="#a0a0b0" tick={{ fontSize: 12 }} />
+                        <YAxis stroke="#a0a0b0" domain={[0, 100]} tick={{ fontSize: 11 }} />
+                        <Tooltip
+                          formatter={(v: any) => [`${v}% match`, '']}
+                          contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
+                        />
+                        <Bar dataKey="score" radius={[4, 4, 0, 0]}>
+                          {chartData.alternativeScores?.map((_: any, i: number) => (
+                            <Cell key={i} fill={i === 0 ? '#6366f1' : '#ffffff20'} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      MONTHLY COST BY SERVICE
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={chartData.services}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis dataKey="name" stroke="#a0a0b0" tick={{ fontSize: 11 }} />
+                        <YAxis stroke="#a0a0b0" tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
+                        <Tooltip contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }} />
+                        <Bar dataKey="monthlyLow" name="Low estimate" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="monthlyHigh" name="High estimate" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MIGRATION DASHBOARD */}
+            {chartData.migrationCostLow && (
+              <div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24, color: 'white' }}>
+                  🔄 Migration Dashboard
+                </h3>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 16, marginBottom: 32 }}>
+                  {[
+                    { label: 'COMPLEXITY', value: chartData.complexity, color: chartData.complexityScore > 7 ? '#ef4444' : chartData.complexityScore > 4 ? '#f59e0b' : '#22c55e' },
+                    { label: 'MIGRATION COST', value: `$${(chartData.migrationCostLow / 1000).toFixed(0)}k–$${(chartData.migrationCostHigh / 1000).toFixed(0)}k`, color: '#f59e0b' },
+                    { label: 'MONTHLY SAVING', value: `$${Math.abs(chartData.monthlyDelta)}/mo`, color: chartData.monthlyDelta < 0 ? '#22c55e' : '#ef4444' },
+                    { label: 'BREAK EVEN', value: `${chartData.breakEvenMonths} months`, color: '#6366f1' },
+                  ].map((stat, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      style={{ background: '#1a1a2e', borderRadius: 16, padding: 20, borderTop: `3px solid ${stat.color}`, textAlign: 'center' }}
+                    >
+                      <div style={{ fontSize: 11, color: '#a0a0b0', marginBottom: 8 }}>{stat.label}</div>
+                      <div style={{ fontSize: 22, fontWeight: 800, color: stat.color }}>{stat.value}</div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      MIGRATION PROGRESS TIMELINE
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={chartData.weeklyPlan}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis dataKey="week" stroke="#a0a0b0" tick={{ fontSize: 11 }} />
+                        <YAxis stroke="#a0a0b0" domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
+                        <Tooltip
+                          formatter={(v: any) => [`${v}% complete`, '']}
+                          contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
+                        />
+                        <Bar dataKey="completion" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  <div style={{ background: '#1a1a2e', borderRadius: 16, padding: 24 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, color: '#a0a0b0' }}>
+                      RISK ASSESSMENT
+                    </div>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart data={chartData.risks} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                        <XAxis type="number" domain={[0, 10]} stroke="#a0a0b0" tick={{ fontSize: 11 }} />
+                        <YAxis type="category" dataKey="name" stroke="#a0a0b0" tick={{ fontSize: 11 }} width={100} />
+                        <Tooltip
+                          formatter={(v: any) => [`${v}/10 severity`, '']}
+                          contentStyle={{ background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 8 }}
+                        />
+                        <Bar dataKey="severity" radius={[0, 4, 4, 0]}>
+                          {chartData.risks?.map((_: any, i: number) => (
+                            <Cell key={i} fill={['#ef4444', '#f59e0b', '#22c55e'][i]} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
         )}
 
         {/* Action row */}
