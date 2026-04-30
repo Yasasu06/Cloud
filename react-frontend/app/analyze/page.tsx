@@ -54,12 +54,7 @@ One specific warning.
 ## Expected Monthly Saving
 **$X - $Y/month** if they follow your recommendations.
 
-Be specific. Use real AWS/Azure/GCP service names. Give real dollar amounts. Write for a smart non-technical founder. No filler words.
-
-After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
-Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
-DATA_JSON: {"costBreakdown":[{"service":"EC2","cost":3200},{"service":"RDS","cost":1800},{"service":"Data Transfer","cost":1200},{"service":"S3","cost":400},{"service":"Other","cost":400}],"wasteAmount":1840,"optimizedAmount":6160,"savingsPercent":23,"riskScore":7,"actionItems":[{"action":"Delete idle instances","saving":340,"effort":"Low"},{"action":"Enable S3 Intelligent Tiering","saving":180,"effort":"Low"},{"action":"Convert to Reserved Instances","saving":890,"effort":"Medium"}]}
-Replace the example numbers with realistic numbers based on the actual user's situation.`,
+Be specific. Use real AWS/Azure/GCP service names. Give real dollar amounts. Write for a smart non-technical founder. No filler words.`,
   },
   {
     id: 'architect',
@@ -94,12 +89,7 @@ Specific requirements for their industry if applicable.
 3. Specific action with time estimate
 
 ## One Thing That Usually Goes Wrong
-Honest warning specific to their project type.
-
-After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
-Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
-DATA_JSON: {"provider":"AWS","providerScore":87,"alternativeScores":[{"name":"AWS","score":87},{"name":"Azure","score":72},{"name":"GCP","score":65}],"services":[{"name":"EC2","monthlyLow":200,"monthlyHigh":400},{"name":"RDS","monthlyLow":150,"monthlyHigh":300},{"name":"S3","monthlyLow":50,"monthlyHigh":100},{"name":"CloudFront","monthlyLow":30,"monthlyHigh":80}],"totalMonthlyLow":430,"totalMonthlyHigh":880,"complexityScore":6,"timeToLaunchWeeks":8}
-Replace the example numbers with realistic numbers based on the actual user's situation.`,
+Honest warning specific to their project type.`,
   },
   {
     id: 'migration',
@@ -135,12 +125,7 @@ One sentence explaining the rating.
 **Risk 3:** What it is and how to prevent it
 
 ## My Honest Recommendation
-Direct answer: should they migrate or not and why. If it does not make financial sense say so clearly.
-
-After your full markdown analysis, add a special data block on its own line starting with exactly: DATA_JSON:
-Then on the same line, a single JSON object with this structure (fill in real numbers based on your analysis):
-DATA_JSON: {"complexity":"Medium","complexityScore":6,"migrationCostLow":12000,"migrationCostHigh":28000,"monthlyDelta":-800,"breakEvenMonths":18,"riskScore":6,"weeklyPlan":[{"week":"1-2","completion":25},{"week":"3-4","completion":50},{"week":"5-6","completion":75},{"week":"7-8","completion":100}],"risks":[{"name":"Data loss","severity":8},{"name":"Downtime","severity":6},{"name":"Cost overrun","severity":5}]}
-Replace the example numbers with realistic numbers based on the actual user's situation.`,
+Direct answer: should they migrate or not and why. If it does not make financial sense say so clearly.`,
   },
 ]
 
@@ -230,6 +215,47 @@ export default function AnalyzePage() {
 
   const activeMode = MODES.find(m => m.id === selectedMode)
 
+  async function fetchChartData(userInput: string, modeId: Mode) {
+    const chartPrompt = modeId === 'finops'
+      ? `Based on this cloud situation: "${userInput}"
+Return ONLY a JSON object, no other text:
+{"costBreakdown":[{"service":"EC2","cost":3200},{"service":"RDS","cost":1800},{"service":"Data Transfer","cost":1200},{"service":"S3","cost":400},{"service":"Other","cost":400}],"wasteAmount":1840,"savingsPercent":23,"riskScore":7,"actionItems":[{"action":"Delete idle instances","saving":340},{"action":"Enable S3 Intelligent Tiering","saving":180},{"action":"Convert to Reserved Instances","saving":890}]}
+Replace the example numbers with realistic estimates based on their actual situation. Return only JSON.`
+      : modeId === 'architect'
+      ? `Based on this project: "${userInput}"
+Return ONLY a JSON object, no other text:
+{"provider":"AWS","providerScore":87,"alternativeScores":[{"name":"AWS","score":87},{"name":"Azure","score":72},{"name":"GCP","score":65}],"services":[{"name":"EC2","monthlyLow":200,"monthlyHigh":400},{"name":"RDS","monthlyLow":150,"monthlyHigh":300},{"name":"S3","monthlyLow":50,"monthlyHigh":100}],"totalMonthlyLow":430,"totalMonthlyHigh":880,"timeToLaunchWeeks":8}
+Replace with realistic numbers. Return only JSON.`
+      : `Based on this migration: "${userInput}"
+Return ONLY a JSON object, no other text:
+{"complexity":"Medium","complexityScore":6,"migrationCostLow":12000,"migrationCostHigh":28000,"monthlyDelta":-800,"breakEvenMonths":18,"weeklyPlan":[{"week":"1-2","completion":25},{"week":"3-4","completion":50},{"week":"5-6","completion":75},{"week":"7-8","completion":100}],"risks":[{"name":"Data loss","severity":8},{"name":"Downtime","severity":6},{"name":"Cost overrun","severity":5}]}
+Replace with realistic numbers. Return only JSON.`
+
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 500,
+          messages: [
+            { role: 'system', content: 'You are a data API. Return only valid JSON, no markdown, no explanation.' },
+            { role: 'user', content: chartPrompt },
+          ],
+        }),
+      })
+      const data = await res.json()
+      const text = data.choices?.[0]?.message?.content || '{}'
+      const clean = text.replace(/```json|```/g, '').trim()
+      setChartData(JSON.parse(clean))
+    } catch (e) {
+      console.error('Chart data fetch failed:', e)
+    }
+  }
+
   async function analyze(modeId: Mode, overrideText?: string) {
     const mode = MODES.find(m => m.id === modeId)
     if (!mode) return
@@ -280,12 +306,7 @@ export default function AnalyzePage() {
               const parsed = JSON.parse(data)
               const token = parsed.choices?.[0]?.delta?.content || ''
               fullText += token
-              const dataMatch = fullText.match(/DATA_JSON:\s*({.*})/s)
-              if (dataMatch) {
-                try { setChartData(JSON.parse(dataMatch[1])) } catch { /* partial JSON */ }
-              }
-              const cleanText = fullText.replace(/DATA_JSON:.*$/ms, '').trim()
-              setResponse(cleanText)
+              setResponse(fullText)
             } catch {
               // partial chunk
             }
@@ -295,6 +316,7 @@ export default function AnalyzePage() {
 
       setDone(true)
       trackEvent('analyze_completed', { mode: modeId })
+      fetchChartData(userText, modeId)
 
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
