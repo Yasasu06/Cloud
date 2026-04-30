@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
+import JargonTooltip from '@/components/JargonTooltip'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -145,7 +146,7 @@ const MarkdownResponse = ({ content }: { content: string }) => (
       ),
       p: ({ children }) => (
         <p style={{ color: '#e0e0e0', lineHeight: 1.8, marginBottom: 12, fontSize: 15 }}>
-          {children}
+          {typeof children === 'string' ? <JargonTooltip text={children} /> : children}
         </p>
       ),
       strong: ({ children }) => (
@@ -165,7 +166,7 @@ const MarkdownResponse = ({ content }: { content: string }) => (
       ),
       li: ({ children }) => (
         <li style={{ color: '#e0e0e0', marginBottom: 8, fontSize: 15, lineHeight: 1.7 }}>
-          {children}
+          {typeof children === 'string' ? <JargonTooltip text={children} /> : children}
         </li>
       ),
       blockquote: ({ children }) => (
@@ -444,6 +445,26 @@ export default function AnalyzePage() {
                 verticalAlign: 'text-bottom',
               }} />
             )}
+          </div>
+        )}
+
+        {/* Jargon hint */}
+        {done && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 0', color: '#666', fontSize: 13 }}>
+            <span style={{
+              background: '#6366f1',
+              color: 'white',
+              borderRadius: '50%',
+              width: 16,
+              height: 16,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 10,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}>?</span>
+            Hover over any underlined term for a plain English explanation
           </div>
         )}
 
