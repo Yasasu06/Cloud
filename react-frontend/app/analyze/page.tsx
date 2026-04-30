@@ -362,6 +362,7 @@ export default function AnalyzePage() {
 
       setDone(true)
       trackEvent('analyze_completed', { mode: modeId })
+      console.log('generating chart data')
       generateChartData(userText, modeId)
 
       const { data: { session } } = await supabase.auth.getSession()
@@ -866,6 +867,12 @@ export default function AnalyzePage() {
             >
               Start New Analysis
             </button>
+          </div>
+        )}
+
+        {done && (
+          <div style={{ color: 'yellow', padding: 16 }}>
+            Debug: chartData = {chartData ? JSON.stringify(Object.keys(chartData)) : 'null'}
           </div>
         )}
       </div>
