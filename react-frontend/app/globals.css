@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #050508;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-hover: rgba(255,255,255,0.06);
+  --border: rgba(255,255,255,0.08);
+  --border-bright: rgba(255,255,255,0.15);
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0b0;
+  --text-muted: #555566;
+  --accent: #6366f1;
+  --accent-glow: rgba(99,102,241,0.3);
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+}
+
 @layer base {
   :root {
     --background: 0 0% 4%;
@@ -103,11 +123,41 @@
 }
 
 .btn-primary {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 28px;
+  color: white;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+  text-decoration: none;
+  display: inline-block;
 }
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.5);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius-md);
+  padding: 12px 28px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  color: white;
+  background: rgba(99,102,241,0.1);
 }
 
 .glass {
@@ -117,11 +167,35 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #ffffff 0%, #6366f1 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #fff 0%, #a0a0ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.accent-glow {
+  box-shadow: 0 0 32px var(--accent-glow);
+}
+
+.mode-finops:hover { border-top: 3px solid #f59e0b !important; }
+.mode-architect:hover { border-top: 3px solid #6366f1 !important; }
+.mode-migration:hover { border-top: 3px solid #22c55e !important; }
 
 .animated-gradient {
   background: linear-gradient(-45deg, #0a0a0f, #0d0d1f, #0a0a1a, #0f0a1f);

@@ -96,7 +96,7 @@ export default function HomePage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+    <div style={{ minHeight: '100vh', background: '#050508', color: 'white' }}>
       {lastRec && (
         <div style={{
           background: 'rgba(99,102,241,0.08)',
@@ -116,6 +116,7 @@ export default function HomePage() {
 
       {/* HERO */}
       <section style={{
+        position: 'relative',
         minHeight: '85vh',
         display: 'flex',
         flexDirection: 'column',
@@ -123,8 +124,22 @@ export default function HomePage() {
         justifyContent: 'center',
         padding: '60px 24px',
         textAlign: 'center',
-        background: 'radial-gradient(ellipse at top, #1a1040 0%, #0a0a0f 70%)',
+        background: 'radial-gradient(ellipse at top, #1a1040 0%, #050508 70%), radial-gradient(circle, #ffffff08 1px, transparent 1px)',
+        backgroundSize: 'auto, 32px 32px',
+        overflow: 'hidden',
       }}>
+        <div style={{
+          position: 'absolute',
+          top: '-200px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          filter: 'blur(40px)',
+        }} />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -154,7 +169,7 @@ export default function HomePage() {
           }}>
             Your cloud bill explained.
             <br />
-            <span style={{ color: '#6366f1' }}>Your waste eliminated.</span>
+            <span className="gradient-text">Your waste eliminated.</span>
             <br />
             In plain English.
           </h1>
@@ -223,17 +238,8 @@ export default function HomePage() {
             </div>
             <button
               onClick={handleSubmit}
-              style={{
-                background: '#6366f1',
-                border: 'none',
-                borderRadius: 10,
-                padding: '12px 24px',
-                color: 'white',
-                fontWeight: 700,
-                cursor: 'pointer',
-                fontSize: 15,
-                whiteSpace: 'nowrap',
-              }}
+              className="btn-primary"
+              style={{ whiteSpace: 'nowrap', padding: '12px 24px', fontSize: 15 }}
             >
               Analyze →
             </button>
@@ -394,12 +400,7 @@ export default function HomePage() {
                 role: 'IT Manager, 80-person company',
               },
             ].map((item, i) => (
-              <div key={i} style={{
-                background: '#1a1a2e',
-                borderRadius: 16,
-                padding: 24,
-                borderLeft: '4px solid #6366f1',
-              }}>
+              <div key={i} className="glass-card" style={{ padding: 24, borderLeft: '4px solid #6366f1' }}>
                 <p style={{
                   color: '#e0e0e0',
                   fontSize: 14,
@@ -458,13 +459,8 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
-                style={{
-                  background: '#1a1a2e',
-                  borderRadius: 16,
-                  padding: 28,
-                  textAlign: 'left',
-                  border: '1px solid #ffffff08',
-                }}
+                className="glass-card"
+                style={{ padding: 28, textAlign: 'left' }}
               >
                 <div style={{ fontSize: 32, marginBottom: 16 }}>{item.icon}</div>
                 <div style={{ color: '#6366f1', fontSize: 11, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>
@@ -487,7 +483,7 @@ export default function HomePage() {
             { value: '$0', label: 'Cost to start', sub: 'No credit card required' },
             { value: '9+', label: 'Providers compared', sub: 'Including alternatives' },
           ].map(stat => (
-            <div key={stat.label} style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, textAlign: 'center' }}>
+            <div key={stat.label} className="glass-card" style={{ padding: 20, textAlign: 'center' }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: '#6366f1', marginBottom: 4 }}>
                 {stat.label === 'Cloud market 2026' ? `$${counts.b855}B`
                   : stat.label === 'Average cloud waste' ? `${counts.pct32}%`

@@ -29,12 +29,10 @@ export default function Navbar() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled
-          ? 'rgba(10, 10, 15, 0.92)'
-          : 'rgba(10, 10, 15, 0.6)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
+        background: 'rgba(5,5,8,0.8)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,18 +58,15 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="relative px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md"
+                  className="text-sm font-medium transition-all duration-200 rounded-md"
                   style={{
                     color: isActive ? '#ffffff' : '#a0a0b0',
+                    background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
                   }}
                 >
                   {link.label}
-                  {isActive && (
-                    <span
-                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
-                      style={{ background: '#6366f1' }}
-                    />
-                  )}
                 </Link>
               )
             })}
@@ -88,8 +83,8 @@ export default function Navbar() {
             </Link>
             <Link
               href="/chat"
-              className="hidden sm:block px-4 py-2 rounded-full text-sm font-semibold text-white transition-all duration-200 hover:scale-105"
-              style={{ background: '#6366f1' }}
+              className="hidden sm:block btn-primary accent-glow"
+              style={{ fontSize: 13, padding: '8px 18px' }}
             >
               Ask AI
             </Link>

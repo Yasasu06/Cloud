@@ -338,14 +338,14 @@ export default function AnalyzePage() {
                   setSelectedMode(mode.id)
                   reset()
                 }}
+                className={`glass-card mode-${mode.id}`}
                 style={{
-                  background: selectedMode === mode.id ? `${mode.color}15` : '#1a1a2e',
-                  border: `2px solid ${selectedMode === mode.id ? mode.color : '#ffffff10'}`,
-                  borderRadius: 16,
+                  background: selectedMode === mode.id ? `${mode.color}15` : undefined,
+                  border: selectedMode === mode.id ? `2px solid ${mode.color}` : undefined,
                   padding: '20px 20px',
                   cursor: 'pointer',
                   textAlign: 'left',
-                  transition: 'all 0.15s',
+                  width: '100%',
                 }}
               >
                 <div style={{ fontSize: 28, marginBottom: 10 }}>{mode.icon}</div>
@@ -416,13 +416,15 @@ export default function AnalyzePage() {
 
         {/* Response (streaming + done) */}
         {(response || loading) && (
-          <div style={{
-            background: '#1a1a2e',
-            borderRadius: 16,
-            padding: 32,
-            border: '1px solid #ffffff08',
-            marginBottom: done ? 0 : 24,
-          }}>
+          <div
+            className="glass-card"
+            style={{
+              padding: 32,
+              marginBottom: done ? 0 : 24,
+              background: 'linear-gradient(#050508, #050508) padding-box, linear-gradient(135deg, #6366f1, transparent) border-box',
+              border: '1px solid transparent',
+            }}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
               <div style={{
                 width: 8,
@@ -478,49 +480,16 @@ export default function AnalyzePage() {
             gap: 12,
             flexWrap: 'wrap',
           }}>
-            <button
-              onClick={() => router.push('/advisor')}
-              style={{
-                background: '#6366f1',
-                border: 'none',
-                borderRadius: 10,
-                padding: '12px 24px',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => router.push('/advisor')} className="btn-primary" style={{ fontSize: 14, padding: '12px 24px' }}>
               Get Full Recommendation →
             </button>
-            <button
-              onClick={() => router.push('/chat')}
-              style={{
-                background: 'transparent',
-                border: '1px solid #ffffff30',
-                borderRadius: 10,
-                padding: '12px 24px',
-                color: 'white',
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => router.push('/chat')} className="btn-secondary" style={{ fontSize: 14, padding: '12px 24px' }}>
               Ask Follow-up Questions
             </button>
             <button
-              onClick={() => {
-                reset()
-                setSelectedMode(null)
-              }}
-              style={{
-                background: 'transparent',
-                border: '1px solid #ffffff15',
-                borderRadius: 10,
-                padding: '12px 24px',
-                color: '#a0a0b0',
-                fontSize: 14,
-                cursor: 'pointer',
-              }}
+              onClick={() => { reset(); setSelectedMode(null) }}
+              className="btn-secondary"
+              style={{ fontSize: 14, padding: '12px 24px', color: '#666' }}
             >
               Start New Analysis
             </button>
