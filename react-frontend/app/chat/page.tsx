@@ -9,12 +9,9 @@ interface Message {
 }
 
 const SUGGESTED_QUESTIONS = [
-  "I'm a startup with 5 engineers and $500/month budget — which cloud should I use?",
-  "We're on AWS but our bills are getting out of control. What should we do?",
-  "I need to build an AI app — which cloud has the best ML tools?",
-  "We need HIPAA compliance. Which provider makes this easiest?",
-  "How hard is it to migrate from AWS to Azure?",
-  "What's the cheapest cloud for a personal project?",
+  "Why is my AWS bill so high?",
+  "Should I switch from AWS to Azure?",
+  "How do I reduce my cloud costs by 30%?",
 ]
 
 const SYSTEM_PROMPT = `You are an expert cloud computing consultant specializing in AWS, Azure, Google Cloud Platform, and alternative providers like DigitalOcean, Hetzner, Vultr, and Oracle Cloud. You give direct, opinionated, practical advice based on real-world experience. You are independent and unbiased — you recommend whatever is genuinely best for the user's situation, not what's most popular. Keep answers concise but complete. Use markdown formatting with bold headings where helpful. Always ask follow-up questions if you need more context to give a better recommendation.`
@@ -185,30 +182,39 @@ export default function ChatPage() {
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>☁️ Cloud AI Consultant</h1>
+          <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>Ask Your Cloud Consultant</h1>
           <p style={{ color: '#a0a0b0' }}>
-            Ask anything about cloud — get expert, unbiased answers instantly.
+            I know your cloud situation. Ask me anything.
           </p>
         </div>
 
         {/* Suggested questions — only shown before user sends first message */}
         {messages.length === 1 && (
           <div style={{ marginBottom: 24 }}>
-            <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 12 }}>SUGGESTED QUESTIONS</p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            <p style={{ color: '#666', fontSize: 11, fontWeight: 600, marginBottom: 10, letterSpacing: 1 }}>SUGGESTED</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button
                   key={q}
-                  onClick={() => sendMessage(q)}
+                  onClick={() => { setInput(q); sendMessage(q) }}
                   style={{
-                    background: '#1a1a2e',
-                    border: '1px solid #ffffff15',
+                    background: 'rgba(99,102,241,0.08)',
+                    border: '1px solid rgba(99,102,241,0.4)',
                     borderRadius: 20,
                     padding: '8px 16px',
                     color: '#a0a0b0',
                     cursor: 'pointer',
                     fontSize: 13,
-                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(99,102,241,0.18)'
+                    e.currentTarget.style.color = '#ffffff'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(99,102,241,0.08)'
+                    e.currentTarget.style.color = '#a0a0b0'
                   }}
                 >
                   {q}
@@ -257,14 +263,31 @@ export default function ChatPage() {
           ))}
           {loading && (
             <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
-              <div
-                style={{
-                  background: '#1a1a2e',
-                  borderRadius: '18px 18px 18px 4px',
-                  padding: '12px 16px',
-                }}
-              >
-                <span style={{ color: '#a0a0b0' }}>Thinking…</span>
+              <style>{`
+                @keyframes typingBounce {
+                  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+                  30% { transform: translateY(-6px); opacity: 1; }
+                }
+              `}</style>
+              <div style={{
+                background: '#1a1a2e',
+                borderRadius: '18px 18px 18px 4px',
+                padding: '14px 18px',
+                display: 'flex',
+                gap: 5,
+                alignItems: 'center',
+              }}>
+                {[0, 1, 2].map(i => (
+                  <span key={i} style={{
+                    display: 'inline-block',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    background: '#6366f1',
+                    animation: `typingBounce 1.2s ease infinite`,
+                    animationDelay: `${i * 0.2}s`,
+                  }} />
+                ))}
               </div>
             </div>
           )}
