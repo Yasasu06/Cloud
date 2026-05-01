@@ -19,6 +19,10 @@ const ADVISE_ITEMS = [
   { href: '/roi-calculator', label: 'ROI Calculator', desc: 'Calculate your return on investment' },
 ]
 
+const INTELLIGENCE_ITEMS = [
+  { href: '/vendor-alerts', label: 'Price Alerts', desc: 'Track AWS, Azure & GCP price changes' },
+]
+
 const MOBILE_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/analyze', label: 'AI Analyze' },
@@ -28,6 +32,7 @@ const MOBILE_LINKS = [
   { href: '/advisor', label: 'Cloud Advisor' },
   { href: '/report-card', label: 'Report Card' },
   { href: '/roi-calculator', label: 'ROI Calculator' },
+  { href: '/vendor-alerts', label: 'Price Alerts' },
   { href: '/pricing', label: 'Pricing' },
 ]
 
@@ -91,8 +96,9 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
-  const adviseActive = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
+  const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
+  const adviseActive       = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
+  const intelligenceActive = ['/vendor-alerts'].includes(pathname)
 
   return (
     <nav
@@ -170,6 +176,24 @@ export default function Navbar() {
                 Advise <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'advise' ? 'rotate(180deg)' : 'none' }} />
               </button>
               <DropdownMenu items={ADVISE_ITEMS} open={openDropdown === 'advise'} />
+            </div>
+
+            {/* Intelligence dropdown */}
+            <div
+              style={{ position: 'relative' }}
+              onMouseEnter={() => setOpenDropdown('intelligence')}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
+              <button style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                color: intelligenceActive ? '#fff' : '#a0a0b0',
+                background: intelligenceActive ? 'rgba(99,102,241,0.15)' : 'transparent',
+                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+              }}>
+                Intelligence <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'intelligence' ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              <DropdownMenu items={INTELLIGENCE_ITEMS} open={openDropdown === 'intelligence'} />
             </div>
 
             <Link
