@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
+import JourneyProgress from '@/components/JourneyProgress'
 import {
   BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -70,6 +71,7 @@ export default function PlannerPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <JourneyProgress currentStep={2} />
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '100px 24px 60px' }}>
 
         <div style={{ marginBottom: 32 }}>

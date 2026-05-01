@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useJourney } from '@/lib/journeyContext'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
+import JourneyProgress from '@/components/JourneyProgress'
 
 const INDUSTRIES = [
   { id: 'healthcare', label: '🏥 Healthcare / Medical', compliance: ['HIPAA', 'HITECH'] },
@@ -241,6 +242,7 @@ Respond with ONLY a JSON object in this exact format, no other text:
         flexDirection: 'column',
         gap: 16,
       }}>
+        <JourneyProgress currentStep={0} />
         <div style={{ fontSize: 40 }}>🤔</div>
         <p style={{ color: '#a0a0b0', fontSize: 18 }}>Analyzing your situation...</p>
         <p style={{ color: '#666', fontSize: 14 }}>Getting you a specific recommendation</p>
@@ -251,6 +253,7 @@ Respond with ONLY a JSON object in this exact format, no other text:
   if (result) {
     return (
       <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+        <JourneyProgress currentStep={0} />
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 60px' }}>
 
           <div style={{ marginBottom: 32 }}>
@@ -489,6 +492,7 @@ Respond with ONLY a JSON object in this exact format, no other text:
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <JourneyProgress currentStep={0} />
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '100px 24px 60px' }}>
 
         <div style={{ position: 'relative', marginBottom: 8 }}>

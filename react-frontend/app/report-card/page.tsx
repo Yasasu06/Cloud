@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import JourneyProgress from '@/components/JourneyProgress'
 
 type Grade = 'A' | 'B' | 'C' | 'D' | 'F'
 type DimensionName = 'Cost Efficiency' | 'Security Posture' | 'Architecture Health' | 'Compliance Readiness' | 'Growth Readiness'
@@ -130,6 +131,7 @@ Get your free cloud report at cloud-psx9.vercel.app`
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <JourneyProgress currentStep={3} />
       <div style={{ maxWidth: 780, margin: '0 auto', padding: '100px 24px 80px' }}>
 
         {/* Header */}

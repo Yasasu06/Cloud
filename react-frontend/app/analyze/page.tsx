@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 import { JargonText, JargonWrapper } from '@/components/JargonTooltip'
+import JourneyProgress from '@/components/JourneyProgress'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -302,6 +303,7 @@ export default function AnalyzePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <JourneyProgress currentStep={1} />
       <div style={{ maxWidth: 860, margin: '0 auto', padding: '100px 24px 60px' }}>
 
         {/* Header */}
