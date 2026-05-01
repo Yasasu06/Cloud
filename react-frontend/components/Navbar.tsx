@@ -10,6 +10,7 @@ const ANALYZE_ITEMS = [
   { href: '/analyze', label: 'AI Analyze', desc: 'Explain your cloud situation' },
   { href: '/bill-upload', label: 'Bill Upload', desc: 'Upload your cloud bill' },
   { href: '/cloud-twin', label: 'Cloud Twin', desc: 'Build your cloud profile' },
+  { href: '/benchmark', label: 'Benchmark', desc: 'Compare your spend to industry averages' },
 ]
 
 const ADVISE_ITEMS = [
@@ -22,6 +23,7 @@ const MOBILE_LINKS = [
   { href: '/analyze', label: 'AI Analyze' },
   { href: '/bill-upload', label: 'Bill Upload' },
   { href: '/cloud-twin', label: 'Cloud Twin' },
+  { href: '/benchmark', label: 'Benchmark' },
   { href: '/advisor', label: 'Cloud Advisor' },
   { href: '/report-card', label: 'Report Card' },
   { href: '/pricing', label: 'Pricing' },
@@ -87,7 +89,7 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive = ['/analyze', '/bill-upload', '/cloud-twin'].includes(pathname)
+  const analyzeActive = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
   const adviseActive = ['/advisor', '/report-card'].includes(pathname)
 
   return (
