@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { CLOUD_TERMS } from '@/lib/cloudTerms'
 
 interface Props {
@@ -13,7 +13,6 @@ export default function JargonTooltip({ text }: Props) {
     x: number
     y: number
   } | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
 
   function highlightTerms(content: string) {
     const terms = Object.keys(CLOUD_TERMS)
@@ -41,30 +40,25 @@ export default function JargonTooltip({ text }: Props) {
 
   function handleMouseEnter(term: string, e: React.MouseEvent<HTMLSpanElement>) {
     const rect = e.currentTarget.getBoundingClientRect()
-    const containerRect = containerRef.current?.getBoundingClientRect()
     setTooltip({
       term,
       definition: CLOUD_TERMS[term],
-      x: rect.left - (containerRect?.left || 0),
-      y: rect.bottom - (containerRect?.top || 0) + 8,
+      x: rect.left,
+      y: rect.bottom + 8,
     })
   }
 
   const parts = highlightTerms(text)
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', display: 'inline' }}>
+    <span>
       {parts.map((part, i) =>
         part.term ? (
           <span
             key={i}
             onMouseEnter={e => handleMouseEnter(part.term!, e)}
             onMouseLeave={() => setTooltip(null)}
-            style={{
-              borderBottom: '1px dotted #6366f1',
-              cursor: 'help',
-              color: 'inherit',
-            }}
+            style={{ borderBottom: '1px dotted #6366f1', cursor: 'help', color: 'inherit' }}
           >
             {part.text}
           </span>
@@ -74,16 +68,17 @@ export default function JargonTooltip({ text }: Props) {
       )}
       {tooltip && (
         <div style={{
-          position: 'absolute',
-          left: Math.min(tooltip.x, 300),
+          position: 'fixed',
+          left: Math.min(tooltip.x, window.innerWidth - 300),
           top: tooltip.y,
           background: '#0a0a0f',
           border: '1px solid #6366f1',
           borderRadius: 12,
           padding: '12px 16px',
           width: 280,
-          zIndex: 1000,
+          zIndex: 9999,
           boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+          pointerEvents: 'none',
         }}>
           <div style={{ color: '#6366f1', fontWeight: 700, fontSize: 13, marginBottom: 6 }}>
             {tooltip.term}
@@ -93,6 +88,6 @@ export default function JargonTooltip({ text }: Props) {
           </div>
         </div>
       )}
-    </div>
+    </span>
   )
 }

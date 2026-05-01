@@ -144,11 +144,16 @@ const MarkdownResponse = ({ content }: { content: string }) => (
           {children}
         </h3>
       ),
-      p: ({ children }) => (
-        <p style={{ color: '#e0e0e0', lineHeight: 1.8, marginBottom: 12, fontSize: 15 }}>
-          {typeof children === 'string' ? <JargonTooltip text={children} /> : children}
-        </p>
-      ),
+      p: ({ children }) => {
+        const text = Array.isArray(children)
+          ? children.map(c => typeof c === 'string' ? c : (c as any)?.props?.children || '').join('')
+          : typeof children === 'string' ? children : ''
+        return (
+          <p style={{ color: '#e0e0e0', lineHeight: 1.8, marginBottom: 12, fontSize: 15 }}>
+            {text ? <JargonTooltip text={text} /> : children}
+          </p>
+        )
+      },
       strong: ({ children }) => (
         <strong style={{ color: 'white', fontWeight: 700 }}>
           {children}
@@ -164,11 +169,16 @@ const MarkdownResponse = ({ content }: { content: string }) => (
           {children}
         </ol>
       ),
-      li: ({ children }) => (
-        <li style={{ color: '#e0e0e0', marginBottom: 8, fontSize: 15, lineHeight: 1.7 }}>
-          {typeof children === 'string' ? <JargonTooltip text={children} /> : children}
-        </li>
-      ),
+      li: ({ children }) => {
+        const text = Array.isArray(children)
+          ? children.map(c => typeof c === 'string' ? c : (c as any)?.props?.children || '').join('')
+          : typeof children === 'string' ? children : ''
+        return (
+          <li style={{ color: '#e0e0e0', marginBottom: 8, fontSize: 15, lineHeight: 1.7 }}>
+            {text ? <JargonTooltip text={text} /> : children}
+          </li>
+        )
+      },
       blockquote: ({ children }) => (
         <div style={{ borderLeft: '4px solid #6366f1', paddingLeft: 16, margin: '16px 0', background: 'rgba(99,102,241,0.05)', borderRadius: '0 8px 8px 0', padding: '12px 16px' }}>
           {children}
