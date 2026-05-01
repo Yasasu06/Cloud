@@ -104,6 +104,7 @@ export default function RootLayout({
                   {[
                     { label: 'Pricing', href: '/pricing' },
                     { label: 'Dashboard', href: '/dashboard' },
+                    { label: 'Weekly Digest', href: '/weekly-digest' },
                     { label: 'Sign In', href: '/auth' },
                   ].map(l => (
                     <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
