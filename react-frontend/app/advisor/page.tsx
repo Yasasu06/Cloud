@@ -56,6 +56,12 @@ interface Answers {
   mainProblem: string
 }
 
+interface Alternative {
+  provider: string
+  score: number
+  reason: string
+}
+
 interface RecommendationResult {
   provider: string
   confidence: number
@@ -66,6 +72,7 @@ interface RecommendationResult {
   compliance: string[]
   warning: string
   nextStep: string
+  alternatives?: Alternative[]
 }
 
 function getProviderColor(provider: string): string {
@@ -134,7 +141,11 @@ Respond with ONLY a JSON object in this exact format, no other text:
   "monthlyEstimate": "realistic monthly cost range like $400-$800/month",
   "compliance": ["compliance item 1 if applicable"],
   "warning": "one honest warning about this choice",
-  "nextStep": "the single most important thing to do first"
+  "nextStep": "the single most important thing to do first",
+  "alternatives": [
+    {"provider": "second best provider name", "score": 75, "reason": "one short phrase why it's second"},
+    {"provider": "third best provider name", "score": 65, "reason": "one short phrase why it's third"}
+  ]
 }`
 
     try {
@@ -333,6 +344,99 @@ Respond with ONLY a JSON object in this exact format, no other text:
             <div style={{ fontSize: 13, color: '#22c55e', fontWeight: 600, marginBottom: 8 }}>YOUR FIRST STEP</div>
             <p style={{ color: '#e0e0e0', fontSize: 15, lineHeight: 1.6 }}>{result.nextStep}</p>
           </div>
+
+          {/* 30-Day Action Plan */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 700, marginBottom: 14, letterSpacing: 1 }}>
+              YOUR 30-DAY ACTION PLAN
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 12 }}>
+              {[
+                { week: 'Week 1', desc: 'Account setup and basic configuration', icon: '🏗️' },
+                { week: 'Week 2', desc: 'Deploy first service and set billing alerts', icon: '🚀' },
+                { week: 'Week 3', desc: 'Security baseline and access controls', icon: '🛡️' },
+                { week: 'Week 4', desc: 'Performance review and cost optimization', icon: '📊' },
+              ].map((item, i) => (
+                <div key={i} style={{
+                  background: '#1a1a2e',
+                  borderRadius: 12,
+                  padding: '16px 18px',
+                  borderTop: `3px solid ${getProviderColor(result.provider)}`,
+                }}>
+                  <div style={{ fontSize: 20, marginBottom: 8 }}>{item.icon}</div>
+                  <div style={{ fontSize: 11, color: '#6366f1', fontWeight: 700, marginBottom: 6, letterSpacing: 1 }}>
+                    {item.week.toUpperCase()}
+                  </div>
+                  <div style={{ fontSize: 13, color: '#e0e0e0', lineHeight: 1.5 }}>{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Compare Alternatives */}
+          {result.alternatives && result.alternatives.length > 0 && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 13, color: '#6366f1', fontWeight: 700, marginBottom: 14, letterSpacing: 1 }}>
+                COMPARE ALTERNATIVES
+              </div>
+              <div style={{ background: '#1a1a2e', borderRadius: 16, overflow: 'hidden', border: '1px solid #ffffff08' }}>
+                {/* Header */}
+                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', background: '#0d0d18' }}>
+                  <div style={{ padding: '12px 16px' }} />
+                  {[
+                    { provider: result.provider, score: result.confidence, note: result.reasons?.[0] || '' },
+                    ...result.alternatives.slice(0, 2),
+                  ].map((col, i) => (
+                    <div key={i} style={{
+                      padding: '12px 14px',
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: i === 0 ? getProviderColor(result.provider) : '#a0a0b0',
+                      borderLeft: '1px solid #ffffff08',
+                    }}>
+                      {i === 0 ? `★ ${col.provider}` : col.provider}
+                    </div>
+                  ))}
+                </div>
+                {/* Score row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', borderTop: '1px solid #ffffff08' }}>
+                  <div style={{ padding: '12px 16px', fontSize: 12, color: '#a0a0b0' }}>Match</div>
+                  {[
+                    { provider: result.provider, score: result.confidence, note: result.reasons?.[0] || '' },
+                    ...result.alternatives.slice(0, 2),
+                  ].map((col, i) => (
+                    <div key={i} style={{
+                      padding: '12px 14px',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: i === 0 ? '#22c55e' : '#a0a0b0',
+                      borderLeft: '1px solid #ffffff08',
+                    }}>
+                      {col.score}%
+                    </div>
+                  ))}
+                </div>
+                {/* Strength row */}
+                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 1fr', borderTop: '1px solid #ffffff08' }}>
+                  <div style={{ padding: '12px 16px', fontSize: 12, color: '#a0a0b0' }}>Strength</div>
+                  {[
+                    { provider: result.provider, score: result.confidence, note: result.reasons?.[0] || '' },
+                    ...result.alternatives.slice(0, 2).map(a => ({ ...a, note: a.reason })),
+                  ].map((col, i) => (
+                    <div key={i} style={{
+                      padding: '12px 14px',
+                      fontSize: 12,
+                      color: '#e0e0e0',
+                      lineHeight: 1.4,
+                      borderLeft: '1px solid #ffffff08',
+                    }}>
+                      {col.note}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button

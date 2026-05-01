@@ -8,7 +8,7 @@ import { Cloud, Menu, X } from 'lucide-react'
 const NAV_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/analyze', label: 'AI Analyze' },
-  { href: '/bill-upload', label: 'Bill Analyzer' },
+  { href: '/cloud-twin', label: 'Cloud Twin' },
   { href: '/advisor', label: 'Advisor' },
   { href: '/report-card', label: 'Report Card' },
   { href: '/pricing', label: 'Pricing' },

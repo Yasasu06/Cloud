@@ -71,9 +71,27 @@ export default function HomePage() {
     loadLastRec()
   }, [])
 
+  const [emailInput, setEmailInput] = useState('')
+  const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [emailLoading, setEmailLoading] = useState(false)
+
   function handleSubmit() {
     if (input.trim()) {
       window.location.href = `/analyze?q=${encodeURIComponent(input)}`
+    }
+  }
+
+  async function handleEmailSubmit() {
+    if (!emailInput.trim() || emailLoading) return
+    setEmailLoading(true)
+    try {
+      await supabase.from('email_subscribers').insert({
+        email: emailInput.trim(),
+        source: 'homepage',
+      })
+    } catch { /* capture silently */ } finally {
+      setEmailSubmitted(true)
+      setEmailLoading(false)
     }
   }
 
@@ -239,6 +257,59 @@ export default function HomePage() {
                 {badge}
               </span>
             ))}
+          </div>
+
+          {/* Email capture */}
+          <div style={{ marginBottom: 40, textAlign: 'center' }}>
+            {!emailSubmitted ? (
+              <div style={{
+                display: 'inline-flex',
+                gap: 8,
+                background: '#1a1a2e',
+                borderRadius: 12,
+                padding: '6px 6px 6px 16px',
+                border: '1px solid #ffffff0d',
+                maxWidth: 380,
+                width: '100%',
+              }}>
+                <input
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleEmailSubmit()}
+                  placeholder="Get weekly cloud cost tips"
+                  type="email"
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: 'none',
+                    outline: 'none',
+                    color: '#a0a0b0',
+                    fontSize: 13,
+                    minWidth: 0,
+                  }}
+                />
+                <button
+                  onClick={handleEmailSubmit}
+                  disabled={emailLoading || !emailInput.trim()}
+                  style={{
+                    background: '#6366f1',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '8px 14px',
+                    color: 'white',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: emailLoading || !emailInput.trim() ? 'not-allowed' : 'pointer',
+                    opacity: emailLoading || !emailInput.trim() ? 0.5 : 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Subscribe
+                </button>
+              </div>
+            ) : (
+              <p style={{ color: '#22c55e', fontSize: 13 }}>✓ Thanks! Check your inbox.</p>
+            )}
           </div>
 
           <div style={{
