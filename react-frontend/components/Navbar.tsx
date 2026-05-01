@@ -16,6 +16,7 @@ const ANALYZE_ITEMS = [
 const ADVISE_ITEMS = [
   { href: '/advisor', label: 'Cloud Advisor', desc: 'Get a provider recommendation' },
   { href: '/report-card', label: 'Report Card', desc: 'Grade your cloud setup' },
+  { href: '/roi-calculator', label: 'ROI Calculator', desc: 'Calculate your return on investment' },
 ]
 
 const MOBILE_LINKS = [
@@ -26,6 +27,7 @@ const MOBILE_LINKS = [
   { href: '/benchmark', label: 'Benchmark' },
   { href: '/advisor', label: 'Cloud Advisor' },
   { href: '/report-card', label: 'Report Card' },
+  { href: '/roi-calculator', label: 'ROI Calculator' },
   { href: '/pricing', label: 'Pricing' },
 ]
 
@@ -90,7 +92,7 @@ export default function Navbar() {
   }, [])
 
   const analyzeActive = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
-  const adviseActive = ['/advisor', '/report-card'].includes(pathname)
+  const adviseActive = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
 
   return (
     <nav
