@@ -96,7 +96,10 @@ export default function HomePage() {
         email: emailInput.trim(),
         source: 'homepage',
       })
-    } catch { /* capture silently */ } finally {
+      // errors (e.g. table not existing) are returned as { error }, not thrown
+    } catch {
+      // network-level failure — fail silently
+    } finally {
       setEmailSubmitted(true)
       setEmailLoading(false)
     }

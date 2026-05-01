@@ -60,83 +60,79 @@ export default function RootLayout({
           <PostHogProvider>
           <main><div className="page-transition">{children}</div></main>
           <footer style={{
-            borderTop: '1px solid #ffffff08',
-            padding: '40px 24px',
-            background: '#0a0a0f',
+            borderTop: '1px solid rgba(255,255,255,0.06)',
+            padding: '60px 24px 0',
+            background: '#050508',
           }}>
-            <div style={{
-              maxWidth: 900,
-              margin: '0 auto',
-              display: 'grid',
-              gridTemplateColumns: '2fr 1fr 1fr 1fr',
-              gap: 40,
-            }}>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 18, marginBottom: 12, color: 'white' }}>
-                  ☁️ Cloud Intelligence
+            <div style={{ maxWidth: 900, margin: '0 auto' }}>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '2fr 1fr 1fr 1fr',
+                gap: 48,
+                marginBottom: 48,
+              }}>
+                {/* Brand */}
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10, color: 'white' }}>
+                    ☁️ Cloud Intelligence
+                  </div>
+                  <p style={{ color: '#555', fontSize: 13, lineHeight: 1.7 }}>
+                    The cloud advisor for companies that can&apos;t afford a cloud architect.
+                  </p>
                 </div>
-                <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6, marginBottom: 16 }}>
-                  The definitive vendor-neutral cloud intelligence platform.
-                  Built for founders, developers, and IT leaders making
-                  cloud decisions.
-                </p>
-                <p style={{ color: '#666', fontSize: 12 }}>
-                  © 2026 Cloud Intelligence Platform. All rights reserved.
-                </p>
+
+                {/* Tools */}
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>TOOLS</div>
+                  {[
+                    { label: 'AI Analyze', href: '/analyze' },
+                    { label: 'Cloud Advisor', href: '/advisor' },
+                    { label: 'Bill Upload', href: '/bill-upload' },
+                    { label: 'Cloud Twin', href: '/cloud-twin' },
+                    { label: 'Report Card', href: '/report-card' },
+                  ].map(l => (
+                    <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+
+                {/* Company */}
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>COMPANY</div>
+                  {[
+                    { label: 'Pricing', href: '/pricing' },
+                    { label: 'Dashboard', href: '/dashboard' },
+                    { label: 'Sign In', href: '/auth' },
+                  ].map(l => (
+                    <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
+
+                {/* Data */}
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>DATA</div>
+                  {[
+                    'Powered by Llama 3.3 70B',
+                    'Data from SEC filings & earnings reports',
+                    'Vendor neutral — no sponsorships',
+                  ].map(line => (
+                    <p key={line} style={{ color: '#555', fontSize: 13, marginBottom: 8 }}>{line}</p>
+                  ))}
+                </div>
               </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>PLATFORM</div>
-                {[
-                  { label: 'Cloud Advisor', href: '/advisor' },
-                  { label: 'Cost Planner', href: '/planner' },
-                  { label: 'Deployment Roadmap', href: '/roadmap' },
-                  { label: 'Exit Analyzer', href: '/repatriation' },
-                  { label: 'Migration Tool', href: '/migration' },
-                  { label: 'Multi-Cloud', href: '/multicloud' },
-                  { label: 'Alternatives', href: '/others' },
-                ].map(l => (
-                  <a key={l.href} href={l.href} style={{
-                    display: 'block',
-                    color: '#a0a0b0',
-                    fontSize: 14,
-                    marginBottom: 8,
-                    textDecoration: 'none',
-                  }}>{l.label}</a>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>RESOURCES</div>
-                {[
-                  { label: 'Intelligence Feed', href: '/intelligence' },
-                  { label: 'Executive Report', href: '/executive' },
-                  { label: 'Ask AI', href: '/chat' },
-                  { label: 'Start Here', href: '/start' },
-                ].map(l => (
-                  <a key={l.href} href={l.href} style={{
-                    display: 'block',
-                    color: '#a0a0b0',
-                    fontSize: 14,
-                    marginBottom: 8,
-                    textDecoration: 'none',
-                  }}>{l.label}</a>
-                ))}
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, marginBottom: 16, fontSize: 14, color: 'white' }}>COMPANY</div>
-                {[
-                  { label: 'About', href: '#' },
-                  { label: 'Privacy Policy', href: '#' },
-                  { label: 'Terms of Service', href: '#' },
-                  { label: 'Contact Us', href: '#' },
-                ].map(l => (
-                  <a key={l.href} href={l.href} style={{
-                    display: 'block',
-                    color: '#a0a0b0',
-                    fontSize: 14,
-                    marginBottom: 8,
-                    textDecoration: 'none',
-                  }}>{l.label}</a>
-                ))}
+
+              {/* Bottom bar */}
+              <div style={{
+                borderTop: '1px solid rgba(255,255,255,0.06)',
+                padding: '20px 0',
+                textAlign: 'center',
+                color: '#333',
+                fontSize: 12,
+              }}>
+                © 2026 Cloud Intelligence. Built for founders, not enterprises.
               </div>
             </div>
           </footer>
