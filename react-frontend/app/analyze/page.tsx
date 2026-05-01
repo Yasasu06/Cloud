@@ -435,6 +435,22 @@ export default function AnalyzePage() {
               </span>
             </div>
 
+            {loading && !response && (
+              <>
+                <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
+                {[100, 80, 90, 70, 85, 60].map((w, i) => (
+                  <div key={i} style={{
+                    height: 16,
+                    background: 'rgba(255,255,255,0.07)',
+                    borderRadius: 8,
+                    marginBottom: 12,
+                    width: `${w}%`,
+                    animation: 'pulse 1.5s infinite',
+                    animationDelay: `${i * 0.1}s`,
+                  }} />
+                ))}
+              </>
+            )}
             <JargonWrapper>
               <MarkdownResponse content={response} />
             </JargonWrapper>

@@ -94,6 +94,7 @@ export default function ReportCardPage() {
   const router = useRouter()
   const [answers, setAnswers] = useState<(boolean | null)[]>([null, null, null, null, null])
   const [showResults, setShowResults] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const allAnswered = answers.every(a => a !== null)
 
@@ -104,6 +105,21 @@ export default function ReportCardPage() {
   function reset() {
     setAnswers([null, null, null, null, null])
     setShowResults(false)
+  }
+
+  async function handleShare() {
+    const gradeMap = Object.fromEntries(grades.map(g => [g.dimension, g.grade]))
+    const text = `☁️ My Cloud Intelligence Report Card
+Cost Efficiency: ${gradeMap['Cost Efficiency']}
+Security: ${gradeMap['Security Posture']}
+Architecture: ${gradeMap['Architecture Health']}
+Compliance: ${gradeMap['Compliance Readiness']}
+Growth: ${gradeMap['Growth Readiness']}
+Overall: ${gpa.toFixed(1)}/4.0 GPA
+Get your free cloud report at cloud-psx9.vercel.app`
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const grades = showResults ? calculateGrades(answers as boolean[]) : []
@@ -308,6 +324,21 @@ export default function ReportCardPage() {
                 }}
               >
                 Get AI Analysis →
+              </button>
+              <button
+                onClick={handleShare}
+                style={{
+                  background: copied ? 'rgba(34,197,94,0.15)' : 'transparent',
+                  border: `1px solid ${copied ? '#22c55e' : '#ffffff20'}`,
+                  borderRadius: 10,
+                  padding: '12px 24px',
+                  color: copied ? '#22c55e' : '#a0a0b0',
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >
+                {copied ? '✓ Copied to clipboard!' : '📤 Share Results'}
               </button>
               <button
                 onClick={reset}

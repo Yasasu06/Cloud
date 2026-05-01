@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 
@@ -19,6 +19,9 @@ export default function HomePage() {
   const [lastRec, setLastRec] = useState<LastRec | null>(null)
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [scenarioVisible, setScenarioVisible] = useState(true)
+  const [counts, setCounts] = useState({ b855: 0, pct32: 0, n9: 0 })
+  const statsRef = useRef<HTMLDivElement>(null)
+  const hasCountedRef = useRef(false)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -29,6 +32,27 @@ export default function HomePage() {
       }, 300)
     }, 3000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const el = statsRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hasCountedRef.current) {
+        hasCountedRef.current = true
+        const steps = 60
+        const intervalMs = 1500 / steps
+        let step = 0
+        const timer = setInterval(() => {
+          step++
+          const p = step / steps
+          setCounts({ b855: Math.round(855 * p), pct32: Math.round(32 * p), n9: Math.round(9 * p) })
+          if (step >= steps) clearInterval(timer)
+        }, intervalMs)
+      }
+    }, { threshold: 0.3 })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -385,7 +409,7 @@ export default function HomePage() {
 
       {/* MARKET PULSE — condensed */}
       <section style={{ padding: '60px 24px', maxWidth: 900, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
+        <div ref={statsRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           {[
             { value: '$855B', label: 'Cloud market 2026', sub: 'Growing 19% annually' },
             { value: '32%', label: 'Average cloud waste', sub: 'Of monthly spend wasted' },
@@ -393,7 +417,12 @@ export default function HomePage() {
             { value: '9+', label: 'Providers compared', sub: 'Including alternatives' },
           ].map(stat => (
             <div key={stat.label} style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, textAlign: 'center' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, color: '#6366f1', marginBottom: 4 }}>{stat.value}</div>
+              <div style={{ fontSize: 32, fontWeight: 900, color: '#6366f1', marginBottom: 4 }}>
+                {stat.label === 'Cloud market 2026' ? `$${counts.b855}B`
+                  : stat.label === 'Average cloud waste' ? `${counts.pct32}%`
+                  : stat.label === 'Providers compared' ? `${counts.n9}+`
+                  : stat.value}
+              </div>
               <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>{stat.label}</div>
               <div style={{ color: '#666', fontSize: 12 }}>{stat.sub}</div>
             </div>
