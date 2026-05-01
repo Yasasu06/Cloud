@@ -213,6 +213,10 @@ export default function AnalyzePage() {
     if (typeof window === 'undefined') return
     const params = new URLSearchParams(window.location.search)
     const q = params.get('q')
+    const modeParam = params.get('mode') as Mode | null
+    if (modeParam && ['finops', 'architect', 'migration'].includes(modeParam)) {
+      setSelectedMode(modeParam)
+    }
     if (q && q.trim()) {
       setInput(q)
       setSelectedMode('finops')

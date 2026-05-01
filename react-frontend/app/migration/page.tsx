@@ -1,241 +1,389 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowRight, CheckCircle2, AlertCircle, Info } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-const PROVIDERS = ['AWS', 'Azure', 'GCP']
+const FROM_PROVIDERS = ['AWS', 'Azure', 'GCP', 'On-premise'] as const
+const TO_PROVIDERS = ['AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner'] as const
 
-interface MigrationPath {
-  complexity: number
-  duration: string
-  hardest: string[]
-  easiest: string[]
-  tips: string[]
+type FromProvider = typeof FROM_PROVIDERS[number]
+type ToProvider = typeof TO_PROVIDERS[number]
+type Complexity = 'Easy' | 'Medium' | 'Hard' | 'Very Hard'
+
+interface MigrationInfo {
+  complexity: Complexity
+  costRange: string
+  monthlySaving: string
+  risks: [string, string, string]
 }
 
-const MIGRATION_DATA: Record<string, MigrationPath> = {
+const COMPLEXITY_COLOR: Record<Complexity, string> = {
+  'Easy': '#22c55e',
+  'Medium': '#f59e0b',
+  'Hard': '#f97316',
+  'Very Hard': '#ef4444',
+}
+
+const DATA: Partial<Record<string, MigrationInfo>> = {
   'AWS→Azure': {
-    complexity: 72,
-    duration: '6–12 months',
-    hardest: ['IAM → Entra ID mapping', 'Lambda → Azure Functions rewrites', 'S3 → Blob Storage data migration'],
-    easiest: ['VPC → VNet configuration', 'SQL databases', 'DNS and CDN'],
-    tips: ['Use Azure Migrate for discovery', 'Start with stateless workloads', 'Establish AD sync first'],
+    complexity: 'Hard',
+    costRange: '$15,000 – $45,000',
+    monthlySaving: 'Save $300 – $800/month',
+    risks: [
+      'IAM → Entra ID mapping requires full identity rewrite',
+      'Lambda → Azure Functions rewrites often take 2–3x longer than expected',
+      'Data egress charges during transition can add $2,000–$8,000 one-time',
+    ],
   },
   'AWS→GCP': {
-    complexity: 68,
-    duration: '4–9 months',
-    hardest: ['IAM roles to GCP IAM', 'EC2 → Compute Engine configs', 'CloudFront → Cloud CDN'],
-    easiest: ['BigQuery replaces Redshift well', 'GKE is closest to EKS', 'Pub/Sub replaces SQS/SNS'],
-    tips: ['Use Migrate for Compute Engine', 'GCS is near drop-in for S3', 'Leverage Anthos for hybrid'],
+    complexity: 'Medium',
+    costRange: '$10,000 – $30,000',
+    monthlySaving: 'Save $800 – $2,500/month (ML workloads)',
+    risks: [
+      'BigQuery learning curve — team retraining typically takes 4–6 weeks',
+      'GKE vs EKS networking model differences cause unexpected downtime',
+      'CloudFront → Cloud CDN config gaps can expose origin servers',
+    ],
+  },
+  'AWS→DigitalOcean': {
+    complexity: 'Medium',
+    costRange: '$5,000 – $20,000',
+    monthlySaving: 'Save $2,000 – $5,000/month',
+    risks: [
+      'No equivalent to Lambda, SQS, or SNS — significant refactoring required',
+      'No enterprise SLA — 99.99% uptime guarantee not available',
+      'Managed Kubernetes (DOKS) lacks EKS auto-scaling features',
+    ],
+  },
+  'AWS→Hetzner': {
+    complexity: 'Hard',
+    costRange: '$8,000 – $25,000',
+    monthlySaving: 'Save $3,000 – $7,000/month',
+    risks: [
+      'EU-only regions — not viable for US or APAC latency requirements',
+      'No managed databases or cache — you own all patching and backups',
+      'Compliance certifications (SOC 2, HIPAA) are your responsibility',
+    ],
   },
   'Azure→AWS': {
-    complexity: 65,
-    duration: '5–10 months',
-    hardest: ['Entra ID → IAM restructure', 'Azure DevOps → CodePipeline', 'Cosmos DB → DynamoDB'],
-    easiest: ['Azure SQL → RDS', 'Blob Storage → S3', 'VNet → VPC'],
-    tips: ['AWS Migration Hub tracks progress', 'Use Schema Conversion Tool', 'CloudEndure for servers'],
+    complexity: 'Hard',
+    costRange: '$15,000 – $40,000',
+    monthlySaving: 'Save $200 – $1,000/month',
+    risks: [
+      'Entra ID → IAM restructure is the most complex identity migration path',
+      'Azure DevOps pipelines need full rebuild in CodePipeline or GitHub Actions',
+      'Microsoft licensing costs may actually increase on AWS (no EA discounts)',
+    ],
   },
   'Azure→GCP': {
-    complexity: 58,
-    duration: '4–8 months',
-    hardest: ['Entra ID → GCP IAM', 'Azure Functions → Cloud Run', 'Azure Monitor → Cloud Ops'],
-    easiest: ['BigQuery + Power BI integration', 'Kubernetes workloads', 'Storage migration'],
-    tips: ['Both share strong Kubernetes DNA', 'Migrate analytics to BigQuery first', 'Use Transfer Appliance for data'],
+    complexity: 'Medium',
+    costRange: '$12,000 – $35,000',
+    monthlySaving: 'Save $1,000 – $3,000/month',
+    risks: [
+      'Entra ID has no direct GCP equivalent — need third-party IdP',
+      'Azure PaaS services (Service Bus, Logic Apps) have no GCP drop-in',
+      'Azure Monitor → Cloud Operations Suite gap causes blind spots',
+    ],
+  },
+  'Azure→DigitalOcean': {
+    complexity: 'Medium',
+    costRange: '$6,000 – $18,000',
+    monthlySaving: 'Save $1,500 – $4,000/month',
+    risks: [
+      'No Azure Active Directory equivalent — SSO and RBAC must be rebuilt',
+      'Enterprise compliance (FedRAMP, HIPAA BAA) not available on DigitalOcean',
+      'AKS managed upgrades and auto-scaling not available in DOKS',
+    ],
+  },
+  'Azure→Hetzner': {
+    complexity: 'Hard',
+    costRange: '$8,000 – $22,000',
+    monthlySaving: 'Save $2,500 – $6,000/month',
+    risks: [
+      'EU-only — rules out global deployments for non-European traffic',
+      'No hybrid cloud model — Azure Arc integrations break completely',
+      'Full infrastructure management shift requires dedicated DevOps hire',
+    ],
   },
   'GCP→AWS': {
-    complexity: 70,
-    duration: '5–11 months',
-    hardest: ['BigQuery → Redshift/Athena', 'GKE → EKS reconfiguration', 'Cloud Spanner → Aurora'],
-    easiest: ['Compute instances', 'Object storage', 'Managed databases'],
-    tips: ['AWS DataSync for storage transfer', 'Replace Spanner with Aurora Global', 'Use AWS Schema Conversion Tool'],
+    complexity: 'Hard',
+    costRange: '$20,000 – $55,000',
+    monthlySaving: 'Cost increase $500 – $2,000/month',
+    risks: [
+      'BigQuery → Redshift/Athena is lossy — query performance often degrades',
+      'Cloud Spanner has no AWS equivalent — Aurora Global is an imperfect substitute',
+      'Vertex AI ML pipelines are significantly harder to replicate on SageMaker',
+    ],
   },
   'GCP→Azure': {
-    complexity: 62,
-    duration: '4–9 months',
-    hardest: ['BigQuery → Synapse Analytics', 'Pub/Sub → Event Hub', 'GCP IAM → Entra ID'],
-    easiest: ['VM migration', 'Container workloads', 'DevOps tooling'],
-    tips: ['Azure Data Factory for pipelines', 'Migrate analytics to Synapse', 'Use Azure Migrate assessment'],
+    complexity: 'Medium',
+    costRange: '$14,000 – $38,000',
+    monthlySaving: 'Save $500 – $1,500/month',
+    risks: [
+      'BigQuery → Synapse Analytics migration often loses 20–30% query performance',
+      'GCP ML tooling (Vertex AI, AutoML) is harder to replace on Azure',
+      'Pub/Sub → Event Hubs requires rewrite of all consumer and producer code',
+    ],
+  },
+  'GCP→DigitalOcean': {
+    complexity: 'Medium',
+    costRange: '$8,000 – $22,000',
+    monthlySaving: 'Save $1,500 – $4,500/month',
+    risks: [
+      'No BigQuery equivalent — analytics workloads need full stack replacement',
+      'GKE Autopilot features not available in DOKS — manual node management',
+      'Vertex AI and ML pipelines are completely stranded with no migration path',
+    ],
+  },
+  'GCP→Hetzner': {
+    complexity: 'Hard',
+    costRange: '$6,000 – $18,000',
+    monthlySaving: 'Save $2,500 – $6,500/month',
+    risks: [
+      'BigQuery has no self-hosted equivalent — complete analytics rewrite required',
+      'EU-only regions eliminate global multi-region architectures',
+      'Every GCP managed service (Spanner, Pub/Sub, Vertex) must be self-hosted',
+    ],
+  },
+  'On-premise→AWS': {
+    complexity: 'Very Hard',
+    costRange: '$50,000 – $200,000',
+    monthlySaving: 'Cost increase $500 – $5,000/month (OpEx shift)',
+    risks: [
+      'CapEx → OpEx model shock — monthly bills replace 3-year hardware amortization',
+      'Data transfer and egress costs add $1,000–$4,000/month not seen on-prem',
+      'Skills gap — average on-prem team needs 6–12 months to reach cloud proficiency',
+    ],
+  },
+  'On-premise→Azure': {
+    complexity: 'Very Hard',
+    costRange: '$50,000 – $190,000',
+    monthlySaving: 'Cost increase $300 – $4,000/month (OpEx shift)',
+    risks: [
+      'Microsoft EA licensing complexity — cloud pricing may override existing deals',
+      'Hybrid setup requires Azure Arc — adds $200–$800/month per connected site',
+      'Security perimeter must be redesigned — on-prem firewall rules do not translate',
+    ],
+  },
+  'On-premise→GCP': {
+    complexity: 'Very Hard',
+    costRange: '$45,000 – $175,000',
+    monthlySaving: 'Cost increase $400 – $4,500/month (OpEx shift)',
+    risks: [
+      'Cultural shift to Google tooling is steep — expect 6+ months of productivity loss',
+      'Anthos required for any hybrid model adds $15,000+ per year',
+      'Data sovereignty concerns — Google\'s data processing terms differ from on-prem',
+    ],
+  },
+  'On-premise→DigitalOcean': {
+    complexity: 'Hard',
+    costRange: '$20,000 – $75,000',
+    monthlySaving: 'Save $2,000 – $6,000/month vs on-prem',
+    risks: [
+      'No enterprise SLAs or compliance certifications (HIPAA, FedRAMP unavailable)',
+      'Limited to 15 regions — may not meet data residency requirements',
+      'All infrastructure self-managed — requires dedicated DevOps investment',
+    ],
+  },
+  'On-premise→Hetzner': {
+    complexity: 'Hard',
+    costRange: '$15,000 – $60,000',
+    monthlySaving: 'Save $3,000 – $8,000/month vs on-prem',
+    risks: [
+      'EU-only regions — eliminates option for US or APAC deployments',
+      'No managed services — databases, cache, queues all self-hosted',
+      'Full DevOps team required — Hetzner provides servers, not a managed platform',
+    ],
   },
 }
 
-function ComplexityGauge({ value }: { value: number }) {
-  const color = value >= 70 ? '#ef4444' : value >= 50 ? '#f59e0b' : '#34A853'
-  const label = value >= 70 ? 'High Complexity' : value >= 50 ? 'Medium Complexity' : 'Lower Complexity'
-
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-32 h-16 overflow-hidden mb-2">
-        <svg viewBox="0 0 120 60" className="w-full">
-          <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="10" />
-          <path
-            d="M10 55 A50 50 0 0 1 110 55"
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeDasharray={`${(value / 100) * 157} 157`}
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className="absolute bottom-0 left-0 right-0 text-center">
-          <span className="text-2xl font-black text-white">{value}</span>
-          <span className="text-xs text-white">/100</span>
-        </div>
-      </div>
-      <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-    </div>
-  )
+const selectStyle: React.CSSProperties = {
+  width: '100%',
+  background: '#1a1a2e',
+  border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 10,
+  padding: '12px 16px',
+  color: 'white',
+  fontSize: 15,
+  outline: 'none',
+  cursor: 'pointer',
 }
 
 export default function MigrationPage() {
   const router = useRouter()
-  const [from, setFrom] = useState('AWS')
-  const [to, setTo] = useState('Azure')
+  const [from, setFrom] = useState<FromProvider>('AWS')
+  const [to, setTo] = useState<ToProvider>('Azure')
 
   const key = `${from}→${to}`
-  const path = MIGRATION_DATA[key] ?? null
-  const isValid = from !== to && path !== null
+  const info = from === to ? null : DATA[key] ?? null
 
   return (
-    <div className="min-h-screen pt-24 px-4 pb-16" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-10">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)' }}>
-            Migration Planner
+    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '100px 24px 80px' }}>
+
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <p style={{ color: '#6366f1', fontSize: 12, fontWeight: 700, letterSpacing: 2, marginBottom: 12 }}>
+            MIGRATION PLANNER
           </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+          <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, marginBottom: 12 }}>
             Plan your cloud migration
           </h1>
-          <p className="text-base" style={{ color: 'var(--text-secondary)' }}>
-            Complexity scores, timelines, and key considerations for every migration path.
+          <p style={{ color: '#a0a0b0', fontSize: 16 }}>
+            Complexity, costs, savings, and risks for every migration path.
           </p>
         </div>
 
-        {/* Provider selectors */}
-        <div
-          className="rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-4 justify-center"
-          style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-        >
+        {/* Dropdowns */}
+        <div style={{
+          background: '#1a1a2e',
+          borderRadius: 16,
+          padding: '28px 28px',
+          border: '1px solid rgba(255,255,255,0.06)',
+          marginBottom: 32,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 16,
+          alignItems: 'end',
+        }}>
           <div>
-            <p className="text-xs font-semibold text-white mb-2 text-center">Migrating FROM</p>
-            <div className="flex gap-2">
-              {PROVIDERS.map((p) => (
-                <button key={p} onClick={() => setFrom(p)}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                  style={{
-                    background: from === p ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                    border: from === p ? '1px solid #6366f1' : '1px solid transparent',
-                    color: from === p ? '#c7d2fe' : '#a0a0b0',
-                  }}
-                >{p}</button>
-              ))}
-            </div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#666', letterSpacing: 1, marginBottom: 8 }}>
+              MIGRATING FROM
+            </label>
+            <select value={from} onChange={e => setFrom(e.target.value as FromProvider)} style={selectStyle}>
+              {FROM_PROVIDERS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
           </div>
-          <ArrowRight size={20} className="hidden sm:block" style={{ color: 'var(--text-secondary)' }} />
+          <div style={{ fontSize: 20, color: '#6366f1', paddingBottom: 14, textAlign: 'center' }}>→</div>
           <div>
-            <p className="text-xs font-semibold text-white mb-2 text-center">Migrating TO</p>
-            <div className="flex gap-2">
-              {PROVIDERS.map((p) => (
-                <button key={p} onClick={() => setTo(p)}
-                  className="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-                  style={{
-                    background: to === p ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                    border: to === p ? '1px solid #6366f1' : '1px solid transparent',
-                    color: to === p ? '#c7d2fe' : '#a0a0b0',
-                  }}
-                >{p}</button>
-              ))}
-            </div>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#666', letterSpacing: 1, marginBottom: 8 }}>
+              MIGRATING TO
+            </label>
+            <select value={to} onChange={e => setTo(e.target.value as ToProvider)} style={selectStyle}>
+              {TO_PROVIDERS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
           </div>
         </div>
 
-        {/* Results */}
-        {from === to ? (
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-          >
-            <Info size={32} className="mx-auto mb-3" style={{ color: 'var(--text-secondary)' }} />
-            <p style={{ color: 'var(--text-secondary)' }}>Select different source and destination providers.</p>
+        {/* Same provider warning */}
+        {from === to && (
+          <div style={{
+            background: '#1a1a2e',
+            borderRadius: 14,
+            padding: '24px',
+            textAlign: 'center',
+            color: '#a0a0b0',
+            border: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            Select different source and destination providers.
           </div>
-        ) : isValid && path ? (
-          <div className="space-y-5">
-            {/* Summary row */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div
-                className="rounded-2xl p-5 flex flex-col items-center text-center col-span-1"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-              >
-                <ComplexityGauge value={path.complexity} />
+        )}
+
+        {/* Results */}
+        {info && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+            {/* Top stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+              <div className="glass-card" style={{ padding: '22px 24px' }}>
+                <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>COMPLEXITY</div>
+                <div style={{ fontSize: 28, fontWeight: 900, color: COMPLEXITY_COLOR[info.complexity] }}>
+                  {info.complexity}
+                </div>
               </div>
-              <div
-                className="rounded-2xl p-5 sm:col-span-2"
-                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}
-              >
-                <p className="text-xs font-semibold mb-1" style={{ color: 'var(--text-secondary)' }}>Migration Path</p>
-                <h2 className="text-2xl font-black text-white mb-1">{from} → {to}</h2>
-                <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-                  Estimated timeline: <span className="text-white font-semibold">{path.duration}</span>
-                </p>
-                <div className="space-y-1">
-                  {path.tips.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm" style={{ color: '#94a3b8' }}>
-                      <span style={{ color: 'var(--accent)' }}>›</span> {tip}
-                    </div>
-                  ))}
+              <div className="glass-card" style={{ padding: '22px 24px' }}>
+                <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>MIGRATION COST</div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: 'white' }}>{info.costRange}</div>
+                <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>one-time estimate</div>
+              </div>
+              <div className="glass-card" style={{ padding: '22px 24px' }}>
+                <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>MONTHLY IMPACT</div>
+                <div style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: info.monthlySaving.startsWith('Save') ? '#22c55e' : '#f97316',
+                }}>
+                  {info.monthlySaving}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="rounded-2xl p-5" style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertCircle size={16} style={{ color: '#f87171' }} />
-                  <p className="text-sm font-semibold" style={{ color: '#f87171' }}>Hardest to Migrate</p>
-                </div>
-                <ul className="space-y-2">
-                  {path.hardest.map((item, i) => (
-                    <li key={i} className="text-sm" style={{ color: '#fca5a5' }}>• {item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="rounded-2xl p-5" style={{ background: 'rgba(52,168,83,0.07)', border: '1px solid rgba(52,168,83,0.2)' }}>
-                <div className="flex items-center gap-2 mb-3">
-                  <CheckCircle2 size={16} style={{ color: '#4ade80' }} />
-                  <p className="text-sm font-semibold" style={{ color: '#4ade80' }}>Easiest to Migrate</p>
-                </div>
-                <ul className="space-y-2">
-                  {path.easiest.map((item, i) => (
-                    <li key={i} className="text-sm" style={{ color: '#86efac' }}>• {item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
-            {/* Next Step banner */}
+            {/* Top 3 risks */}
             <div style={{
-              marginTop: 24,
-              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-              borderRadius: 16,
-              padding: 24,
-              border: '1px solid #ffffff15',
+              background: 'rgba(239,68,68,0.05)',
+              border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: 14,
+              padding: '22px 24px',
             }}>
-              <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 8 }}>YOUR JOURNEY IS COMPLETE</div>
-              <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-                Want expert guidance on your specific situation?
-              </h3>
-              <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
-                Chat with our AI consultant — describe your exact setup and get a personalized migration plan.
-              </p>
+              <div style={{ fontSize: 12, color: '#f87171', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>
+                TOP 3 RISKS
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {info.risks.map((risk, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <span style={{
+                      background: 'rgba(239,68,68,0.15)',
+                      color: '#f87171',
+                      fontWeight: 800,
+                      fontSize: 12,
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                      marginTop: 1,
+                    }}>
+                      {i + 1}
+                    </span>
+                    <span style={{ fontSize: 14, color: '#fca5a5', lineHeight: 1.5 }}>{risk}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Get Full Plan CTA */}
+            <div style={{
+              background: 'linear-gradient(135deg, #1e1b4b, #1a1a2e)',
+              borderRadius: 16,
+              padding: '24px 28px',
+              border: '1px solid rgba(99,102,241,0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 16,
+            }}>
+              <div>
+                <div style={{ fontSize: 13, color: '#a0a0b0', marginBottom: 6 }}>NEXT STEP</div>
+                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
+                  Get a detailed migration plan for {from} → {to}
+                </h3>
+                <p style={{ color: '#a0a0b0', fontSize: 13 }}>
+                  AI analysis with week-by-week timeline, team requirements, and risk mitigation.
+                </p>
+              </div>
               <button
-                onClick={() => router.push('/chat')}
-                style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 12, padding: '12px 28px', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}
+                onClick={() => router.push('/analyze?mode=migration')}
+                style={{
+                  background: '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 12,
+                  padding: '13px 28px',
+                  fontSize: 15,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  flexShrink: 0,
+                }}
               >
-                Talk to AI Consultant →
+                Get Full Plan →
               </button>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   )

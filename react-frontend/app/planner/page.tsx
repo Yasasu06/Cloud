@@ -210,7 +210,7 @@ export default function PlannerPage() {
                           max_tokens: 300,
                           messages: [{
                             role: 'user',
-                            content: `A company spends $${spend}/month on ${provider} cloud and is projected to grow ${growth}x over 12 months, reaching $${finalCost}/month. In 3 plain English sentences: 1) Is this growth rate typical or alarming? 2) What is the most important cost optimization they should do right now? 3) At what spend level should they consider reserved instances or committed use discounts?`,
+                            content: `In 3 sentences: is a ${growth}x growth rate over 12 months for cloud spend normal or alarming, what is the top optimization for a company spending $${spend}/month on ${provider}, and at what monthly spend level should they consider reserved instances or committed use discounts? Current spend: $${spend}/month growing to $${finalCost}/month.`,
                           }],
                         }),
                       })
@@ -233,7 +233,7 @@ export default function PlannerPage() {
                   </button>
 
                   {aiInsight && aiInsight !== 'loading' && (
-                    <div style={{ background: '#1a1a2e', borderRadius: 12, padding: 20, borderLeft: '4px solid #6366f1' }}>
+                    <div className="glass-card" style={{ padding: 20, borderLeft: '4px solid #6366f1' }}>
                       <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 600, marginBottom: 8 }}>AI COST ANALYSIS</div>
                       <p style={{ color: '#e0e0e0', fontSize: 14, lineHeight: 1.7 }}>{aiInsight}</p>
                     </div>
