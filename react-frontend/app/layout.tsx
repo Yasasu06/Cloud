@@ -90,6 +90,7 @@ export default function RootLayout({
                     { label: 'Bill Upload', href: '/bill-upload' },
                     { label: 'Cloud Twin', href: '/cloud-twin' },
                     { label: 'Report Card', href: '/report-card' },
+                    { label: 'Glossary', href: '/cloud-glossary' },
                   ].map(l => (
                     <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
                       {l.label}
