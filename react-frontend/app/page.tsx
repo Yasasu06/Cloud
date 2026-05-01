@@ -472,25 +472,25 @@ export default function HomePage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
             {[
               {
-                step: '01',
+                step: '01', href: '/analyze',
                 title: 'Describe your situation',
                 desc: 'Tell us your cloud provider, monthly spend, team size, and biggest frustration. Plain English — no forms.',
                 icon: '💬',
               },
               {
-                step: '02',
+                step: '02', href: '/analyze',
                 title: 'Get your analysis',
                 desc: "Our AI gives you a specific breakdown — what you're paying for, where you're wasting money, and exactly what to do next.",
                 icon: '🔍',
               },
               {
-                step: '03',
+                step: '03', href: '/advisor',
                 title: 'Take action',
                 desc: 'Follow your personalized plan. Every recommendation includes the specific steps, services, and expected savings.',
                 icon: '⚡',
               },
               {
-                step: '04',
+                step: '04', href: '/dashboard',
                 title: 'Track progress',
                 desc: 'Save your analysis, share with your team, and come back as your situation changes.',
                 icon: '📈',
@@ -503,7 +503,9 @@ export default function HomePage() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 viewport={{ once: true }}
                 className="glass-card"
-                style={{ padding: 28, textAlign: 'left' }}
+                onClick={() => router.push(item.href)}
+                style={{ padding: 28, textAlign: 'left', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s' }}
+                whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(99,102,241,0.18)' }}
               >
                 <div style={{ fontSize: 32, marginBottom: 16 }}>{item.icon}</div>
                 <div style={{ color: '#6366f1', fontSize: 11, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>
@@ -511,6 +513,46 @@ export default function HomePage() {
                 </div>
                 <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 10 }}>{item.title}</h3>
                 <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6 }}>{item.desc}</p>
+                <div style={{ marginTop: 16, fontSize: 12, color: '#6366f1', fontWeight: 600 }}>Open →</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* EVERYTHING YOU NEED */}
+      <section style={{ padding: '80px 24px', borderTop: '1px solid #ffffff08' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, marginBottom: 12 }}>
+              Everything you need
+            </h2>
+            <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 440, margin: '0 auto' }}>
+              A full toolkit for cloud clarity — analysis, benchmarking, compliance, and more.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
+            {[
+              { icon: '🤖', title: 'AI Analyze',     href: '/analyze',      desc: 'Explain any cloud situation' },
+              { icon: '🧭', title: 'Cloud Advisor',  href: '/advisor',      desc: 'Get a provider recommendation' },
+              { icon: '📄', title: 'Bill Upload',    href: '/bill-upload',  desc: 'Analyze your actual bill' },
+              { icon: '📊', title: 'Report Card',    href: '/report-card',  desc: 'Grade your cloud setup' },
+              { icon: '🏗️', title: 'Architecture',   href: '/architecture', desc: 'Visualize your stack' },
+              { icon: '💰', title: 'Savings Calc',   href: '/savings',      desc: 'See your potential savings' },
+              { icon: '🛡️', title: 'Compliance',     href: '/compliance',   desc: 'Check your requirements' },
+              { icon: '📈', title: 'Benchmark',      href: '/benchmark',    desc: 'Compare to industry averages' },
+            ].map(tool => (
+              <motion.div
+                key={tool.href}
+                className="glass-card"
+                onClick={() => router.push(tool.href)}
+                style={{ padding: '20px', cursor: 'pointer' }}
+                whileHover={{ y: -3, boxShadow: '0 8px 32px rgba(99,102,241,0.15)' }}
+                transition={{ duration: 0.15 }}
+              >
+                <div style={{ fontSize: 28, marginBottom: 10 }}>{tool.icon}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 4 }}>{tool.title}</div>
+                <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5 }}>{tool.desc}</div>
               </motion.div>
             ))}
           </div>
