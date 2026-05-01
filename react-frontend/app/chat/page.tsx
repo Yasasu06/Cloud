@@ -41,8 +41,24 @@ export default function ChatPage() {
         .limit(1)
         .single()
       if (data) {
-        const rec = data as { provider: string; confidence: number; workload: string; team_size: string; budget: string }
-        setUserContext(`The user's last cloud recommendation was ${rec.provider} with ${rec.confidence}% confidence. Their workload is ${rec.workload}, team size is ${rec.team_size}, and budget is ${rec.budget}.`)
+        const rec = data as {
+          provider: string
+          confidence: number
+          workload: string
+          team_size: string
+          budget: string
+          industry?: string
+          spend?: string
+          monthly_spend?: string
+        }
+        const parts: string[] = [
+          `Last cloud analysis: ${rec.workload} mode, recommended ${rec.provider}`,
+        ]
+        if (rec.team_size) parts.push(`team size: ${rec.team_size}`)
+        if (rec.budget) parts.push(`budget: ${rec.budget}`)
+        if (rec.spend || rec.monthly_spend) parts.push(`monthly spend: ${rec.spend || rec.monthly_spend}`)
+        if (rec.industry) parts.push(`industry: ${rec.industry}`)
+        setUserContext(parts.join(', ') + '. Use this context to give personalized cloud advice.')
       }
     }
     loadContext()
