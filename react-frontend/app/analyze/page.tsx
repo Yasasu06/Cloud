@@ -199,6 +199,11 @@ export default function AnalyzePage() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -469,6 +474,44 @@ export default function AnalyzePage() {
                 verticalAlign: 'text-bottom',
               }} />
             )}
+          </div>
+        )}
+
+        {/* Save nudge for logged-out users */}
+        {done && !isLoggedIn && (
+          <div
+            className="glass-card"
+            style={{
+              marginTop: 16,
+              padding: '16px 20px',
+              border: '1px solid rgba(99,102,241,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 16,
+              flexWrap: 'wrap',
+            }}
+          >
+            <p style={{ color: '#c7c8f0', fontSize: 14, margin: 0 }}>
+              <strong style={{ color: 'white' }}>Save this analysis</strong> — Sign in to keep your results and get personalized recommendations.
+            </p>
+            <button
+              onClick={() => router.push('/auth')}
+              style={{
+                background: '#6366f1',
+                border: 'none',
+                borderRadius: 8,
+                padding: '9px 20px',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: 13,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}
+            >
+              Sign In
+            </button>
           </div>
         )}
 
