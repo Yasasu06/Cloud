@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 
@@ -15,8 +16,10 @@ const SCENARIOS = [
 ]
 
 export default function HomePage() {
+  const router = useRouter()
   const [input, setInput] = useState('')
   const [lastRec, setLastRec] = useState<LastRec | null>(null)
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [scenarioVisible, setScenarioVisible] = useState(true)
   const [counts, setCounts] = useState({ b855: 0, pct32: 0, n9: 0 })
@@ -53,6 +56,10 @@ export default function HomePage() {
     }, { threshold: 0.3 })
     observer.observe(el)
     return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    setHasProfile(!!localStorage.getItem('cloud_twin_profile'))
   }, [])
 
   useEffect(() => {
@@ -346,6 +353,39 @@ export default function HomePage() {
           </div>
         </motion.div>
       </section>
+
+      {/* WHERE TO START — new users only */}
+      {hasProfile === false && (
+        <section style={{ padding: '72px 24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ maxWidth: 860, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <h2 style={{ fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 800, marginBottom: 10 }}>
+                Where do you want to start?
+              </h2>
+              <p style={{ color: '#a0a0b0', fontSize: 15 }}>Pick what fits your situation best.</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+              {[
+                { icon: '🌱', title: "I'm new to cloud", desc: 'Help me choose the right cloud for my project', href: '/advisor' },
+                { icon: '💸', title: 'I have a bill problem', desc: 'Explain my bill and find waste', href: '/analyze' },
+                { icon: '🔄', title: 'I want to switch providers', desc: 'Evaluate my options', href: '/analyze' },
+              ].map(card => (
+                <button
+                  key={card.title}
+                  onClick={() => router.push(card.href)}
+                  className="glass-card"
+                  style={{ padding: '32px 24px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+                >
+                  <div style={{ fontSize: 36, marginBottom: 16 }}>{card.icon}</div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: 'white', marginBottom: 8 }}>{card.title}</div>
+                  <div style={{ fontSize: 14, color: '#a0a0b0', lineHeight: 1.5 }}>{card.desc}</div>
+                  <div style={{ marginTop: 20, fontSize: 13, color: '#6366f1', fontWeight: 600 }}>Get started →</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* SOCIAL PROOF / CREDIBILITY */}
       <section style={{ padding: '60px 24px', borderTop: '1px solid #ffffff08', textAlign: 'center' }}>
