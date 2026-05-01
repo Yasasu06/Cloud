@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Cloud, Menu, X, ChevronDown } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 const ANALYZE_ITEMS = [
   { href: '/analyze', label: 'AI Analyze', desc: 'Explain your cloud situation' },
@@ -72,8 +73,19 @@ export default function Navbar() {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+  const [loggedIn, setLoggedIn] = useState(false)
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setLoggedIn(!!session)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setLoggedIn(!!session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
 
   const analyzeActive = ['/analyze', '/bill-upload', '/cloud-twin'].includes(pathname)
   const adviseActive = ['/advisor', '/report-card'].includes(pathname)
@@ -171,13 +183,29 @@ export default function Navbar() {
 
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-3">
-            <Link
-              href="/auth"
-              className="hidden sm:block text-sm font-medium transition-colors duration-200"
-              style={{ color: '#a0a0b0', padding: '6px 12px', textDecoration: 'none' }}
-            >
-              Sign In
-            </Link>
+            {loggedIn ? (
+              <Link
+                href="/dashboard"
+                className="hidden sm:block text-sm font-medium transition-colors duration-200"
+                style={{
+                  color: pathname === '/dashboard' ? '#fff' : '#a0a0b0',
+                  padding: '6px 12px',
+                  textDecoration: 'none',
+                  background: pathname === '/dashboard' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  borderRadius: 8,
+                }}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/auth"
+                className="hidden sm:block text-sm font-medium transition-colors duration-200"
+                style={{ color: '#a0a0b0', padding: '6px 12px', textDecoration: 'none' }}
+              >
+                Sign In
+              </Link>
+            )}
             <Link
               href="/chat"
               className="hidden sm:block btn-primary accent-glow"
@@ -217,14 +245,25 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link
-            href="/auth"
-            onClick={() => setMenuOpen(false)}
-            className="block px-3 py-2 rounded-md text-sm font-medium"
-            style={{ color: '#a0a0b0', textDecoration: 'none' }}
-          >
-            Sign In
-          </Link>
+          {loggedIn ? (
+            <Link
+              href="/dashboard"
+              onClick={() => setMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-medium"
+              style={{ color: '#a0a0b0', textDecoration: 'none' }}
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <Link
+              href="/auth"
+              onClick={() => setMenuOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-medium"
+              style={{ color: '#a0a0b0', textDecoration: 'none' }}
+            >
+              Sign In
+            </Link>
+          )}
           <Link
             href="/chat"
             onClick={() => setMenuOpen(false)}
