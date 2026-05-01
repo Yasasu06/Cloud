@@ -355,6 +355,15 @@ Get your free cloud report at cloud-psx9.vercel.app`
                 Retake Quiz
               </button>
             </div>
+
+            <div style={{ marginTop: 32 }}>
+              <p style={{ color: '#666', fontSize: 13, marginBottom: 12, textAlign: 'center', letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
+                <button className="btn-secondary" onClick={() => router.push('/analyze')}>🔍 Analyze My Bill</button>
+                <button className="btn-secondary" onClick={() => router.push('/chat')}>💬 Ask AI</button>
+                <button className="btn-secondary" onClick={() => router.push('/advisor')}>🏗️ Get Recommendation</button>
+              </div>
+            </div>
           </div>
         )}
       </div>

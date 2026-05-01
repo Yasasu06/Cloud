@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -14,6 +15,7 @@ Be specific. Write for a non-technical founder.`
 type Tab = 'paste' | 'csv'
 
 export default function BillUploadPage() {
+  const router = useRouter()
   const [tab, setTab] = useState<Tab>('paste')
   const [billText, setBillText] = useState('')
   const [csvContent, setCsvContent] = useState('')
@@ -262,6 +264,16 @@ export default function BillUploadPage() {
             {loading && (
               <span style={{ color: '#6366f1', animation: 'pulse 1s infinite' }}>▍</span>
             )}
+          </div>
+        )}
+
+        {response && !loading && (
+          <div style={{ marginTop: 32 }}>
+            <p style={{ color: '#666', fontSize: 13, marginBottom: 12, letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button className="btn-secondary" onClick={() => router.push('/report-card')}>📊 Grade My Setup</button>
+              <button className="btn-secondary" onClick={() => router.push('/chat')}>💬 Ask AI Questions</button>
+            </div>
           </div>
         )}
       </div>

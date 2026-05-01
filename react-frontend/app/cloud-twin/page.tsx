@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const QUESTIONS = [
   {
@@ -93,6 +94,7 @@ interface ChatEntry {
 const STORAGE_KEY = 'cloud-twin-profile'
 
 export default function CloudTwinPage() {
+  const router = useRouter()
   const [currentQ, setCurrentQ] = useState(0)
   const [profile, setProfile] = useState<Partial<Profile>>({})
   const [history, setHistory] = useState<ChatEntry[]>([])
@@ -295,6 +297,14 @@ export default function CloudTwinPage() {
             >
               Get Full Recommendation →
             </a>
+          </div>
+
+          <div style={{ marginTop: 32 }}>
+            <p style={{ color: '#666', fontSize: 13, marginBottom: 12, letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button className="btn-secondary" onClick={() => router.push('/analyze')}>🔍 Analyze My Situation</button>
+              <button className="btn-secondary" onClick={() => router.push('/advisor')}>🏗️ Get Recommendation</button>
+            </div>
           </div>
         </div>
       </div>

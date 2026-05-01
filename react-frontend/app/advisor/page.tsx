@@ -473,6 +473,15 @@ Respond with ONLY a JSON object in this exact format, no other text:
               Start Over
             </button>
           </div>
+
+          <div style={{ marginTop: 32 }}>
+            <p style={{ color: '#666', fontSize: 13, marginBottom: 12 }}>WHAT&apos;S NEXT</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              <button className="btn-secondary" onClick={() => router.push('/planner')}>💰 Estimate My Costs</button>
+              <button className="btn-secondary" onClick={() => router.push('/chat')}>💬 Ask AI Questions</button>
+              <button className="btn-secondary" onClick={() => router.push('/report-card')}>📊 Grade My Setup</button>
+            </div>
+          </div>
         </div>
       </div>
     )
