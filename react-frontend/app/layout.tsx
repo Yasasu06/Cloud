@@ -113,6 +113,7 @@ export default function RootLayout({
                   <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>COMPANY</div>
                   {[
                     { label: 'Pricing', href: '/pricing' },
+                    { label: 'What We Replace', href: '/replaces' },
                     { label: 'Experts', href: '/experts' },
                     { label: 'Dashboard', href: '/dashboard' },
                     { label: 'Weekly Digest', href: '/weekly-digest' },

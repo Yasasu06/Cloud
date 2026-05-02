@@ -39,6 +39,7 @@ const INTELLIGENCE_ITEMS = [
   { href: '/benchmark',      label: '📊 Benchmarks',          desc: 'Compare to industry' },
   { href: '/cloud-glossary', label: '📚 Glossary',            desc: 'Cloud terms explained' },
   { href: '/waste-report',   label: '🗑️ Waste Report',         desc: 'Find what you\'re wasting' },
+  { href: '/replaces',       label: '💡 What We Replace',     desc: 'Roles replaced by AI' },
 ]
 
 const MOBILE_LINKS = [
@@ -66,6 +67,7 @@ const MOBILE_LINKS = [
   { href: '/cloud-glossary',      label: 'Glossary' },
   { href: '/waste-report',        label: 'Waste Report' },
   { href: '/alternatives',         label: 'All Providers' },
+  { href: '/replaces',            label: 'What We Replace' },
   { href: '/pricing',             label: 'Pricing' },
 ]
 
