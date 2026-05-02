@@ -31,6 +31,11 @@ export default function AuthPage() {
         })
         if (error) throw error
         setSuccess('Account created! Check your email to confirm.')
+        fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'welcome', email }),
+        }).catch(() => {})
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error

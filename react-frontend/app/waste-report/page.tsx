@@ -25,6 +25,8 @@ export default function WasteReportPage() {
   const [report, setReport] = useState('')
   const [done, setDone] = useState(false)
   const [lastGenerated, setLastGenerated] = useState<Date | null>(null)
+  const [emailSent, setEmailSent] = useState(false)
+  const [sendingEmail, setSendingEmail] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -107,6 +109,37 @@ Use real ${provider} service names. Be specific with dollar amounts.`
 
   function handlePrint() {
     window.print()
+  }
+
+  async function emailReport() {
+    setSendingEmail(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        alert('Please sign in to email your report')
+        return
+      }
+      await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'waste_report',
+          email: session.user.email,
+          userName: session.user.email?.split('@')[0] ?? 'there',
+          wasteAmount: Math.round(spend * 0.28),
+          items: [
+            `Idle ${provider} compute instances — ${fmt(spend * 0.10)}/month`,
+            `Unused storage snapshots — ${fmt(spend * 0.07)}/month`,
+            `Over-provisioned database — ${fmt(spend * 0.06)}/month`,
+          ],
+        }),
+      })
+      setEmailSent(true)
+    } catch (_e) {
+      alert('Failed to send email. Please try again.')
+    } finally {
+      setSendingEmail(false)
+    }
   }
 
   if (loading) {
@@ -217,6 +250,13 @@ Use real ${provider} service names. Be specific with dollar amounts.`
                       style={{ background: '#6366f1', border: 'none', borderRadius: 8, padding: '7px 16px', color: 'white', fontWeight: 700, cursor: 'pointer', fontSize: 13 }}
                     >
                       🖨 Download PDF
+                    </button>
+                    <button
+                      onClick={emailReport}
+                      disabled={sendingEmail || emailSent}
+                      style={{ background: emailSent ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)', border: `1px solid ${emailSent ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '7px 14px', color: emailSent ? '#22c55e' : '#a0a0b0', cursor: sendingEmail || emailSent ? 'not-allowed' : 'pointer', fontSize: 13, opacity: sendingEmail ? 0.6 : 1 }}
+                    >
+                      {emailSent ? '✓ Sent to email' : sendingEmail ? 'Sending…' : '📧 Email Report'}
                     </button>
                   </div>
                 )}

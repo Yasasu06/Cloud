@@ -116,6 +116,7 @@ export default function RootLayout({
                     { label: 'Dashboard', href: '/dashboard' },
                     { label: 'Weekly Digest', href: '/weekly-digest' },
                     { label: 'Changelog', href: '/changelog' },
+                    { label: 'White Label', href: '/white-label' },
                     { label: 'Sign In', href: '/auth' },
                     { label: 'Terms of Service', href: '/terms' },
                     { label: 'Privacy Policy', href: '/privacy' },
