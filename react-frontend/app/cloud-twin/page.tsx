@@ -299,7 +299,18 @@ export default function CloudTwinPage() {
             </a>
           </div>
 
-          <div style={{ marginTop: 32 }}>
+          {/* Advisor banner */}
+          <div style={{ marginTop: 24, background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>Want a deeper recommendation?</div>
+              <div style={{ fontSize: 12, color: '#666' }}>Our Cloud Advisor quiz gives you a full provider recommendation with confidence score.</div>
+            </div>
+            <a href="/advisor" style={{ background: '#6366f1', border: 'none', borderRadius: 10, padding: '10px 18px', color: 'white', fontWeight: 700, fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              Try Cloud Advisor quiz →
+            </a>
+          </div>
+
+          <div style={{ marginTop: 24 }}>
             <p style={{ color: '#666', fontSize: 13, marginBottom: 12, letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <button className="btn-secondary" onClick={() => router.push('/analyze')}>🔍 Analyze My Situation</button>
