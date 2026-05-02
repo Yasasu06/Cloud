@@ -189,7 +189,7 @@ export default function HomePage() {
 
           {/* Feature pills */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
-            {['⚡ Results in 30 seconds', '🔒 Vendor Neutral', '🆓 Always Free to Start'].map(pill => (
+            {['⚡ Results in 30 seconds', '🔒 Vendor Neutral', '🆓 Always Free to Start', '🌐 12 providers covered'].map(pill => (
               <span key={pill} style={{
                 background: 'rgba(255,255,255,0.05)',
                 border: '1px solid rgba(255,255,255,0.1)',

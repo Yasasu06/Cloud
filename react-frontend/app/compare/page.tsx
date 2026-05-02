@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
-const ALL_PROVIDERS = ['AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner', 'Oracle Cloud', 'Linode'] as const
+const ALL_PROVIDERS = ['AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner', 'Oracle Cloud', 'Linode', 'Vultr', 'Cloudflare Workers', 'OVH', 'Render', 'Railway'] as const
 type Provider = typeof ALL_PROVIDERS[number]
 
 interface ProviderData {
@@ -30,7 +30,12 @@ const DATA: Record<Provider, ProviderData> = {
   DigitalOcean:  { color: '#0080ff', tagline: 'Developer-friendly',     startingCost: '$4/mo (Droplet)', freeTier: '$200 credit for 60 days',                                       bestFor: 'Startups, developers, web apps, side projects',                       regions: 15, supportCost: 'Free ticket; $50/mo faster response', egressFees: '1TB free/mo then $0.01/GB', aiMl: 2, easeOfUse: 5, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 2 },
   Hetzner:       { color: '#e63946', tagline: 'Best price/performance', startingCost: '€3.29/mo (~$3.50)', freeTier: 'None (pay-as-you-go)',                                        bestFor: 'EU workloads, cost-sensitive apps, bare metal',                      regions: 5,  supportCost: 'Free (community + ticket)',          egressFees: '20TB free/mo then €1/TB',   aiMl: 1, easeOfUse: 4, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 1 },
   'Oracle Cloud':{ color: '#c0392b', tagline: 'Generous free tier',     startingCost: '$0 (Always Free)', freeTier: 'Always-free: 2 AMD VMs, 4 ARM VMs, 200GB storage, 10TB egress', bestFor: 'Oracle DB workloads, cost-sensitive enterprise teams',                regions: 46, supportCost: 'Free; from $100/mo (Premier)',       egressFees: '10TB free/mo then $0.0085/GB', aiMl: 2, easeOfUse: 2, smbFriendly: 3, lockIn: 'Medium', lockInScore: 2, costScore: 2 },
-  Linode:        { color: '#02b159', tagline: 'Simple & affordable',    startingCost: '$5/mo (1GB)',      freeTier: '$100 credit for 60 days',                                       bestFor: 'Linux workloads, developers, simple web hosting',                    regions: 11, supportCost: 'Free ticket; $15/mo professional',   egressFees: '1TB free/mo then $0.01/GB', aiMl: 1, easeOfUse: 5, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 2 },
+  Linode:              { color: '#02b159', tagline: 'Simple & affordable',     startingCost: '$5/mo (1GB)',       freeTier: '$100 credit for 60 days',                                        bestFor: 'Linux workloads, developers, simple web hosting',                    regions: 11, supportCost: 'Free ticket; $15/mo professional',      egressFees: '1TB free/mo then $0.01/GB',     aiMl: 1, easeOfUse: 5, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 2 },
+  Vultr:               { color: '#007bfc', tagline: 'Global edge computing',   startingCost: '$2.50/mo',          freeTier: '$250 credit for 30 days',                                        bestFor: 'Edge computing, global reach, bare metal',                           regions: 32, supportCost: 'Free ticket; $30/mo Pro',             egressFees: '1TB free/mo then $0.01/GB',     aiMl: 1, easeOfUse: 4, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 1 },
+  'Cloudflare Workers':{ color: '#f6821f', tagline: 'Edge-first serverless',   startingCost: '$0 (free tier)',    freeTier: '100k requests/day free forever',                                 bestFor: 'Edge functions, static sites, global APIs',                          regions: 300, supportCost: 'Community; $200/mo Business',          egressFees: 'Zero egress included',          aiMl: 2, easeOfUse: 4, smbFriendly: 5, lockIn: 'Medium', lockInScore: 2, costScore: 1 },
+  OVH:                 { color: '#123f6d', tagline: 'European cloud leader',   startingCost: '€3/mo (~$3)',       freeTier: 'None (pay-as-you-go)',                                           bestFor: 'EU compliance, data sovereignty, dedicated servers',                 regions: 14, supportCost: 'Free; from €56/mo OVHcloud Pro',       egressFees: 'Bandwidth included in plans',   aiMl: 1, easeOfUse: 3, smbFriendly: 4, lockIn: 'Low',    lockInScore: 1, costScore: 1 },
+  Render:              { color: '#46e3b7', tagline: 'Heroku replacement',      startingCost: '$7/mo',             freeTier: 'Static sites free; limited services',                            bestFor: 'Web services, Heroku migrants, Git deploy',                          regions: 5,  supportCost: 'Community; $29/mo team plan',          egressFees: '$0.10/GB',                      aiMl: 1, easeOfUse: 5, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 2 },
+  Railway:             { color: '#b044f8', tagline: 'Modern dev platform',     startingCost: '$5/mo + usage',     freeTier: '$5 credit/month',                                                bestFor: 'Indie hackers, side projects, fast deploys',                         regions: 3,  supportCost: 'Community Discord',                    egressFees: '$0.10/GB',                      aiMl: 1, easeOfUse: 5, smbFriendly: 5, lockIn: 'Low',    lockInScore: 1, costScore: 2 },
 }
 
 const LOCK_IN_COLOR: Record<ProviderData['lockIn'], string> = { Low: '#22c55e', Medium: '#f59e0b', High: '#ef4444' }
@@ -81,6 +86,15 @@ const ROWS: { key: string; label: string; render: (d: ProviderData) => React.Rea
 export default function ComparePage() {
   const router = useRouter()
   const [selected, setSelected] = useState<Provider[]>(['AWS', 'GCP', 'DigitalOcean'])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    const withParam = params.get('with') as Provider | null
+    if (withParam && ALL_PROVIDERS.includes(withParam)) {
+      setSelected(['AWS', 'GCP', withParam])
+    }
+  }, [])
   const [winnerKey, setWinnerKey] = useState<WinnerKey | null>(null)
 
   function toggleProvider(p: Provider) {

@@ -16,6 +16,7 @@ const ANALYZE_ITEMS = [
   { href: '/forecast',           label: '📈 Cost Forecast',            desc: 'Project your cloud spend' },
   { href: '/multi-cloud',        label: '☁️ Multi-Cloud View',          desc: 'Consolidate all providers' },
   { href: '/terraform-estimator',label: '🏗️ Infrastructure Estimator', desc: 'Estimate infra costs' },
+  { href: '/alternatives',       label: '🌐 All Providers',            desc: 'Beyond AWS, Azure & GCP' },
 ]
 
 const ADVISE_ITEMS = [
@@ -56,6 +57,7 @@ const MOBILE_LINKS = [
   { href: '/benchmark',           label: 'Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
   { href: '/waste-report',        label: 'Waste Report' },
+  { href: '/alternatives',         label: 'All Providers' },
   { href: '/pricing',             label: 'Pricing' },
 ]
 

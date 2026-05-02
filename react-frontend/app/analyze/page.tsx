@@ -96,7 +96,9 @@ Specific requirements for their industry if applicable.
 3. Specific action with time estimate
 
 ## One Thing That Usually Goes Wrong
-Honest warning specific to their project type.`,
+Honest warning specific to their project type.
+
+When recommending providers, also consider DigitalOcean, Hetzner, Linode, Vultr, Cloudflare Workers, Oracle Cloud, OVH, Render, and Railway when appropriate. For startups under $5k/month spend, alternatives often provide 50–70% savings vs AWS/Azure/GCP.`,
   },
   {
     id: 'migration',
