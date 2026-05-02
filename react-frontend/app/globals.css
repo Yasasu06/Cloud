@@ -321,6 +321,8 @@
 }
 
 @media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+  .stack-mobile { flex-direction: column !important; grid-template-columns: 1fr !important; }
   .navbar-links { display: none; }
 
   [style*="grid-template-columns: 1fr 1fr 1fr"] {

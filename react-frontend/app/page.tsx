@@ -176,7 +176,7 @@ export default function HomePage() {
             100% VENDOR NEUTRAL · NO AWS/AZURE/GCP SPONSORSHIP
           </div>
 
-          <h1 style={{ fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 16 }}>
+          <h1 style={{ fontSize: 'clamp(28px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 16 }}>
             Your Cloud Bill,
             <br />
             <span className="shimmer-text">Finally Explained.</span>

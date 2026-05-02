@@ -214,7 +214,21 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 60, color: '#555', fontSize: 13 }}>
+        {/* Performance pricing banner */}
+        <div style={{ marginTop: 48, padding: '24px 28px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: '#22c55e', marginBottom: 4 }}>Only pay when we save you money</div>
+            <div style={{ fontSize: 13, color: '#666' }}>Performance pricing: we take 15% of savings found. No savings → no charge.</div>
+          </div>
+          <button
+            onClick={() => router.push('/performance-pricing')}
+            style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '10px 20px', color: 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
+          >
+            Learn more →
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 40, color: '#555', fontSize: 13 }}>
           14-day free trial on paid tiers · No credit card required for Free plan · Questions?{' '}
           <a href="mailto:hello@cloudintelligence.io" style={{ color: '#6366f1', textDecoration: 'none' }}>
             hello@cloudintelligence.io

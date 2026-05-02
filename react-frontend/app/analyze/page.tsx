@@ -403,7 +403,7 @@ Focus on things they can do TODAY.`,
 
         {/* Mode selection */}
         {!done && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 32 }}>
             {MODES.map(mode => (
               <button
                 key={mode.id}

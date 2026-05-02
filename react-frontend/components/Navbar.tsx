@@ -249,7 +249,7 @@ export default function Navbar() {
             }}
           >
             🔍
-            <span style={{ fontSize: 11, color: '#555' }}>⌘K</span>
+            <span className="hide-mobile" style={{ fontSize: 11, color: '#555' }}>⌘K</span>
           </button>
 
           {/* Right side */}
