@@ -18,6 +18,10 @@ import RecommendationCard from '@/components/analysis/RecommendationCard'
 import AlternativesSection from '@/components/analysis/AlternativesSection'
 import QuickWinsList from '@/components/analysis/QuickWinsList'
 import AnalysisSkeleton from '@/components/analysis/AnalysisSkeleton'
+import RiskProfile, { type RiskProfileData } from '@/components/analysis/RiskProfile'
+import CounterArguments, { type CounterArgument } from '@/components/analysis/CounterArguments'
+import Perspectives, { type Perspective } from '@/components/analysis/Perspectives'
+import DecisionModal from '@/components/DecisionModal'
 import type { AnalysisResult } from '@/components/analysis/types'
 
 const JSON_SCHEMA_INSTRUCTION = `
@@ -355,6 +359,12 @@ export default function AnalyzePage() {
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [parseError, setParseError] = useState(false)
   const [showWizard, setShowWizard] = useState(false)
+  const [riskProfile, setRiskProfile] = useState<RiskProfileData | null>(null)
+  const [counterArgs, setCounterArgs] = useState<CounterArgument[]>([])
+  const [perspectives, setPerspectives] = useState<Perspective[]>([])
+  const [perspectiveMode, setPerspectiveMode] = useState<'single' | 'four'>('single')
+  const [perspectivesLoading, setPerspectivesLoading] = useState(false)
+  const [showDecisionModal, setShowDecisionModal] = useState(false)
   const [showSparkle, setShowSparkle] = useState(false)
 
   useEffect(() => {
@@ -399,6 +409,9 @@ export default function AnalyzePage() {
     setQuickWins([])
     setAnalysis(null)
     setParseError(false)
+    setRiskProfile(null)
+    setCounterArgs([])
+    setPerspectives([])
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
     try {
@@ -426,6 +439,10 @@ export default function AnalyzePage() {
       const parsed = tryExtractJson(fullText)
       if (parsed && parsed.summary && Array.isArray(parsed.recommendations)) {
         setAnalysis(parsed)
+        // Fire decision-framework calls in parallel — non-blocking
+        void fetchRiskProfile(userText)
+        void fetchCounterArguments(userText, parsed.recommendations.map(r => r.title).join('; '))
+        if (perspectiveMode === 'four') void fetchPerspectives(userText)
       } else {
         setParseError(true)
         console.error('JSON parse failed for analyze response')
@@ -455,6 +472,112 @@ export default function AnalyzePage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function fetchRiskProfile(userInput: string) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 400,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: 'Return only JSON, no other text.' },
+            { role: 'user', content: `For this cloud decision: "${userInput}"
+Return JSON:
+{
+  "reversibility": "easy" | "medium" | "hard",
+  "blast_radius": "low" | "medium" | "high",
+  "time_to_implement": "minutes" | "hours" | "days" | "weeks",
+  "risk_level": "low" | "medium" | "high",
+  "recommended_approach": "Just do it" | "Test first" | "Phase rollout" | "Get expert review",
+  "rationale": "One sentence why this approach"
+}` },
+          ],
+        }),
+      })
+      const data = await res.json()
+      const parsed = tryExtractJson(data.choices?.[0]?.message?.content || '')
+      if (parsed && (parsed as unknown as RiskProfileData).recommended_approach) {
+        setRiskProfile(parsed as unknown as RiskProfileData)
+      }
+    } catch (e) { console.error('risk profile failed', e) }
+  }
+
+  async function fetchCounterArguments(userInput: string, recsSummary: string) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 600,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: 'Return only JSON, no other text. You are a contrarian senior cloud architect — challenge the recommendations.' },
+            { role: 'user', content: `Situation: "${userInput}"
+Recommendations being made: ${recsSummary}
+
+Give 2-3 reasons why this advice might NOT be right for this user. Be honest and thought-provoking, not alarming.
+
+Return JSON:
+{
+  "counter_arguments": [
+    {
+      "title": "Short headline of the counter-argument",
+      "explanation": "Why this might be the wrong move",
+      "when_applies": "When this concern is most relevant to the user"
+    }
+  ]
+}` },
+          ],
+        }),
+      })
+      const data = await res.json()
+      const parsed = tryExtractJson(data.choices?.[0]?.message?.content || '')
+      const args = (parsed as unknown as { counter_arguments?: CounterArgument[] })?.counter_arguments
+      if (Array.isArray(args)) setCounterArgs(args)
+    } catch (e) { console.error('counter arguments failed', e) }
+  }
+
+  async function fetchPerspectives(userInput: string) {
+    setPerspectivesLoading(true)
+    const PERSONAS: Array<{ role: Perspective['role']; system: string }> = [
+      { role: 'finops',     system: 'You are a senior FinOps Analyst. Focus exclusively on cost, waste, and ROI.' },
+      { role: 'architect',  system: 'You are a senior Solutions Architect. Focus on technical fit, scalability, and integration.' },
+      { role: 'operations', system: 'You are a senior Operations Manager. Focus on reliability, security, and on-call burden.' },
+      { role: 'business',   system: 'You are a Business Strategist. Focus on long-term lock-in, contract terms, and strategic impact.' },
+    ]
+    try {
+      const results = await Promise.all(PERSONAS.map(async p => {
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+          body: JSON.stringify({
+            model: 'llama-3.3-70b-versatile',
+            max_tokens: 350,
+            response_format: { type: 'json_object' },
+            messages: [
+              { role: 'system', content: `${p.system} Return only JSON.` },
+              { role: 'user', content: `For this cloud situation: "${userInput}"
+Return JSON:
+{
+  "take": "Your main take in 1-2 sentences",
+  "top_concern": "Your single biggest concern",
+  "would_do_differently": "What you would do differently than a generic AI advisor"
+}` },
+            ],
+          }),
+        })
+        const data = await res.json()
+        const parsed = tryExtractJson(data.choices?.[0]?.message?.content || '') as unknown as Omit<Perspective, 'role'> | null
+        return parsed ? { ...parsed, role: p.role } as Perspective : null
+      }))
+      setPerspectives(results.filter((r): r is Perspective => r !== null))
+    } catch (e) { console.error('perspectives failed', e) }
+    finally { setPerspectivesLoading(false) }
   }
 
   function reset() {
@@ -692,11 +815,45 @@ Focus on things they can do TODAY.`,
           {/* Loading skeleton */}
           {loading && !analysis && <AnalysisSkeleton />}
 
+          {/* Perspective mode toggle */}
+          {analysis && (
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+              <div style={{ display: 'inline-flex', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, padding: 2 }}>
+                {(['single', 'four'] as const).map(m => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      setPerspectiveMode(m)
+                      if (m === 'four' && perspectives.length === 0 && input) void fetchPerspectives(input)
+                    }}
+                    style={{
+                      padding: '5px 12px', borderRadius: 6, fontSize: 11, fontWeight: 600, border: 'none', cursor: 'pointer',
+                      background: perspectiveMode === m ? 'rgba(99,102,241,0.2)' : 'transparent',
+                      color: perspectiveMode === m ? '#818cf8' : '#666',
+                    }}
+                  >
+                    {m === 'single' ? 'Single Expert' : '🎭 Four Perspectives'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Visual analysis output */}
           {analysis && (
             <div className="page-enter">
               <SummaryCard data={analysis.summary} />
               <MetricsRow data={analysis.key_metrics} />
+
+              {/* Risk profile (decision framework) */}
+              {riskProfile && <RiskProfile data={riskProfile} />}
+
+              {/* Four-perspectives view */}
+              {perspectiveMode === 'four' && (
+                perspectivesLoading
+                  ? <div className="ai-shimmer" style={{ height: 220, marginBottom: 24 }} />
+                  : perspectives.length > 0 && <Perspectives data={perspectives} />
+              )}
               {analysis.cost_breakdown && analysis.cost_breakdown.length > 0 && (
                 <CostBreakdownChart data={analysis.cost_breakdown} />
               )}
@@ -721,6 +878,28 @@ Focus on things they can do TODAY.`,
               {analysis.alternative_providers && analysis.alternative_providers.length > 0 && (
                 <AlternativesSection data={analysis.alternative_providers} />
               )}
+
+              {/* Counter-arguments (decision framework) */}
+              {counterArgs.length > 0 && <CounterArguments data={counterArgs} />}
+
+              {/* Document Decision CTA */}
+              <div style={{
+                marginTop: 20, padding: '16px 20px', borderRadius: 12,
+                background: 'rgba(99,102,241,0.06)',
+                border: '1px solid rgba(99,102,241,0.2)',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12,
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>📝 Document this decision</div>
+                  <div style={{ fontSize: 12, color: '#a0a0b0' }}>Capture your reasoning and set a review date for future you.</div>
+                </div>
+                <button
+                  onClick={() => setShowDecisionModal(true)}
+                  style={{ background: '#6366f1', border: 'none', borderRadius: 8, padding: '8px 16px', color: 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  Document Decision →
+                </button>
+              </div>
 
               {/* Confidence breakdown */}
               <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -803,6 +982,12 @@ Focus on things they can do TODAY.`,
         )}
 
         {showWizard && <ImplementationWizard onClose={() => setShowWizard(false)} savingEstimate="$200–800/mo" />}
+        {showDecisionModal && (
+          <DecisionModal
+            decisionText={analysis?.summary?.headline ?? input}
+            onClose={() => setShowDecisionModal(false)}
+          />
+        )}
 
         {/* Disclaimer */}
         {done && (
