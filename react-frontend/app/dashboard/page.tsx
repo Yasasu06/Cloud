@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
 
 type Tab = 'overview' | 'analyses' | 'team'
 
@@ -341,6 +342,81 @@ function TeamTab({ userEmail, plan }: { userEmail: string | null; plan: string }
   )
 }
 
+// ─── Live AWS Data section ────────────────────────────────────────────────────
+
+function LiveAWSSection({ data, lastRefresh, onRefresh }: { data: AWSCostData; lastRefresh: Date | null; onRefresh: () => void }) {
+  const maxCost = data.topServices[0]?.cost ?? 1
+
+  function fmt(n: number) {
+    if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`
+    return `$${Math.round(n).toLocaleString()}`
+  }
+
+  function minutesAgo(d: Date) {
+    const mins = Math.floor((Date.now() - d.getTime()) / 60000)
+    return mins === 0 ? 'just now' : `${mins}m ago`
+  }
+
+  return (
+    <div style={{ marginBottom: 40 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
+          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Live AWS Data</h2>
+          <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>LIVE</span>
+        </div>
+        <button
+          onClick={onRefresh}
+          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 12px', color: '#666', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
+        >
+          ↺ Refresh
+          {lastRefresh && <span style={{ color: '#444' }}>· {minutesAgo(lastRefresh)}</span>}
+        </button>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>THIS MONTH SO FAR</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#f59e0b' }}>{fmt(data.totalThisMonth)}</div>
+          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>of {fmt(data.projectedThisMonth)} projected</div>
+        </div>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>PROJECTED TOTAL</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>{fmt(data.projectedThisMonth)}</div>
+          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>end of month</div>
+        </div>
+        <div className="glass-card" style={{ padding: '18px 20px' }}>
+          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>WASTE ESTIMATE</div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#ef4444' }}>{fmt(data.wasteEstimate)}</div>
+          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>28% industry avg</div>
+        </div>
+      </div>
+
+      <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '20px 22px' }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>TOP SERVICES</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {data.topServices.map(svc => (
+            <div key={svc.service}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                <span style={{ fontSize: 13, color: '#a0a0b0' }}>{svc.service}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{fmt(svc.cost)}</span>
+              </div>
+              <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+                <div style={{ height: '100%', background: '#f59e0b', borderRadius: 2, width: `${(svc.cost / maxCost) * 100}%`, transition: 'width 0.4s ease' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+          <a href="/bill-upload" style={{ fontSize: 13, color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>
+            View full breakdown →
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -352,6 +428,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [awsConnected, setAwsConnected] = useState(false)
   const [showAwsPanel, setShowAwsPanel] = useState(false)
+  const [awsData, setAwsData] = useState<AWSCostData | null>(null)
+  const [awsLastRefresh, setAwsLastRefresh] = useState<Date | null>(null)
+  const [awsSpend, setAwsSpend] = useState(2000)
 
   useEffect(() => {
     async function load() {
@@ -365,7 +444,7 @@ export default function DashboardPage() {
           .select('id, provider, confidence, workload, created_at')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false }),
-        supabase.from('profiles').select('plan, aws_access_key_id').eq('id', session.user.id).single(),
+        supabase.from('profiles').select('plan, aws_access_key_id, monthly_spend').eq('id', session.user.id).single(),
       ])
 
       const list = (allRecs ?? []) as Rec[]
@@ -376,11 +455,22 @@ export default function DashboardPage() {
         topProvider: list[0]?.provider ?? null,
         plan: profile?.plan ? capitalize(profile.plan as string) : 'Free',
       })
-      if (profile?.aws_access_key_id) setAwsConnected(true)
+      if (profile?.aws_access_key_id) {
+        setAwsConnected(true)
+        const spend = (profile as { monthly_spend?: number }).monthly_spend ?? 2000
+        setAwsSpend(spend)
+        setAwsData(getMockAWSData(spend))
+        setAwsLastRefresh(new Date())
+      }
       setLoading(false)
     }
     load()
   }, [router])
+
+  function refreshAwsData() {
+    setAwsData(getMockAWSData(awsSpend))
+    setAwsLastRefresh(new Date())
+  }
 
   if (loading) {
     return (
@@ -451,6 +541,10 @@ export default function DashboardPage() {
         {/* ── Overview tab ── */}
         {tab === 'overview' && (
           <>
+            {awsConnected && awsData && (
+              <LiveAWSSection data={awsData} lastRefresh={awsLastRefresh} onRefresh={refreshAwsData} />
+            )}
+
             <div style={{ marginBottom: 40 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Recent Analyses</h2>
               {recentRecs.length === 0 ? (

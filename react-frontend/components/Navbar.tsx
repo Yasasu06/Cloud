@@ -33,6 +33,7 @@ const INTELLIGENCE_ITEMS = [
   { href: '/weekly-digest',  label: '📰 Cloud Updates',       desc: 'Latest provider news' },
   { href: '/benchmark',      label: '📊 Benchmarks',          desc: 'Compare to industry' },
   { href: '/cloud-glossary', label: '📚 Glossary',            desc: 'Cloud terms explained' },
+  { href: '/waste-report',   label: '🗑️ Waste Report',         desc: 'Find what you\'re wasting' },
 ]
 
 const MOBILE_LINKS = [
@@ -54,6 +55,7 @@ const MOBILE_LINKS = [
   { href: '/vendor-alerts',       label: 'Price Alerts' },
   { href: '/benchmark',           label: 'Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
+  { href: '/waste-report',        label: 'Waste Report' },
   { href: '/pricing',             label: 'Pricing' },
 ]
 
@@ -126,7 +128,7 @@ export default function Navbar() {
 
   const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost', '/forecast', '/multi-cloud', '/terraform-estimator'].includes(pathname)
   const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance', '/reserved-instances'].includes(pathname)
-  const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary'].includes(pathname)
+  const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary', '/waste-report'].includes(pathname)
 
   return (
     <nav
