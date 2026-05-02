@@ -35,11 +35,12 @@ const ADVISE_ITEMS = [
 ]
 
 const INTELLIGENCE_ITEMS = [
-  { href: '/vendor-alerts',  label: '💸 Price Alerts',        desc: 'Track price changes' },
-  { href: '/provider-news',  label: '📰 Cloud Updates',       desc: 'Latest provider news' },
-  { href: '/cloud-glossary', label: '📚 Glossary',            desc: 'Cloud terms explained' },
-  { href: '/waste-report',   label: '🗑️ Waste Report',         desc: 'Find what you\'re wasting' },
-  { href: '/replaces',       label: '💡 What We Replace',     desc: '$400K of expertise for $49/mo' },
+  { href: '/vendor-alerts',  label: '💸 Price Alerts',          desc: 'Track price changes' },
+  { href: '/provider-news',  label: '📰 Cloud Updates',         desc: 'Latest provider news' },
+  { href: '/benchmark',      label: '📊 Industry Benchmarks',   desc: 'How you compare to peers' },
+  { href: '/cloud-glossary', label: '📚 Glossary',              desc: 'Cloud terms explained' },
+  { href: '/waste-report',   label: '🗑️ Waste Report',           desc: 'Find what you\'re wasting' },
+  { href: '/replaces',       label: '💡 What We Replace',       desc: '$400K of expertise for $49/mo' },
 ]
 
 const MOBILE_LINKS = [
@@ -65,6 +66,7 @@ const MOBILE_LINKS = [
   { href: '/credits-tracker',     label: 'Credits Tracker' },
   { href: '/sanity-check',        label: 'Sanity Check' },
   { href: '/vendor-alerts',       label: 'Price Alerts' },
+  { href: '/benchmark',           label: 'Industry Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
   { href: '/waste-report',        label: 'Waste Report' },
   { href: '/alternatives',        label: 'All Providers' },

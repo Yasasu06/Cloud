@@ -22,8 +22,6 @@ export default function HomePage() {
   const [hasProfile, setHasProfile] = useState<boolean | null>(null)
   const [scenarioIndex, setScenarioIndex] = useState(0)
   const [scenarioVisible, setScenarioVisible] = useState(true)
-  const [counts, setCounts] = useState({ market: 0, waste: 0, providers: 0 })
-
   useEffect(() => {
     const interval = setInterval(() => {
       setScenarioVisible(false)
@@ -32,24 +30,6 @@ export default function HomePage() {
         setScenarioVisible(true)
       }, 300)
     }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const targets = { market: 855, waste: 28, providers: 12 }
-    const duration = 1500
-    const steps = 60
-    let step = 0
-    const interval = setInterval(() => {
-      step++
-      const progress = step / steps
-      setCounts({
-        market:    Math.round(targets.market * progress),
-        waste:     Math.round(targets.waste * progress),
-        providers: Math.round(targets.providers * progress),
-      })
-      if (step >= steps) clearInterval(interval)
-    }, duration / steps)
     return () => clearInterval(interval)
   }, [])
 
@@ -564,10 +544,10 @@ export default function HomePage() {
       <section style={{ padding: '60px 24px', maxWidth: 900, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           {[
-            { animated: `$${counts.market}B`,       label: 'Cloud market 2026',   sub: 'Growing 19% annually' },
-            { animated: `${counts.waste}%`,          label: 'Average cloud waste', sub: 'Of monthly spend wasted' },
-            { animated: '$0',                        label: 'Cost to start',       sub: 'No credit card required' },
-            { animated: `${counts.providers}+`,      label: 'Providers compared',  sub: 'Including alternatives' },
+            { animated: '$855B',  label: 'Cloud market 2026',   sub: 'Growing 19% annually' },
+            { animated: '28%',    label: 'Average cloud waste', sub: 'Of monthly spend wasted' },
+            { animated: '$0',     label: 'Cost to start',       sub: 'No credit card required' },
+            { animated: '12+',    label: 'Providers compared',  sub: 'Including alternatives' },
           ].map(stat => (
             <div key={stat.label} className="glass-card" style={{ padding: 20, textAlign: 'center' }}>
               <div style={{ fontSize: 32, fontWeight: 900, color: '#6366f1', marginBottom: 4 }}>
