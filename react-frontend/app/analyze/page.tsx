@@ -11,6 +11,87 @@ import JourneyProgress from '@/components/JourneyProgress'
 import ImplementationWizard from '@/components/ImplementationWizard'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
 import { getUserMode, modeInstruction } from '@/lib/userMode'
+import SummaryCard from '@/components/analysis/SummaryCard'
+import MetricsRow from '@/components/analysis/MetricsRow'
+import CostBreakdownChart from '@/components/analysis/CostBreakdownChart'
+import RecommendationCard from '@/components/analysis/RecommendationCard'
+import AlternativesSection from '@/components/analysis/AlternativesSection'
+import QuickWinsList from '@/components/analysis/QuickWinsList'
+import AnalysisSkeleton from '@/components/analysis/AnalysisSkeleton'
+import type { AnalysisResult } from '@/components/analysis/types'
+
+const JSON_SCHEMA_INSTRUCTION = `
+
+OUTPUT FORMAT — Respond with ONLY valid JSON, no other text, no markdown fences. Use this exact schema:
+
+{
+  "summary": {
+    "headline": "One sentence verdict for this client",
+    "verdict_type": "savings_opportunity",
+    "confidence": "high",
+    "monthly_spend": 5000,
+    "estimated_waste_pct": 28,
+    "estimated_waste_amount": 1400
+  },
+  "key_metrics": [
+    {"label": "Monthly Spend", "value": "$5,000", "trend": "stable"},
+    {"label": "Waste Identified", "value": "$1,400", "trend": "concerning"},
+    {"label": "Potential Savings", "value": "28%", "trend": "positive"}
+  ],
+  "cost_breakdown": [
+    {"service": "EC2", "amount": 2500, "percent": 50, "waste_estimate": 600},
+    {"service": "RDS", "amount": 1200, "percent": 24, "waste_estimate": 200},
+    {"service": "Other", "amount": 1300, "percent": 26, "waste_estimate": 200}
+  ],
+  "recommendations": [
+    {
+      "id": 1,
+      "title": "Switch to Reserved Instances",
+      "icon": "💰",
+      "impact": "high",
+      "effort": "low",
+      "savings_amount": 525,
+      "savings_text": "$525/month",
+      "explanation": "Technical reasoning",
+      "plain_english": "Like prepaying gym membership for a discount",
+      "steps": ["Step 1", "Step 2", "Step 3"],
+      "risk_level": "low",
+      "implementation_time": "2 hours"
+    }
+  ],
+  "alternative_providers": [
+    {
+      "name": "DigitalOcean",
+      "logo": "🌊",
+      "monthly_cost_estimate": 4200,
+      "why": "Simpler interface saves dev time",
+      "savings_vs_current": 800,
+      "recommended_for": "Teams under 10 engineers"
+    }
+  ],
+  "quick_wins": [
+    {"title": "Delete unused EBS volumes", "savings": "$45/month", "time": "10 min"},
+    {"title": "Stop dev environments overnight", "savings": "$180/month", "time": "1 hour"},
+    {"title": "Enable S3 Intelligent Tiering", "savings": "$30/month", "time": "5 min"}
+  ]
+}
+
+Be specific with numbers. Use real cloud pricing. Be conservative — better to under-promise. Provide 3–6 recommendations and 0–3 alternative providers. Always include 3 quick_wins.`
+
+function tryExtractJson(raw: string): AnalysisResult | null {
+  if (!raw) return null
+  try { return JSON.parse(raw) as AnalysisResult } catch (_e) { /* try harder */ }
+  const fenced = raw.match(/```json\s*([\s\S]*?)\s*```/) || raw.match(/```\s*([\s\S]*?)\s*```/)
+  if (fenced) {
+    try { return JSON.parse(fenced[1]) as AnalysisResult } catch (_e) { /* keep going */ }
+  }
+  const first = raw.indexOf('{')
+  const last = raw.lastIndexOf('}')
+  if (first >= 0 && last > first) {
+    try { return JSON.parse(raw.slice(first, last + 1)) as AnalysisResult } catch (_e) { /* fall through */ }
+  }
+  return null
+}
 
 const ALT_PROVIDER_INSTRUCTION = `
 
@@ -271,6 +352,8 @@ export default function AnalyzePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [quickWins, setQuickWins] = useState<any[]>([])
   const [copied, setCopied] = useState(false)
+  const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
+  const [parseError, setParseError] = useState(false)
   const [showWizard, setShowWizard] = useState(false)
   const [showSparkle, setShowSparkle] = useState(false)
 
@@ -314,6 +397,8 @@ export default function AnalyzePage() {
     setDone(false)
     setSaved(false)
     setQuickWins([])
+    setAnalysis(null)
+    setParseError(false)
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
     try {
@@ -325,45 +410,29 @@ export default function AnalyzePage() {
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          max_tokens: 1000,
-          stream: true,
+          max_tokens: 3000,
+          response_format: { type: 'json_object' },
           messages: [
-            { role: 'system', content: mode.systemPrompt + ALT_PROVIDER_INSTRUCTION + modeInstruction(getUserMode()) },
+            { role: 'system', content: mode.systemPrompt + ALT_PROVIDER_INSTRUCTION + JSON_SCHEMA_INSTRUCTION + modeInstruction(getUserMode()) },
             { role: 'user', content: userText },
           ],
         }),
       })
 
-      const reader = res.body?.getReader()
-      const decoder = new TextDecoder()
-      let fullText = ''
+      const data = await res.json()
+      const fullText: string = data.choices?.[0]?.message?.content || ''
+      setResponse(fullText)
 
-      if (reader) {
-        while (true) {
-          const { done: streamDone, value } = await reader.read()
-          if (streamDone) break
-
-          const chunk = decoder.decode(value)
-          const lines = chunk.split('\n').filter(l => l.startsWith('data: '))
-
-          for (const line of lines) {
-            const data = line.replace('data: ', '')
-            if (data === '[DONE]') continue
-            try {
-              const parsed = JSON.parse(data)
-              const token = parsed.choices?.[0]?.delta?.content || ''
-              fullText += token
-              setResponse(fullText)
-            } catch {
-              // partial chunk
-            }
-          }
-        }
+      const parsed = tryExtractJson(fullText)
+      if (parsed && parsed.summary && Array.isArray(parsed.recommendations)) {
+        setAnalysis(parsed)
+      } else {
+        setParseError(true)
+        console.error('JSON parse failed for analyze response')
       }
 
       setDone(true)
       trackEvent('analyze_completed', { mode: modeId })
-      void fetchQuickWins(userText)
 
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
@@ -378,8 +447,10 @@ export default function AnalyzePage() {
         })
         setSaved(true)
       }
-    } catch {
+    } catch (e) {
+      console.error('analyze() failed', e)
       setResponse('Sorry, analysis failed. Please try again.')
+      setParseError(true)
       setDone(true)
     } finally {
       setLoading(false)
@@ -583,34 +654,26 @@ Focus on things they can do TODAY.`,
           </div>
         )}
 
-        {/* Response (streaming + done) */}
-        {(response || loading) && (
+        {/* Visual analysis output */}
+        {(loading || analysis || (response && parseError)) && (
           <>
           <DisclaimerBanner />
-          <div
-            className={`glass-card${loading ? ' animate-glow' : ''}`}
-            style={{
-              padding: 32,
-              marginBottom: done ? 0 : 24,
-              position: 'relative',
-              background: 'linear-gradient(#050508, #050508) padding-box, linear-gradient(135deg, #6366f1, transparent) border-box',
-              border: '1px solid transparent',
-            }}
-          >
+
+          {/* Status bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8, position: 'relative' }}>
             {showSparkle && (
-              <div style={{ position: 'absolute', top: 12, right: 16, display: 'flex', gap: 6, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', top: -4, right: 16, display: 'flex', gap: 6, pointerEvents: 'none' }}>
                 {['✦', '✧', '✦'].map((s, i) => (
                   <span key={i} className="sparkle-icon" style={{ fontSize: 14, color: '#818cf8', animationDelay: `${i * 0.15}s` }}>{s}</span>
                 ))}
               </div>
             )}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#6366f1' : '#22c55e' }} />
-                <span style={{ color: '#a0a0b0', fontSize: 13 }}>
-                  {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
-                </span>
-              </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div className={loading ? 'pulse-ring' : ''} style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#6366f1' : '#22c55e' }} />
+              <span style={{ color: '#a0a0b0', fontSize: 13 }}>
+                {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
+              </span>
+            </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: 11, color: '#444', padding: '3px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
                   Llama 3.3 70B
@@ -626,44 +689,41 @@ Focus on things they can do TODAY.`,
               </div>
             </div>
 
-            {loading && !response && (
-              <>
-                <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(99,102,241,0.08)', borderRadius: 12, marginBottom: 16 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animation: 'pulse 1s infinite', flexShrink: 0 }} />
-                  <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your situation...</span>
-                  <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
+          {/* Loading skeleton */}
+          {loading && !analysis && <AnalysisSkeleton />}
+
+          {/* Visual analysis output */}
+          {analysis && (
+            <div className="page-enter">
+              <SummaryCard data={analysis.summary} />
+              <MetricsRow data={analysis.key_metrics} />
+              {analysis.cost_breakdown && analysis.cost_breakdown.length > 0 && (
+                <CostBreakdownChart data={analysis.cost_breakdown} />
+              )}
+
+              {analysis.recommendations?.length > 0 && (
+                <div style={{ marginTop: 28, marginBottom: 8 }}>
+                  <h2 style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 14, letterSpacing: -0.2 }}>Recommendations</h2>
+                  <JargonWrapper>
+                    <>
+                      {analysis.recommendations.map(rec => (
+                        <RecommendationCard key={rec.id} data={rec} onStartWizard={() => setShowWizard(true)} />
+                      ))}
+                    </>
+                  </JargonWrapper>
                 </div>
-                {[100, 80, 90, 70, 85, 60].map((w, i) => (
-                  <div key={i} style={{
-                    height: 16,
-                    background: 'rgba(255,255,255,0.07)',
-                    borderRadius: 8,
-                    marginBottom: 12,
-                    width: `${w}%`,
-                    animation: 'pulse 1.5s infinite',
-                    animationDelay: `${i * 0.1}s`,
-                  }} />
-                ))}
-              </>
-            )}
-            <JargonWrapper>
-              <MarkdownResponse content={response} />
-            </JargonWrapper>
+              )}
 
-            {loading && (
-              <span style={{
-                display: 'inline-block',
-                width: 2,
-                height: 14,
-                background: '#6366f1',
-                marginLeft: 2,
-                verticalAlign: 'text-bottom',
-              }} />
-            )}
+              {analysis.quick_wins && analysis.quick_wins.length > 0 && (
+                <QuickWinsList data={analysis.quick_wins} />
+              )}
 
-            {done && response && (
-              <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+              {analysis.alternative_providers && analysis.alternative_providers.length > 0 && (
+                <AlternativesSection data={analysis.alternative_providers} />
+              )}
+
+              {/* Confidence breakdown */}
+              <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ fontSize: 11, letterSpacing: 2, color: '#666', marginBottom: 12 }}>
                   🛡️ CONFIDENCE BREAKDOWN
                 </div>
@@ -674,18 +734,30 @@ Focus on things they can do TODAY.`,
                   <ConfidenceBadge level="low"    text="Future projections" />
                 </div>
                 <p style={{ color: '#666', fontSize: 12, margin: 0 }}>
-                  🟢 Verified against published AWS/Azure/GCP pricing as of {new Date().toLocaleDateString()}.&nbsp;
+                  🟢 Verified against published cloud provider pricing as of {new Date().toLocaleDateString()}.&nbsp;
                   🟡 Based on typical workload patterns.&nbsp;
                   🟠 Projections vary with actual usage.
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Fallback: JSON parse failed but we have raw text */}
+          {parseError && response && !analysis && (
+            <div className="glass-card" style={{ padding: 24 }}>
+              <p style={{ color: '#f59e0b', fontSize: 12, fontWeight: 700, marginBottom: 12, letterSpacing: 1 }}>
+                ⚠ DISPLAY ISSUE DETECTED — SHOWING SIMPLIFIED VIEW
+              </p>
+              <JargonWrapper>
+                <MarkdownResponse content={response} />
+              </JargonWrapper>
+            </div>
+          )}
           </>
         )}
 
-        {/* Quick Wins */}
-        {quickWins.length > 0 && (
+        {/* Legacy quick wins fallback (rarely shown — kept for backward compat) */}
+        {!analysis && quickWins.length > 0 && (
           <div style={{ marginTop: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease-in-out infinite' }} />
