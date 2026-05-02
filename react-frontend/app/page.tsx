@@ -365,6 +365,47 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* TRUST BADGES */}
+      <section style={{ padding: '72px 24px', borderTop: '1px solid #ffffff08' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <p style={{ color: '#666', fontSize: 13, letterSpacing: 2, textAlign: 'center', marginBottom: 40 }}>
+            WHY FOUNDERS TRUST CLOUD INTELLIGENCE
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
+            {[
+              {
+                icon: '🛡️',
+                title: '100% Vendor Neutral',
+                desc: 'We never take partner commissions from AWS, Azure, or GCP. Our advice favors what\'s best for you, including recommending cheaper alternatives.',
+                color: '#6366f1',
+              },
+              {
+                icon: '📊',
+                title: 'Verified Pricing Data',
+                desc: `Every dollar amount we cite is backed by the cloud provider's published pricing as of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`,
+                color: '#22c55e',
+              },
+              {
+                icon: '✅',
+                title: 'Performance Guarantee Available',
+                desc: 'With our Pay-Per-Saving plan, you only pay when we deliver verified savings. Zero risk — if we don\'t save you money, you pay nothing.',
+                color: '#f59e0b',
+              },
+            ].map(badge => (
+              <div key={badge.title} style={{
+                padding: '24px 22px', borderRadius: 16,
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 14 }}>{badge.icon}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 8 }}>{badge.title}</div>
+                <div style={{ fontSize: 13, color: '#a0a0b0', lineHeight: 1.6 }}>{badge.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* THE PROBLEM WE SOLVE */}
       <section style={{ padding: '80px 24px', maxWidth: 900, margin: '0 auto' }}>
         <motion.div

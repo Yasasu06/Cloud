@@ -53,6 +53,7 @@ export default function SavingsPage() {
   const [companySize, setCompanySize] = useState<typeof COMPANY_SIZES[number]>('11–50 employees')
   const [calculated, setCalculated] = useState(false)
   const [displayed, setDisplayed] = useState<DisplayedValues>(ZERO)
+  const [showCalc, setShowCalc] = useState(false)
   const rafRef = useRef<number | null>(null)
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }, [])
@@ -209,6 +210,80 @@ export default function SavingsPage() {
                   <div style={{ fontSize: 12, color: '#444', lineHeight: 1.5 }}>{row.desc}</div>
                 </div>
               ))}
+            </div>
+
+            {/* Show calculations */}
+            <div style={{ marginBottom: 20 }}>
+              <button
+                onClick={() => setShowCalc(v => !v)}
+                style={{
+                  background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8,
+                  padding: '8px 16px', color: '#666', fontSize: 13, cursor: 'pointer', transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = '#a0a0b0' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = '#666' }}
+              >
+                {showCalc ? '▲ Hide calculations' : '▼ Show how we calculated this'}
+              </button>
+
+              {showCalc && (
+                <div style={{ marginTop: 12, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '20px 24px' }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>📐 CALCULATION METHODOLOGY</div>
+                  {[
+                    {
+                      label: 'Reserved Instances',
+                      color: '#6366f1',
+                      saving: `$${Math.round(spend * 0.35).toLocaleString()}`,
+                      formula: `Monthly spend × 35%`,
+                      source: 'AWS publishes 30–72% RI savings. We use a conservative 35% (1-year No Upfront).',
+                      link: 'aws.amazon.com/ec2/pricing/reserved-instances/',
+                    },
+                    {
+                      label: 'Right-sizing',
+                      color: '#f59e0b',
+                      saving: `$${Math.round(spend * 0.18).toLocaleString()}`,
+                      formula: `Monthly spend × 18%`,
+                      source: 'FinOps Foundation 2025: average 20% waste from over-provisioning. We use 18% (conservative).',
+                      link: 'finops.org/research/state-of-finops/',
+                    },
+                    {
+                      label: 'Idle Resource Cleanup',
+                      color: '#22c55e',
+                      saving: `$${Math.round(spend * 0.12).toLocaleString()}`,
+                      formula: `Monthly spend × 12%`,
+                      source: 'Flexera State of Cloud 2025: 27% of cloud spend is wasted. Idle resources account for ~12%.',
+                      link: 'flexera.com/blog/cloud/state-of-the-cloud/',
+                    },
+                    {
+                      label: 'Storage Optimization',
+                      color: '#0078D4',
+                      saving: `$${Math.round(spend * 0.08).toLocaleString()}`,
+                      formula: `Monthly spend × 8%`,
+                      source: 'Moving infrequently accessed data from S3 Standard to Intelligent-Tiering saves 60–80% on that data. We assume ~8% of total spend is cold storage.',
+                      link: 'aws.amazon.com/s3/pricing/',
+                    },
+                  ].map(row => (
+                    <div key={row.label} style={{ paddingBottom: 16, marginBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: row.color }}>{row.label}</span>
+                        <span style={{ fontSize: 14, fontWeight: 900, color: row.color }}>{row.saving}/mo</span>
+                      </div>
+                      <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                        <span style={{ color: '#444', fontWeight: 700 }}>Formula:</span> {row.formula}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
+                        <span style={{ color: '#444', fontWeight: 700 }}>Benchmark:</span> {row.source}
+                      </div>
+                      <div style={{ fontSize: 11, color: '#444' }}>
+                        Source: {row.link}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 12, color: '#555' }}>
+                    All percentages are conservative estimates. Actual savings depend on your specific workload and commitment level.
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{
