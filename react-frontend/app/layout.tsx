@@ -124,6 +124,7 @@ export default function RootLayout({
                   {[
                     { label: 'Pricing', href: '/pricing' },
                     { label: 'Case Studies', href: '/case-studies' },
+                    { label: 'Live Stats', href: '/stats' },
                     { label: 'What We Replace', href: '/replaces' },
                     { label: 'Experts', href: '/experts' },
                     { label: 'Dashboard', href: '/dashboard' },

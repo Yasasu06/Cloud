@@ -7,6 +7,8 @@ import { supabase } from '@/lib/supabase'
 import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
 import DecisionsMade from '@/components/DecisionsMade'
 import RoleAwareToolGrid from '@/components/RoleAwareToolGrid'
+import OnboardingTour from '@/components/OnboardingTour'
+import WeeklyDigestToggle from '@/components/WeeklyDigestToggle'
 
 const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
   founder:    { icon: '🚀', label: 'Founder' },
@@ -435,6 +437,7 @@ export default function DashboardPage() {
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>('overview')
   const [role, setRole] = useState<string | null>(null)
+  const [tourOpen, setTourOpen] = useState(false)
 
   useEffect(() => {
     const urlRole = searchParams.get('role')
@@ -567,20 +570,32 @@ export default function DashboardPage() {
             <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 4 }}>Welcome back, {email}</h1>
             <p style={{ color: '#a0a0b0', fontSize: 15 }}>Your cloud intelligence overview.</p>
           </div>
-          {role && ROLE_LABELS[role] && (
-            <Link href="/for-you" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '8px 14px', borderRadius: 10,
-              background: 'rgba(99,102,241,0.08)',
-              border: '1px solid rgba(99,102,241,0.2)',
-              color: '#818cf8', fontSize: 13, fontWeight: 600,
-              textDecoration: 'none', whiteSpace: 'nowrap',
-            }}>
-              <span style={{ color: '#666', fontSize: 11 }}>Showing tools for:</span>
-              <span>{ROLE_LABELS[role].icon} {ROLE_LABELS[role].label}</span>
-              <span style={{ color: '#666' }}>▾</span>
-            </Link>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setTourOpen(true)}
+              style={{
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 8, padding: '6px 12px', color: '#a0a0b0',
+                fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              🎯 Take Tour Again
+            </button>
+            {role && ROLE_LABELS[role] && (
+              <Link href="/for-you" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '8px 14px', borderRadius: 10,
+                background: 'rgba(99,102,241,0.08)',
+                border: '1px solid rgba(99,102,241,0.2)',
+                color: '#818cf8', fontSize: 13, fontWeight: 600,
+                textDecoration: 'none', whiteSpace: 'nowrap',
+              }}>
+                <span style={{ color: '#666', fontSize: 11 }}>Showing tools for:</span>
+                <span>{ROLE_LABELS[role].icon} {ROLE_LABELS[role].label}</span>
+                <span style={{ color: '#666' }}>▾</span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Stat cards */}
@@ -695,6 +710,9 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {/* Weekly digest preference */}
+            <WeeklyDigestToggle />
 
             {/* Role-aware tool grid */}
             <RoleAwareToolGrid />
@@ -863,6 +881,7 @@ export default function DashboardPage() {
         )}
 
       </div>
+      <OnboardingTour forceOpen={tourOpen} onClose={() => setTourOpen(false)} />
     </div>
   )
 }

@@ -37,6 +37,7 @@ const ADVISE_ITEMS = [
 
 const INTELLIGENCE_ITEMS = [
   { href: '/pricing-explorer', label: '💰 Pricing Explorer',      desc: 'Compare 12 providers in real time' },
+  { href: '/stats',            label: '📊 Live Stats',            desc: 'Aggregated user results' },
   { href: '/vendor-alerts',    label: '💸 Price Alerts',          desc: 'Track price changes' },
   { href: '/provider-news',    label: '📰 Cloud Updates',         desc: 'Latest provider news' },
   { href: '/benchmark',        label: '📊 Industry Benchmarks',   desc: 'How you compare to peers' },
@@ -68,6 +69,7 @@ const MOBILE_LINKS = [
   { href: '/credits-tracker',     label: 'Credits Tracker' },
   { href: '/sanity-check',        label: 'Sanity Check' },
   { href: '/pricing-explorer',    label: 'Pricing Explorer' },
+  { href: '/stats',               label: 'Live Stats' },
   { href: '/vendor-alerts',       label: 'Price Alerts' },
   { href: '/benchmark',           label: 'Industry Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },

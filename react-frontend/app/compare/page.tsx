@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { compareCompute, type ComparisonRow } from '@/lib/pricing/compare'
+import LivePricingBadge from '@/components/LivePricingBadge'
 
 const ALL_PROVIDERS = ['AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner', 'Oracle Cloud', 'Linode', 'Vultr', 'Cloudflare Workers', 'OVH', 'Render', 'Railway'] as const
 type Provider = typeof ALL_PROVIDERS[number]
@@ -96,6 +98,26 @@ export default function ComparePage() {
     }
   }, [])
   const [winnerKey, setWinnerKey] = useState<WinnerKey | null>(null)
+  const [liveSpec, setLiveSpec] = useState({ vcpus: 2, ram_gb: 4 })
+  const [liveRows, setLiveRows] = useState<ComparisonRow[]>([])
+  const [liveLoading, setLiveLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setLiveLoading(true)
+    compareCompute(liveSpec).then(rows => {
+      if (!cancelled) { setLiveRows(rows); setLiveLoading(false) }
+    })
+    return () => { cancelled = true }
+  }, [liveSpec])
+
+  // Match selected providers (Provider type uses "Oracle Cloud", "Cloudflare Workers" — pricing module uses short names)
+  const PROVIDER_MAP: Record<string, string> = { 'Oracle Cloud': 'Oracle', 'Cloudflare Workers': 'Cloudflare' }
+  const PROVIDER_MAP_INV: Record<string, string> = { Oracle: 'Oracle Cloud', Cloudflare: 'Cloudflare Workers' }
+  const filteredLiveRows = useMemo(() => {
+    const wanted = new Set(selected.map(p => PROVIDER_MAP[p] ?? p))
+    return liveRows.filter(r => wanted.has(r.provider))
+  }, [liveRows, selected])
 
   function toggleProvider(p: Provider) {
     setSelected(prev => {
@@ -140,6 +162,70 @@ export default function ComparePage() {
             })}
           </div>
         </div>
+
+        {/* Live pricing panel */}
+        {selected.length >= 2 && (
+          <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '24px 28px', border: '1px solid rgba(34,197,94,0.2)', marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0 }}>Live Pricing</h2>
+                <LivePricingBadge compact />
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {[{ l: '1 vCPU · 1GB', v: 1, r: 1 }, { l: '2 vCPU · 4GB', v: 2, r: 4 }, { l: '4 vCPU · 16GB', v: 4, r: 16 }, { l: '8 vCPU · 32GB', v: 8, r: 32 }].map(s => (
+                  <button key={s.l} onClick={() => setLiveSpec({ vcpus: s.v, ram_gb: s.r })}
+                    style={{ padding: '5px 12px', borderRadius: 16, fontSize: 11, fontWeight: 600,
+                      background: liveSpec.vcpus === s.v && liveSpec.ram_gb === s.r ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${liveSpec.vcpus === s.v && liveSpec.ram_gb === s.r ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                      color: liveSpec.vcpus === s.v && liveSpec.ram_gb === s.r ? '#818cf8' : '#a0a0b0', cursor: 'pointer' }}
+                  >{s.l}</button>
+                ))}
+              </div>
+            </div>
+
+            {liveLoading ? (
+              <div className="ai-shimmer" style={{ height: 160, borderRadius: 12 }} />
+            ) : filteredLiveRows.length === 0 ? (
+              <p style={{ color: '#666', fontSize: 13, padding: '12px 0' }}>None of your selected providers have an instance matching {liveSpec.vcpus} vCPU + {liveSpec.ram_gb}GB. Try a smaller spec.</p>
+            ) : (
+              <>
+                {filteredLiveRows.length > 1 && (() => {
+                  const cheapest = filteredLiveRows[0]
+                  const top = filteredLiveRows[filteredLiveRows.length - 1]
+                  const delta = top.instance.price_monthly_usd - cheapest.instance.price_monthly_usd
+                  return delta > 0 ? (
+                    <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)', marginBottom: 12, fontSize: 13 }}>
+                      <strong style={{ color: '#22c55e' }}>Save ${delta.toFixed(0)}/mo</strong>{' '}
+                      <span style={{ color: '#a0a0b0' }}>vs the most expensive — {cheapest.provider} ({cheapest.instance.name}) is the cheapest match.</span>
+                    </div>
+                  ) : null
+                })()}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {filteredLiveRows.map((row, i) => {
+                    const color = DATA[row.provider as Provider]?.color ?? DATA[(PROVIDER_MAP_INV[row.provider] ?? row.provider) as Provider]?.color ?? '#888'
+                    const isCheapest = i === 0
+                    return (
+                      <div key={row.provider} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '12px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.05)`, borderLeft: `3px solid ${color}` }}>
+                        <div style={{ flex: '1 1 160px', minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            <strong style={{ color, fontSize: 13 }}>{row.provider}</strong>
+                            {isCheapest && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', background: 'rgba(34,197,94,0.15)', color: '#22c55e', borderRadius: 4, letterSpacing: 0.8 }}>WINNER</span>}
+                            <LivePricingBadge provider={row.provider} compact />
+                          </div>
+                          <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{row.instance.name} — {row.instance.vcpus}vCPU/{row.instance.ram_gb}GB</div>
+                        </div>
+                        <div style={{ flex: '0 0 auto', textAlign: 'right' }}>
+                          <span style={{ fontSize: 18, fontWeight: 900, color: 'white' }}>${row.instance.price_monthly_usd.toFixed(0)}</span>
+                          <span style={{ fontSize: 10, color: '#666', marginLeft: 4 }}>/mo</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {selected.length >= 2 && (
           <div style={{ overflowX: 'auto', marginBottom: 40 }}>

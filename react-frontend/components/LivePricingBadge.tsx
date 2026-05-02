@@ -1,6 +1,6 @@
 'use client'
 
-import { PROVIDER_LAST_UPDATED, PROVIDER_SOURCE } from '@/lib/pricing/compare'
+import { PROVIDER_LAST_UPDATED, providerSource } from '@/lib/pricing/compare'
 
 function timeAgo(dateStr: string): string {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86400000)
@@ -18,7 +18,7 @@ interface Props {
 export default function LivePricingBadge({ provider, compact }: Props) {
   if (provider) {
     const last = PROVIDER_LAST_UPDATED[provider]
-    const source = PROVIDER_SOURCE[provider]
+    const source = providerSource(provider)
     if (!last) return null
     const isLive = source === 'live-api'
     return (

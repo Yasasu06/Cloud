@@ -42,6 +42,7 @@ const PATH_LABELS: Record<string, string> = {
   'case-studies':     'Case Studies',
   'for-you':          'Find Your Toolkit',
   'pricing-explorer': 'Pricing Explorer',
+  stats:              'Live Stats',
   terms:              'Terms',
   privacy:            'Privacy',
 }
@@ -75,6 +76,7 @@ const SECTION_LABELS: Record<string, string> = {
   'waste-report':     'Intelligence',
   replaces:           'Intelligence',
   'pricing-explorer': 'Intelligence',
+  stats:              'Intelligence',
 }
 
 export default function Breadcrumbs() {
