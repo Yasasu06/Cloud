@@ -85,6 +85,11 @@ export default function ForecastPage() {
         </div>
 
         {/* Inputs */}
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
+          💡 <strong style={{ color: 'white', fontWeight: 600 }}>No historical data?</strong> Use{' '}
+          <a href="/benchmark" style={{ color: '#818cf8' }}>/benchmark</a> to compare to similar companies.
+        </div>
+
         <div style={{ background: '#1a1a2e', borderRadius: 16, padding: '24px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 32, display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div style={{ flex: '1 1 180px' }}>
             <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 8 }}>CURRENT MONTHLY SPEND</label>

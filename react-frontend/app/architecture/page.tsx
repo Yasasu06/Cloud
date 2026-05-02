@@ -143,6 +143,11 @@ ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare f
           ))}
         </div>
 
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
+          💡 <strong style={{ color: 'white', fontWeight: 600 }}>Not sure of your stack?</strong> Try the{' '}
+          <a href="/advisor" style={{ color: '#818cf8' }}>/advisor</a> quiz to discover what you need.
+        </div>
+
         <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 32 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 12 }}>
             DESCRIBE YOUR PROJECT

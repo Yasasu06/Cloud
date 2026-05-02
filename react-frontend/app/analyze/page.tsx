@@ -370,6 +370,18 @@ function RelatedTools({ response }: { response: string }) {
 export default function AnalyzePage() {
   const router = useRouter()
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null)
+  const [userType, setUserType] = useState<'direct' | 'guided' | 'explore' | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const stored = localStorage.getItem('analyze_user_type')
+    if (stored === 'direct' || stored === 'guided' || stored === 'explore') setUserType(stored)
+  }, [])
+
+  function pickUserType(t: 'direct' | 'guided' | 'explore') {
+    setUserType(t)
+    if (typeof window !== 'undefined') localStorage.setItem('analyze_user_type', t)
+  }
   const [input, setInput] = useState('')
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
@@ -688,8 +700,60 @@ Focus on things they can do TODAY.`,
           ))}
         </div>
 
+        {/* Three user types picker */}
+        {!done && !userType && !selectedMode && (
+          <div style={{ marginBottom: 32 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 14, textAlign: 'center' }}>How would you like to start?</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+              {[
+                { id: 'direct',  icon: '🎯', title: 'I know my problem', desc: 'I can describe my situation in plain English.' },
+                { id: 'guided',  icon: '🧭', title: 'Something feels wrong', desc: "Walk me through 5 questions to find it." },
+                { id: 'explore', icon: '🔍', title: 'Just exploring', desc: 'Show me popular use cases as starting templates.' },
+              ].map(opt => (
+                <button key={opt.id} onClick={() => pickUserType(opt.id as 'direct' | 'guided' | 'explore')}
+                  style={{ padding: '20px 22px', borderRadius: 14, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)', textAlign: 'left', cursor: 'pointer', color: 'white', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(99,102,241,0.4)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(0)' }}
+                >
+                  <div style={{ fontSize: 28, marginBottom: 10 }}>{opt.icon}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 4 }}>{opt.title}</div>
+                  <div style={{ fontSize: 12, color: '#a0a0b0', lineHeight: 1.5 }}>{opt.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* "Explore" mode shows quick-start templates */}
+        {!done && userType === 'explore' && !selectedMode && !response && (
+          <div style={{ marginBottom: 24, padding: '16px 18px', borderRadius: 12, background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.15)' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#818cf8', letterSpacing: 1.5, marginBottom: 10 }}>POPULAR STARTING POINTS</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[
+                "We're spending $12k/month on AWS and the bill keeps growing — find waste",
+                'Starting a healthcare SaaS — which cloud for HIPAA compliance?',
+                'Considering moving from AWS to Hetzner for cost — what should I know?',
+                'Our LLM costs hit $4k/month — how do we reduce them?',
+              ].map(t => (
+                <button key={t} onClick={() => { setSelectedMode('finops'); setInput(t) }}
+                  style={{ padding: '8px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 12, color: '#a0a0b0', cursor: 'pointer', textAlign: 'left', maxWidth: '100%' }}
+                >{t}</button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Don't have data? helper */}
+        {!done && !response && userType && !loading && (
+          <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
+            💡 <strong style={{ color: 'white', fontWeight: 600 }}>Don&apos;t have your bill handy?</strong> Try{' '}
+            <a href="/instant-audit" style={{ color: '#818cf8' }}>/instant-audit</a> — works with just your spend total.
+            {' '}Or use <a href="/advisor" style={{ color: '#818cf8' }}>/advisor</a> to discover what you need via a 5-question quiz.
+          </div>
+        )}
+
         {/* Mode selection */}
-        {!done && (
+        {!done && userType && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16, marginBottom: 32 }}>
             {MODES.map(mode => (
               <button

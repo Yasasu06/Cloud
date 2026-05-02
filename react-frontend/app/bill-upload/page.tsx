@@ -214,6 +214,11 @@ export default function BillUploadPage() {
           </p>
         </div>
 
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
+          💡 <strong style={{ color: 'white', fontWeight: 600 }}>No CSV file?</strong> Try{' '}
+          <a href="/analyze" style={{ color: '#818cf8' }}>/analyze</a> with just your spend amount instead.
+        </div>
+
         {/* AWS instructions banner */}
         <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>

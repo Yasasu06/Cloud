@@ -9,6 +9,7 @@ import DecisionsMade from '@/components/DecisionsMade'
 import RoleAwareToolGrid from '@/components/RoleAwareToolGrid'
 import OnboardingTour from '@/components/OnboardingTour'
 import WeeklyDigestToggle from '@/components/WeeklyDigestToggle'
+import FreeTrialMeter from '@/components/FreeTrialMeter'
 
 const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
   founder:    { icon: '🚀', label: 'Founder' },
@@ -710,6 +711,9 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {/* Free tier usage meter */}
+            <FreeTrialMeter />
 
             {/* Weekly digest preference */}
             <WeeklyDigestToggle />
