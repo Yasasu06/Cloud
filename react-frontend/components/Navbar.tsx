@@ -7,20 +7,24 @@ import { Menu, X, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const ANALYZE_ITEMS = [
-  { href: '/analyze',       label: '🔍 AI Analyze',          desc: 'Explain any cloud situation' },
-  { href: '/architecture',  label: '🏗️ Architecture',         desc: 'Visualize your stack' },
-  { href: '/bill-upload',   label: '📊 Bill Upload',          desc: 'Analyze your actual bill' },
-  { href: '/savings',       label: '💰 Savings Calculator',   desc: 'Find your savings' },
-  { href: '/migration-cost',label: '🔄 Egress Calculator',    desc: 'Cost to switch providers' },
+  { href: '/analyze',            label: '🔍 AI Analyze',              desc: 'Explain any cloud situation' },
+  { href: '/architecture',       label: '🏗️ Architecture',             desc: 'Visualize your stack' },
+  { href: '/bill-upload',        label: '📊 Bill Upload',              desc: 'Analyze your actual bill' },
+  { href: '/savings',            label: '💰 Savings Calculator',       desc: 'Find your savings' },
+  { href: '/migration-cost',     label: '🔄 Egress Calculator',        desc: 'Cost to switch providers' },
+  { href: '/forecast',           label: '📈 Cost Forecast',            desc: 'Project your cloud spend' },
+  { href: '/multi-cloud',        label: '☁️ Multi-Cloud View',          desc: 'Consolidate all providers' },
+  { href: '/terraform-estimator',label: '🏗️ Infrastructure Estimator', desc: 'Estimate infra costs' },
 ]
 
 const ADVISE_ITEMS = [
-  { href: '/advisor',       label: '🎯 Cloud Advisor',        desc: 'Get a recommendation' },
-  { href: '/report-card',   label: '📋 Report Card',          desc: 'Grade your setup' },
-  { href: '/benchmark',     label: '🏆 Cloud Score',          desc: 'Maturity assessment' },
-  { href: '/ai-advisor',    label: '💼 AI Strategy',          desc: 'Full strategy session' },
-  { href: '/roi-calculator',label: '📈 ROI Calculator',       desc: 'Calculate your ROI' },
-  { href: '/compliance',    label: '✅ Compliance',           desc: 'Check requirements' },
+  { href: '/advisor',            label: '🎯 Cloud Advisor',            desc: 'Get a recommendation' },
+  { href: '/report-card',        label: '📋 Report Card',              desc: 'Grade your setup' },
+  { href: '/benchmark',          label: '🏆 Cloud Score',              desc: 'Maturity assessment' },
+  { href: '/ai-advisor',         label: '💼 AI Strategy',              desc: 'Full strategy session' },
+  { href: '/roi-calculator',     label: '📈 ROI Calculator',           desc: 'Calculate your ROI' },
+  { href: '/compliance',         label: '✅ Compliance',               desc: 'Check requirements' },
+  { href: '/reserved-instances', label: '🔒 Reserved Instances',       desc: 'Optimize commitments' },
 ]
 
 const INTELLIGENCE_ITEMS = [
@@ -31,21 +35,25 @@ const INTELLIGENCE_ITEMS = [
 ]
 
 const MOBILE_LINKS = [
-  { href: '/',               label: 'Home' },
-  { href: '/analyze',        label: 'AI Analyze' },
-  { href: '/architecture',   label: 'Architecture' },
-  { href: '/bill-upload',    label: 'Bill Upload' },
-  { href: '/savings',        label: 'Savings Calculator' },
-  { href: '/migration-cost', label: 'Egress Calculator' },
-  { href: '/advisor',        label: 'Cloud Advisor' },
-  { href: '/report-card',    label: 'Report Card' },
-  { href: '/ai-advisor',     label: 'AI Strategy' },
-  { href: '/roi-calculator', label: 'ROI Calculator' },
-  { href: '/compliance',     label: 'Compliance' },
-  { href: '/vendor-alerts',  label: 'Price Alerts' },
-  { href: '/benchmark',      label: 'Benchmarks' },
-  { href: '/cloud-glossary', label: 'Glossary' },
-  { href: '/pricing',        label: 'Pricing' },
+  { href: '/',                    label: 'Home' },
+  { href: '/analyze',             label: 'AI Analyze' },
+  { href: '/architecture',        label: 'Architecture' },
+  { href: '/bill-upload',         label: 'Bill Upload' },
+  { href: '/savings',             label: 'Savings Calculator' },
+  { href: '/migration-cost',      label: 'Egress Calculator' },
+  { href: '/forecast',            label: 'Cost Forecast' },
+  { href: '/multi-cloud',         label: 'Multi-Cloud View' },
+  { href: '/terraform-estimator', label: 'Infrastructure Estimator' },
+  { href: '/advisor',             label: 'Cloud Advisor' },
+  { href: '/report-card',         label: 'Report Card' },
+  { href: '/ai-advisor',          label: 'AI Strategy' },
+  { href: '/roi-calculator',      label: 'ROI Calculator' },
+  { href: '/compliance',          label: 'Compliance' },
+  { href: '/reserved-instances',  label: 'Reserved Instances' },
+  { href: '/vendor-alerts',       label: 'Price Alerts' },
+  { href: '/benchmark',           label: 'Benchmarks' },
+  { href: '/cloud-glossary',      label: 'Glossary' },
+  { href: '/pricing',             label: 'Pricing' },
 ]
 
 function DropdownMenu({ items, open }: { items: typeof ANALYZE_ITEMS; open: boolean }) {
@@ -103,8 +111,8 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost'].includes(pathname)
-  const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance'].includes(pathname)
+  const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost', '/forecast', '/multi-cloud', '/terraform-estimator'].includes(pathname)
+  const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance', '/reserved-instances'].includes(pathname)
   const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary'].includes(pathname)
 
   return (
