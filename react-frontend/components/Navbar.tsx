@@ -11,6 +11,7 @@ const ANALYZE_ITEMS = [
   { href: '/bill-upload', label: 'Bill Upload', desc: 'Upload your cloud bill' },
   { href: '/cloud-twin', label: 'Cloud Twin', desc: 'Build your cloud profile' },
   { href: '/benchmark', label: 'Benchmark', desc: 'Compare your spend to industry averages' },
+  { href: '/migration-cost', label: 'Egress Calculator', desc: 'Cost to switch cloud providers' },
 ]
 
 const ADVISE_ITEMS = [
@@ -35,6 +36,7 @@ const MOBILE_LINKS = [
   { href: '/roi-calculator', label: 'ROI Calculator' },
   { href: '/vendor-alerts', label: 'Price Alerts' },
   { href: '/cost-alerts', label: 'Cost Alerts' },
+  { href: '/migration-cost', label: 'Egress Calculator' },
   { href: '/pricing', label: 'Pricing' },
 ]
 
@@ -98,7 +100,7 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
+  const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark', '/migration-cost'].includes(pathname)
   const adviseActive       = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
   const intelligenceActive = ['/vendor-alerts', '/cost-alerts'].includes(pathname)
 
