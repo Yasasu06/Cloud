@@ -163,7 +163,9 @@ Respond with ONLY a JSON object in this exact format, no other text:
           messages: [
             {
               role: 'system',
-              content: 'You are a cloud architect. Always respond with valid JSON only. No markdown, no explanation, just the JSON object.',
+              content: `You are a cloud architect. Always respond with valid JSON only. No markdown, no explanation, just the JSON object.
+
+ALTERNATIVE PROVIDERS: Consider alternatives equally — DigitalOcean, Hetzner, Cloudflare, Linode, Vultr, Render, Railway. For startups spending under $2k/month, DigitalOcean or Render is often a better fit than AWS/Azure/GCP. For EU + cost-sensitive workloads, recommend Hetzner. For edge + zero-egress, recommend Cloudflare. Don't default to AWS just because it's the default — score by actual fit.`,
             },
             { role: 'user', content: prompt },
           ],

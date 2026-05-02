@@ -91,12 +91,14 @@ export default function ArchitecturePage() {
               content: `You are a cloud architect. Given a project description, return ONLY valid JSON (no markdown) with this exact structure:
 {
   "services": [
-    { "name": "string", "tier": "network|compute|database|storage|security", "provider": "AWS|Azure|GCP|Generic", "cost": "$X/mo", "connects": ["OtherServiceName"] }
+    { "name": "string", "tier": "network|compute|database|storage|security", "provider": "AWS|Azure|GCP|Cloudflare|Hetzner|Render|Railway|DigitalOcean|Generic", "cost": "$X/mo", "connects": ["OtherServiceName"] }
   ],
   "summary": "one sentence describing the architecture",
   "monthlyCost": "$X–Y/month estimated"
 }
-Include 5–9 services. Use realistic cloud service names. Tier must be one of: network, compute, database, storage, security.`,
+Include 5–9 services. Use realistic cloud service names. Tier must be one of: network, compute, database, storage, security.
+
+ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare for CDN/edge/zero-egress, Hetzner for cost-sensitive servers (60–80% cheaper than AWS), Render for PaaS, Railway for indie/startup deploys, DigitalOcean for simplicity. Don't default to AWS/Azure/GCP for everything.`,
             },
             { role: 'user', content: description },
           ],

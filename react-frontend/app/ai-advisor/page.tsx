@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import { getUserMode, modeInstruction } from '@/lib/userMode'
 
 const QUESTIONS = [
   "What are you building or running on cloud? Give me a quick description.",
@@ -221,7 +222,10 @@ export default function AiAdvisorPage() {
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'user', content: buildPrompt(finalAnswers) }],
+          messages: [
+            { role: 'system', content: 'You are a senior cloud strategy advisor.' + modeInstruction(getUserMode()) },
+            { role: 'user', content: buildPrompt(finalAnswers) },
+          ],
           stream: true,
           max_tokens: 1400,
         }),

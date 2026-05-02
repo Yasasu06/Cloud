@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import GlobalSearch from './GlobalSearch'
+import ModeToggle from './ModeToggle'
 
 const ANALYZE_ITEMS = [
   { href: '/analyze',            label: '🔍 AI Analyze',              desc: 'Explain any cloud situation' },
@@ -292,6 +293,11 @@ export default function Navbar() {
             🔍
             <span className="hide-mobile" style={{ fontSize: 11, color: '#555' }}>⌘K</span>
           </button>
+
+          {/* Mode toggle (Plain English / Technical) */}
+          <div className="hide-mobile">
+            <ModeToggle />
+          </div>
 
           {/* Right side */}
           <div className="flex items-center gap-3">

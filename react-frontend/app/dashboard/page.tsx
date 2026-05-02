@@ -1,10 +1,19 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
+
+const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
+  founder:    { icon: '🚀', label: 'Founder' },
+  finops:     { icon: '💰', label: 'FinOps Lead' },
+  architect:  { icon: '🏗️', label: 'Architect' },
+  itmanager:  { icon: '👥', label: 'IT Manager' },
+  consultant: { icon: '🎯', label: 'Consultant' },
+  beginner:   { icon: '🧑‍💻', label: 'Beginner' },
+}
 
 type Tab = 'overview' | 'analyses' | 'team' | 'clients'
 
@@ -421,7 +430,20 @@ function LiveAWSSection({ data, lastRefresh, onRefresh }: { data: AWSCostData; l
 
 export default function DashboardPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>('overview')
+  const [role, setRole] = useState<string | null>(null)
+
+  useEffect(() => {
+    const urlRole = searchParams.get('role')
+    if (urlRole && ROLE_LABELS[urlRole]) {
+      setRole(urlRole)
+      localStorage.setItem('user_role', urlRole)
+    } else {
+      const stored = localStorage.getItem('user_role')
+      if (stored && ROLE_LABELS[stored]) setRole(stored)
+    }
+  }, [searchParams])
   const [email, setEmail] = useState<string | null>(null)
   const [recentRecs, setRecentRecs] = useState<Rec[]>([])
   const [stats, setStats] = useState<Stats>({ total: 0, lastDate: null, topProvider: null, plan: 'Free' })
@@ -537,10 +559,26 @@ export default function DashboardPage() {
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '100px 24px 80px' }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 32 }}>
-          <p style={{ color: '#6366f1', fontSize: 12, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>DASHBOARD</p>
-          <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 4 }}>Welcome back, {email}</h1>
-          <p style={{ color: '#a0a0b0', fontSize: 15 }}>Your cloud intelligence overview.</p>
+        <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+          <div>
+            <p style={{ color: '#6366f1', fontSize: 12, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>DASHBOARD</p>
+            <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 4 }}>Welcome back, {email}</h1>
+            <p style={{ color: '#a0a0b0', fontSize: 15 }}>Your cloud intelligence overview.</p>
+          </div>
+          {role && ROLE_LABELS[role] && (
+            <Link href="/for-you" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '8px 14px', borderRadius: 10,
+              background: 'rgba(99,102,241,0.08)',
+              border: '1px solid rgba(99,102,241,0.2)',
+              color: '#818cf8', fontSize: 13, fontWeight: 600,
+              textDecoration: 'none', whiteSpace: 'nowrap',
+            }}>
+              <span style={{ color: '#666', fontSize: 11 }}>Showing tools for:</span>
+              <span>{ROLE_LABELS[role].icon} {ROLE_LABELS[role].label}</span>
+              <span style={{ color: '#666' }}>▾</span>
+            </Link>
+          )}
         </div>
 
         {/* Stat cards */}

@@ -10,6 +10,16 @@ import { JargonText, JargonWrapper } from '@/components/JargonTooltip'
 import JourneyProgress from '@/components/JourneyProgress'
 import ImplementationWizard from '@/components/ImplementationWizard'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import { getUserMode, modeInstruction } from '@/lib/userMode'
+
+const ALT_PROVIDER_INSTRUCTION = `
+
+ALTERNATIVE PROVIDERS:
+Always consider alternative providers (DigitalOcean, Hetzner, Cloudflare, Linode, Vultr, Render, Railway) when relevant. For startups spending under $5k/month, these alternatives often provide better value than the big 3. Don't default to AWS/Azure/GCP — recommend based on actual fit. Specifically:
+- Cloudflare Workers/R2 for edge + zero-egress workloads
+- Hetzner for cost-sensitive EU workloads (60–80% cheaper than AWS for similar specs)
+- DigitalOcean for simplicity and predictable pricing
+- Render/Railway for Heroku-style deploys without ops overhead`
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -318,7 +328,7 @@ export default function AnalyzePage() {
           max_tokens: 1000,
           stream: true,
           messages: [
-            { role: 'system', content: mode.systemPrompt },
+            { role: 'system', content: mode.systemPrompt + ALT_PROVIDER_INSTRUCTION + modeInstruction(getUserMode()) },
             { role: 'user', content: userText },
           ],
         }),

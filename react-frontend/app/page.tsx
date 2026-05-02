@@ -1,9 +1,35 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import { routeForQuery } from '@/lib/smartRouter'
 
 interface LastRec { provider: string; confidence: number }
+
+const HERO_CHIPS = [
+  { emoji: '💸', text: 'My AWS bill doubled', q: 'My AWS bill doubled this month' },
+  { emoji: '🏗️', text: 'Designing a SaaS app', q: 'Designing a SaaS app architecture' },
+  { emoji: '🌍', text: 'Considering DigitalOcean', q: 'Considering DigitalOcean as an alternative' },
+  { emoji: '🤖', text: 'OpenAI costs are killing me', q: 'OpenAI costs are killing me - need to reduce LLM spend' },
+  { emoji: '🎁', text: 'Tracking startup credits', q: 'Tracking my startup credits across providers' },
+  { emoji: '🏥', text: 'HIPAA compliance check', q: 'HIPAA compliance check for healthcare workload' },
+]
+
+const PROVIDER_LIST = [
+  { name: 'AWS',          color: '#f59e0b', desc: 'Market leader' },
+  { name: 'Azure',        color: '#0078D4', desc: 'Microsoft ecosystem' },
+  { name: 'GCP',          color: '#4285f4', desc: 'AI-first cloud' },
+  { name: 'DigitalOcean', color: '#0080ff', desc: 'Developer-friendly' },
+  { name: 'Hetzner',      color: '#e63946', desc: 'Best price/perf' },
+  { name: 'Linode',       color: '#02b159', desc: 'Simple & affordable' },
+  { name: 'Vultr',        color: '#007bfc', desc: 'Global edge' },
+  { name: 'Cloudflare',   color: '#f6821f', desc: 'Edge serverless' },
+  { name: 'Oracle',       color: '#c0392b', desc: 'Generous free tier' },
+  { name: 'OVH',          color: '#123f6d', desc: 'European leader' },
+  { name: 'Render',       color: '#46e3b7', desc: 'Heroku replacement' },
+  { name: 'Railway',      color: '#b044f8', desc: 'Modern dev platform' },
+]
 
 const DEMO_LINES = [
   { text: 'Analyzing your AWS bill...', color: '#a0a0b0', delay: 0 },
@@ -28,11 +54,18 @@ function FadeInSection({ children, delay = 0 }: { children: React.ReactNode; del
 }
 
 export default function HomePage() {
+  const router = useRouter()
+  const [query, setQuery] = useState('')
   const [lastRec, setLastRec] = useState<LastRec | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [particles, setParticles] = useState<Array<{ x: number; y: number; size: number; dur: number; delay: number }>>([])
   const [visibleLines, setVisibleLines] = useState(0)
   const demoRef = useRef<NodeJS.Timeout | null>(null)
+
+  function submit(q: string) {
+    if (!q.trim()) return
+    router.push(routeForQuery(q.trim()))
+  }
 
   useEffect(() => {
     const handle = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY })
@@ -125,15 +158,62 @@ export default function HomePage() {
             AI-powered cloud advisor that explains your spend, finds waste, and gives you a 30-day action plan. In plain English. In 30 seconds.
           </p>
 
-          {/* Two CTAs */}
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
-            <a href="/instant-audit" className="btn-primary animate-glow" style={{ fontSize: 16, padding: '14px 32px', display: 'inline-block' }}>
-              Start Free Audit →
-            </a>
-            <a href="#demo-preview" className="btn-secondary" style={{ fontSize: 16, padding: '14px 32px', display: 'inline-block' }}>
-              Watch 60s Demo
-            </a>
+          {/* Smart routing input */}
+          <div style={{ position: 'relative', maxWidth: 640, margin: '0 auto 20px' }}>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && submit(query)}
+              placeholder="Describe your cloud situation in plain English..."
+              style={{
+                width: '100%', padding: '20px 130px 20px 24px', fontSize: 17,
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(99,102,241,0.25)',
+                borderRadius: 16, color: 'white', outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            <button
+              onClick={() => submit(query)}
+              disabled={!query.trim()}
+              className={query.trim() ? 'animate-glow' : ''}
+              style={{
+                position: 'absolute', right: 8, top: 8, bottom: 8,
+                padding: '0 22px', borderRadius: 12, fontSize: 14, fontWeight: 700,
+                background: query.trim() ? '#6366f1' : 'rgba(99,102,241,0.25)',
+                color: 'white', border: 'none',
+                cursor: query.trim() ? 'pointer' : 'not-allowed',
+              }}
+            >
+              Go →
+            </button>
           </div>
+
+          {/* Example chips */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', maxWidth: 720, margin: '0 auto 24px' }}>
+            {HERO_CHIPS.map(c => (
+              <button
+                key={c.text}
+                onClick={() => submit(c.q)}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 20, padding: '7px 14px', fontSize: 13,
+                  color: '#a0a0b0', fontWeight: 500, cursor: 'pointer',
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(99,102,241,0.4)'; (e.currentTarget as HTMLElement).style.color = 'white' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; (e.currentTarget as HTMLElement).style.color = '#a0a0b0' }}
+              >
+                {c.emoji} {c.text}
+              </button>
+            ))}
+          </div>
+
+          {/* /for-you link */}
+          <a href="/for-you" style={{ display: 'inline-block', color: '#818cf8', fontSize: 13, textDecoration: 'none', fontWeight: 600, marginBottom: 28 }}>
+            Or browse tools by your role →
+          </a>
 
           {/* Trust line */}
           <p style={{ color: '#555', fontSize: 13 }}>
@@ -280,6 +360,39 @@ export default function HomePage() {
                   </div>
                 </a>
               </FadeInSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 12 PROVIDERS COVERED ─────────────────────────────────────── */}
+      <section style={{ padding: '72px 24px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 980, margin: '0 auto' }}>
+          <FadeInSection>
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <p style={{ color: '#555', fontSize: 13, letterSpacing: 2, marginBottom: 12 }}>EQUAL WEIGHT, NO SPONSORSHIPS</p>
+              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, marginBottom: 12 }}>12 providers covered</h2>
+              <p style={{ color: '#a0a0b0', fontSize: 15, maxWidth: 520, margin: '0 auto' }}>
+                We don&apos;t just compare AWS, Azure, and GCP. Alternatives often deliver better value for startups — we treat all providers equally.
+              </p>
+            </div>
+          </FadeInSection>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
+            {PROVIDER_LIST.map(p => (
+              <a key={p.name} href={`/compare?provider=${encodeURIComponent(p.name)}`}
+                style={{
+                  padding: '16px 14px', borderRadius: 12, textDecoration: 'none',
+                  background: 'rgba(255,255,255,0.02)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderLeft: `3px solid ${p.color}`,
+                  transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)' }}
+              >
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 4 }}>{p.name}</div>
+                <div style={{ fontSize: 11, color: '#666' }}>{p.desc}</div>
+              </a>
             ))}
           </div>
         </div>

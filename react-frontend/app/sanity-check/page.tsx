@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import { getUserMode, modeInstruction } from '@/lib/userMode'
 
 const EXAMPLES = [
   'Enable Aurora Multi-AZ for production database',
@@ -75,7 +76,7 @@ export default function SanityCheckPage() {
           max_tokens: 700,
           stream: true,
           messages: [
-            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'system', content: SYSTEM_PROMPT + modeInstruction(getUserMode()) },
             { role: 'user', content: `I am about to: ${input}` },
           ],
         }),
