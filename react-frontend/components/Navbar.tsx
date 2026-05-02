@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import GlobalSearch from './GlobalSearch'
 
 const ANALYZE_ITEMS = [
   { href: '/analyze',            label: '🔍 AI Analyze',              desc: 'Explain any cloud situation' },
@@ -100,8 +101,20 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [loggedIn, setLoggedIn] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
+
+  useEffect(() => {
+    function handleKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session))
@@ -217,6 +230,26 @@ export default function Navbar() {
             </Link>
           </div>
 
+          {/* Search button */}
+          <button
+            onClick={() => setSearchOpen(true)}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: 8,
+              padding: '6px 12px',
+              color: '#a0a0b0',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 13,
+            }}
+          >
+            🔍
+            <span style={{ fontSize: 11, color: '#555' }}>⌘K</span>
+          </button>
+
           {/* Right side */}
           <div className="flex items-center gap-3">
             {loggedIn ? (
@@ -252,6 +285,8 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {searchOpen && <GlobalSearch onClose={() => setSearchOpen(false)} />}
 
       {/* Mobile menu */}
       {menuOpen && (

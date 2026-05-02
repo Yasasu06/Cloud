@@ -1,0 +1,15 @@
+-- Run this in the Supabase SQL editor to enable search tracking:
+--
+-- create table search_queries (
+--   id uuid default gen_random_uuid() primary key,
+--   query text not null,
+--   result_found boolean default true,
+--   clicked_result text,
+--   user_id uuid references auth.users(id),
+--   created_at timestamp default now()
+-- );
+--
+-- Enable row-level security (optional but recommended):
+-- alter table search_queries enable row level security;
+-- create policy "Anyone can insert" on search_queries for insert with check (true);
+-- create policy "Owners can read own rows" on search_queries for select using (auth.uid() = user_id);
