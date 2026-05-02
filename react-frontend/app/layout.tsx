@@ -114,6 +114,8 @@ export default function RootLayout({
                     { label: 'Dashboard', href: '/dashboard' },
                     { label: 'Weekly Digest', href: '/weekly-digest' },
                     { label: 'Sign In', href: '/auth' },
+                    { label: 'Terms of Service', href: '/terms' },
+                    { label: 'Privacy Policy', href: '/privacy' },
                   ].map(l => (
                     <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
                       {l.label}
