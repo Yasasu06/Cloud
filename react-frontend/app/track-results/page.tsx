@@ -115,7 +115,7 @@ export default function TrackResultsPage() {
             <a href="/analyze" style={{ background: '#6366f1', border: 'none', borderRadius: 10, padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
               Run Another Analysis →
             </a>
-            <a href="/savings" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 24px', color: '#a0a0b0', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+            <a href="/optimize?tab=savings" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 24px', color: '#a0a0b0', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
               Savings Calculator
             </a>
           </div>

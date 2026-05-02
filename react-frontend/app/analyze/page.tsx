@@ -337,11 +337,11 @@ function ConfidenceBadge({ level, text }: { level: 'high' | 'medium' | 'low'; te
 }
 
 const TOOL_SUGGESTIONS = [
-  { keywords: ['reserved instance', 'reserved instances', ' ri '], label: '💎 Reserved Instances', href: '/reserved-instances' },
-  { keywords: ['egress', 'data transfer', 'bandwidth cost'], label: '🔄 Egress Calculator', href: '/migration-cost' },
+  { keywords: ['reserved instance', 'reserved instances', ' ri '], label: '💎 Reserved Instances', href: '/optimize?tab=reserved' },
+  { keywords: ['egress', 'data transfer', 'bandwidth cost'], label: '🔄 Egress Calculator', href: '/migrate?tab=egress' },
   { keywords: ['compliance', 'hipaa', 'gdpr', 'pci', 'fedramp', 'hitrust', 'sox'], label: '✅ Compliance', href: '/compliance' },
   { keywords: ['architecture', 'stack', 'infrastructure design', 'service design'], label: '🏗️ Architecture', href: '/architecture' },
-  { keywords: ['benchmark', 'industry average', 'peers', 'compare to'], label: '🏆 Cloud Score', href: '/benchmark' },
+  { keywords: ['benchmark', 'industry average', 'peers', 'compare to'], label: '🏆 Cloud Score', href: '/learn?tab=benchmarks' },
 ]
 
 function RelatedTools({ response }: { response: string }) {

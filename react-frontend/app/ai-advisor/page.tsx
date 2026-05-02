@@ -421,7 +421,7 @@ export default function AiAdvisorPage() {
                   }}>
                     Upload Your Cloud Bill →
                   </a>
-                  <a href="/migration-cost" style={{
+                  <a href="/migrate?tab=egress" style={{
                     flex: 1, minWidth: 160, display: 'block', textAlign: 'center',
                     background: 'rgba(255,255,255,0.06)', color: '#a0a0b0', fontWeight: 600,
                     fontSize: 13, padding: '12px 0', borderRadius: 10, textDecoration: 'none',

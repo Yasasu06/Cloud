@@ -110,8 +110,8 @@ export default function RootLayout({
                     { label: 'Bill Upload', href: '/bill-upload' },
                     { label: 'Report Card', href: '/report-card' },
                     { label: 'Sanity Check', href: '/sanity-check' },
-                    { label: 'What We Replace', href: '/replaces' },
-                    { label: 'Glossary', href: '/cloud-glossary' },
+                    { label: 'What We Replace', href: '/for-consultants?tab=roles' },
+                    { label: 'Glossary', href: '/learn?tab=glossary' },
                   ].map(l => (
                     <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
                       {l.label}
@@ -126,12 +126,12 @@ export default function RootLayout({
                     { label: 'Pricing', href: '/pricing' },
                     { label: 'Case Studies', href: '/case-studies' },
                     { label: 'Live Stats', href: '/stats' },
-                    { label: 'What We Replace', href: '/replaces' },
-                    { label: 'Experts', href: '/experts' },
+                    { label: 'What We Replace', href: '/for-consultants?tab=roles' },
+                    { label: 'Experts', href: '/for-consultants?tab=experts' },
                     { label: 'Dashboard', href: '/dashboard' },
-                    { label: 'Weekly Digest', href: '/weekly-digest' },
+                    { label: 'Weekly Digest', href: '/intelligence?tab=digest' },
                     { label: 'Changelog', href: '/changelog' },
-                    { label: 'White Label', href: '/white-label' },
+                    { label: 'White Label', href: '/for-consultants?tab=white-label' },
                     { label: 'Sign In', href: '/auth' },
                     { label: 'Terms of Service', href: '/terms' },
                     { label: 'Privacy Policy', href: '/privacy' },

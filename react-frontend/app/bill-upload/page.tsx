@@ -385,7 +385,7 @@ export default function BillUploadPage() {
             <p style={{ color: '#666', fontSize: 13, marginBottom: 12, letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               <button className="btn-secondary" onClick={() => router.push('/report-card')}>📊 Grade My Setup</button>
-              <button className="btn-secondary" onClick={() => router.push('/savings')}>💰 Savings Calculator</button>
+              <button className="btn-secondary" onClick={() => router.push('/optimize?tab=savings')}>💰 Savings Calculator</button>
               <button className="btn-secondary" onClick={() => router.push('/chat')}>💬 Ask AI Questions</button>
             </div>
           </div>

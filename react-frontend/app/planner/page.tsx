@@ -264,7 +264,7 @@ export default function PlannerPage() {
                   </p>
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                     <button
-                      onClick={() => router.push('/migration')}
+                      onClick={() => router.push('/migrate?tab=migration')}
                       style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 12, padding: '12px 24px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
                     >
                       Analyze My Migration →

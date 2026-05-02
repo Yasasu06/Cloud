@@ -67,7 +67,7 @@ export default function ProviderNewsTool({ embedded = false }: Props) {
   const filtered = filter === 'All' ? NEWS : NEWS.filter(n => n.provider === filter)
 
   // Hub-aware digest link
-  const digestHref = embedded ? '/intelligence?tab=digest' : '/weekly-digest'
+  const digestHref = embedded ? '/intelligence?tab=digest' : '/intelligence?tab=digest'
 
   const inner = (
     <>

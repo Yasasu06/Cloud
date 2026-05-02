@@ -52,30 +52,30 @@ const MOBILE_LINKS = [
   { href: '/instant-audit',       label: 'Instant Audit' },
   { href: '/architecture',        label: 'Architecture' },
   { href: '/bill-upload',         label: 'Bill Upload' },
-  { href: '/savings',             label: 'Savings Calculator' },
-  { href: '/migration-cost',      label: 'Egress Calculator' },
-  { href: '/forecast',            label: 'Cost Forecast' },
+  { href: '/optimize?tab=savings',             label: 'Savings Calculator' },
+  { href: '/migrate?tab=egress',      label: 'Egress Calculator' },
+  { href: '/cost-intelligence?tab=forecast',            label: 'Cost Forecast' },
   { href: '/multi-cloud',         label: 'Multi-Cloud View' },
   { href: '/terraform-estimator', label: 'Infrastructure Estimator' },
-  { href: '/cost-per-user',       label: 'Cost Per User' },
-  { href: '/ai-cost-tracker',     label: 'AI Costs' },
+  { href: '/cost-intelligence?tab=per-user',       label: 'Cost Per User' },
+  { href: '/cost-intelligence?tab=ai-costs',     label: 'AI Costs' },
   { href: '/advisor',             label: 'Cloud Advisor' },
   { href: '/report-card',         label: 'Report Card' },
   { href: '/cloud-score',         label: 'Cloud Score' },
   { href: '/ai-advisor',          label: 'AI Strategy' },
   { href: '/roi-calculator',      label: 'ROI Calculator' },
   { href: '/compliance',          label: 'Compliance' },
-  { href: '/reserved-instances',  label: 'Reserved Instances' },
-  { href: '/credits-tracker',     label: 'Credits Tracker' },
+  { href: '/optimize?tab=reserved',  label: 'Reserved Instances' },
+  { href: '/cost-intelligence?tab=credits',     label: 'Credits Tracker' },
   { href: '/sanity-check',        label: 'Sanity Check' },
   { href: '/pricing-explorer',    label: 'Pricing Explorer' },
   { href: '/stats',               label: 'Live Stats' },
-  { href: '/vendor-alerts',       label: 'Price Alerts' },
-  { href: '/benchmark',           label: 'Industry Benchmarks' },
-  { href: '/cloud-glossary',      label: 'Glossary' },
-  { href: '/waste-report',        label: 'Waste Report' },
+  { href: '/intelligence?tab=alerts',       label: 'Price Alerts' },
+  { href: '/learn?tab=benchmarks',           label: 'Industry Benchmarks' },
+  { href: '/learn?tab=glossary',      label: 'Glossary' },
+  { href: '/optimize?tab=waste',        label: 'Waste Report' },
   { href: '/alternatives',        label: 'All Providers' },
-  { href: '/replaces',            label: 'What We Replace' },
+  { href: '/for-consultants?tab=roles',            label: 'What We Replace' },
   { href: '/pricing',             label: 'Pricing' },
 ]
 
@@ -165,9 +165,9 @@ export default function Navbar() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost', '/forecast', '/multi-cloud', '/terraform-estimator'].includes(pathname)
-  const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance', '/reserved-instances'].includes(pathname)
-  const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary', '/waste-report'].includes(pathname)
+  const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/instant-audit', '/multi-cloud', '/terraform-estimator'].includes(pathname)
+  const adviseActive       = ['/advisor', '/report-card', '/cloud-score', '/ai-advisor', '/sanity-check', '/compliance'].includes(pathname)
+  const intelligenceActive = ['/pricing-explorer', '/compare', '/intelligence', '/stats'].includes(pathname)
 
   function toggle(name: string) {
     setOpenDropdown(prev => prev === name ? null : name)

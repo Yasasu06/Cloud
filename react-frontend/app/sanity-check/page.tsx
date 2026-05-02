@@ -241,7 +241,7 @@ export default function SanityCheckPage() {
         {done && (
           <div style={{ marginTop: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {[
-              { label: '💰 See Savings Calculator', href: '/savings' },
+              { label: '💰 See Savings Calculator', href: '/optimize?tab=savings' },
               { label: '🏗️ Visualize Architecture', href: '/architecture' },
               { label: '🔍 Full AI Analysis', href: '/analyze' },
             ].map(t => (

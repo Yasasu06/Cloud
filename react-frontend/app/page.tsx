@@ -340,7 +340,7 @@ export default function HomePage() {
             {[
               { icon: '🚀', role: 'Startup Founders', tagline: 'Stop wasting credits', desc: 'You have $25K in AWS credits and a growing bill you can\'t explain. Get a clear breakdown and stop burning runway.', href: '/advisor', cta: 'Get founder advice', color: '#6366f1' },
               { icon: '🏢', role: 'IT Managers', tagline: 'Clarity on your bill', desc: 'Monthly cloud costs are rising faster than your revenue. Identify waste, justify the bill to leadership, and build a savings plan.', href: '/instant-audit', cta: 'Run an audit', color: '#22c55e' },
-              { icon: '💼', role: 'Consultants', tagline: 'White-label reports', desc: 'Deliver professional cloud cost analysis to clients under your brand. Generate reports in seconds, not weeks.', href: '/white-label', cta: 'Explore white label', color: '#f59e0b' },
+              { icon: '💼', role: 'Consultants', tagline: 'White-label reports', desc: 'Deliver professional cloud cost analysis to clients under your brand. Generate reports in seconds, not weeks.', href: '/for-consultants?tab=white-label', cta: 'Explore white label', color: '#f59e0b' },
             ].map((card, i) => (
               <FadeInSection key={i} delay={i * 0.1}>
                 <a href={card.href} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>

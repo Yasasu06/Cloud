@@ -221,7 +221,7 @@ export default function PricingPage() {
             <div style={{ fontSize: 13, color: '#666' }}>Performance pricing: we take 15% of savings found. No savings → no charge.</div>
           </div>
           <button
-            onClick={() => router.push('/performance-pricing')}
+            onClick={() => router.push('/for-consultants?tab=pricing')}
             style={{ background: '#22c55e', border: 'none', borderRadius: 10, padding: '10px 20px', color: 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' }}
           >
             Learn more →
