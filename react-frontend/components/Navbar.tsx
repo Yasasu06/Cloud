@@ -21,6 +21,7 @@ const ADVISE_ITEMS = [
 
 const INTELLIGENCE_ITEMS = [
   { href: '/vendor-alerts', label: 'Price Alerts', desc: 'Track AWS, Azure & GCP price changes' },
+  { href: '/cost-alerts', label: 'Cost Alerts', desc: 'Set up cloud budget alerts' },
 ]
 
 const MOBILE_LINKS = [
@@ -33,6 +34,7 @@ const MOBILE_LINKS = [
   { href: '/report-card', label: 'Report Card' },
   { href: '/roi-calculator', label: 'ROI Calculator' },
   { href: '/vendor-alerts', label: 'Price Alerts' },
+  { href: '/cost-alerts', label: 'Cost Alerts' },
   { href: '/pricing', label: 'Pricing' },
 ]
 
@@ -98,7 +100,7 @@ export default function Navbar() {
 
   const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark'].includes(pathname)
   const adviseActive       = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
-  const intelligenceActive = ['/vendor-alerts'].includes(pathname)
+  const intelligenceActive = ['/vendor-alerts', '/cost-alerts'].includes(pathname)
 
   return (
     <nav
