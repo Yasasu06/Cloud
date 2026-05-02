@@ -160,6 +160,22 @@ Include 5–9 services. Use realistic cloud service names. Tier must be one of: 
           </button>
         </div>
 
+        {loading && (
+          <>
+            <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(99,102,241,0.08)', borderRadius: 12, marginBottom: 16 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animation: 'pulse 1s infinite', flexShrink: 0 }} />
+              <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your situation...</span>
+              <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
+            </div>
+            <div style={{ background: '#111118', borderRadius: 16, padding: 28, border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
+              {[85, 70, 90, 60, 75, 55].map((w, i) => (
+                <div key={i} style={{ height: 16, background: 'rgba(255,255,255,0.07)', borderRadius: 8, marginBottom: 12, width: `${w}%`, animation: 'pulse 1.5s infinite', animationDelay: `${i * 0.1}s` }} />
+              ))}
+            </div>
+          </>
+        )}
+
         {error && (
           <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, padding: '16px 20px', marginBottom: 24, color: '#f87171', fontSize: 14 }}>
             {error}

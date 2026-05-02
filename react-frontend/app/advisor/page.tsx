@@ -232,20 +232,21 @@ Respond with ONLY a JSON object in this exact format, no other text:
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: '100vh',
-        background: '#0a0a0f',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexDirection: 'column',
-        gap: 16,
-      }}>
+      <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
         <JourneyProgress currentStep={0} />
-        <div style={{ fontSize: 40 }}>🤔</div>
-        <p style={{ color: '#a0a0b0', fontSize: 18 }}>Analyzing your situation...</p>
-        <p style={{ color: '#666', fontSize: 14 }}>Getting you a specific recommendation</p>
+        <div style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 60px' }}>
+          <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(99,102,241,0.08)', borderRadius: 12, marginBottom: 16 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animation: 'pulse 1s infinite', flexShrink: 0 }} />
+            <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your situation...</span>
+            <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
+          </div>
+          <div style={{ background: '#111118', borderRadius: 16, padding: 28, border: '1px solid rgba(255,255,255,0.06)' }}>
+            {[90, 75, 85, 60, 70, 50].map((w, i) => (
+              <div key={i} style={{ height: 16, background: 'rgba(255,255,255,0.07)', borderRadius: 8, marginBottom: 12, width: `${w}%`, animation: 'pulse 1.5s infinite', animationDelay: `${i * 0.1}s` }} />
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

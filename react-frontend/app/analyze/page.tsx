@@ -550,6 +550,11 @@ Focus on things they can do TODAY.`,
             {loading && !response && (
               <>
                 <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(99,102,241,0.08)', borderRadius: 12, marginBottom: 16 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animation: 'pulse 1s infinite', flexShrink: 0 }} />
+                  <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your situation...</span>
+                  <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
+                </div>
                 {[100, 80, 90, 70, 85, 60].map((w, i) => (
                   <div key={i} style={{
                     height: 16,
