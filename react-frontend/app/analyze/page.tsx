@@ -37,6 +37,7 @@ import MetricsRow from '@/components/analysis/MetricsRow'
 import CostBreakdownChart from '@/components/analysis/CostBreakdownChart'
 import RecommendationCard from '@/components/analysis/RecommendationCard'
 import LivePricingBadge from '@/components/LivePricingBadge'
+import NextActionCards from '@/components/NextActionCards'
 import AlternativesSection from '@/components/analysis/AlternativesSection'
 import QuickWinsList from '@/components/analysis/QuickWinsList'
 import AnalysisSkeleton from '@/components/analysis/AnalysisSkeleton'
@@ -989,6 +990,13 @@ Focus on things they can do TODAY.`,
                   Document Decision →
                 </button>
               </div>
+
+              {/* Next Action cards */}
+              <NextActionCards actions={[
+                { icon: '💰', title: 'Calculate Exact Savings', desc: 'Run optimization tools',  href: '/optimize' },
+                { icon: '📊', title: 'See Visual Journey',      desc: '12-week trajectory',       href: '/outcome-simulator' },
+                { icon: '📝', title: 'Document This Decision',  desc: 'Save reasoning + review', onClick: () => setShowDecisionModal(true) },
+              ]} />
 
               {/* Confidence breakdown */}
               <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 12, border: '1px solid rgba(255,255,255,0.06)' }}>

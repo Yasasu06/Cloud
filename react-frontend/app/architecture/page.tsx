@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import NextActionCards from '@/components/NextActionCards'
 
 interface Service {
   name: string
@@ -267,6 +268,12 @@ ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare f
                 ℹ️ Recommendations are based on published cloud provider pricing and industry benchmarks. Actual savings may vary. Always verify recommendations with your cloud provider before making changes to production infrastructure.
               </p>
             </div>
+
+            <NextActionCards actions={[
+              { icon: '💸', title: 'Estimate Costs',  desc: 'Live pricing for stack',     href: '/cost-intelligence' },
+              { icon: '🔄', title: 'Plan Migration',  desc: 'Provider switch planner',     href: '/migrate' },
+              { icon: '✓',  title: 'Validate Decision', desc: 'Pre-decision sanity check',  href: '/sanity-check' },
+            ]} />
           </div>
         )}
       </div>

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 import JourneyProgress from '@/components/JourneyProgress'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import NextActionCards from '@/components/NextActionCards'
 
 const INDUSTRIES = [
   { id: 'healthcare', label: '🏥 Healthcare / Medical', compliance: ['HIPAA', 'HITECH'] },
@@ -496,6 +497,12 @@ ALTERNATIVE PROVIDERS: Consider alternatives equally — DigitalOcean, Hetzner, 
               <button className="btn-secondary" onClick={() => router.push('/report-card')}>📊 Grade My Setup</button>
             </div>
           </div>
+
+          <NextActionCards actions={[
+            { icon: '🛠️', title: 'Implementation Plan', desc: '12-week visual journey',  href: '/outcome-simulator' },
+            { icon: '💰', title: 'Estimate Costs',      desc: 'Live pricing for stack',    href: '/cost-intelligence' },
+            { icon: '✓',  title: 'Validate Choice',     desc: 'Pre-decision sanity check', href: '/sanity-check' },
+          ]} />
         </div>
       </div>
     )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import NextActionCards from '@/components/NextActionCards'
 
 interface Question {
   id: string
@@ -251,6 +252,12 @@ export default function CloudScorePage() {
                 Retake
               </button>
             </div>
+
+            <NextActionCards actions={[
+              { icon: '📊', title: 'Industry Benchmark', desc: 'Compare to peers',          href: '/learn?tab=benchmarks' },
+              { icon: '💼', title: 'Build Action Plan',  desc: 'Strategy session',           href: '/ai-advisor' },
+              { icon: '🛠️', title: 'Visualize Journey',  desc: '12-week trajectory',         href: '/outcome-simulator' },
+            ]} />
           </>
         )}
 

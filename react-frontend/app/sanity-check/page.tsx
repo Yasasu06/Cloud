@@ -4,6 +4,7 @@ import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
 import { getUserMode, modeInstruction } from '@/lib/userMode'
+import NextActionCards from '@/components/NextActionCards'
 
 const EXAMPLES = [
   'Enable Aurora Multi-AZ for production database',
@@ -225,6 +226,15 @@ export default function SanityCheckPage() {
               {loading && <span style={{ display: 'inline-block', width: 8, height: 16, background: '#818cf8', borderRadius: 2, marginLeft: 2, animation: 'pulse 1s infinite' }} />}
             </div>
           </div>
+        )}
+
+        {/* Next Action cards */}
+        {done && (
+          <NextActionCards actions={[
+            { icon: '📊', title: 'See Outcome Path',  desc: '12-week visual journey', href: '/outcome-simulator' },
+            { icon: '💰', title: 'Calculate ROI',      desc: 'Estimate financial impact', href: '/roi-calculator' },
+            { icon: '📝', title: 'Document Decision',  desc: 'Save reasoning + review',   href: '/track-results' },
+          ]} />
         )}
 
         {/* Related tools after done */}

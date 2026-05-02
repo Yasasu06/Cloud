@@ -57,6 +57,7 @@ export default function RootLayout({
       <head>
       </head>
       <body className={inter.className} style={{ background: '#050508' }}>
+        <a href="#main-content" className="skip-link">Skip to main content</a>
         <div style={{
           position: 'fixed',
           inset: 0,
@@ -72,7 +73,7 @@ export default function RootLayout({
           <PostHogProvider>
           <PageTracker />
           <PersonalHeader />
-          <main>
+          <main id="main-content">
             <Breadcrumbs />
             <BackToDashboard />
             <div className="page-enter">{children}</div>

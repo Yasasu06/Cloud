@@ -43,6 +43,70 @@
   animation: shimmerSlow 2.5s linear infinite;
 }
 
+/* Typography baseline — applied page-wide unless overridden */
+h1 { letter-spacing: -0.02em; }
+h2 { letter-spacing: -0.01em; }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid rgba(99,102,241,0.5);
+  outline-offset: 1px;
+}
+button:focus-visible, a:focus-visible {
+  outline: 2px solid rgba(99,102,241,0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Floating label inputs */
+.floating-label {
+  position: relative;
+}
+.floating-label input,
+.floating-label textarea {
+  width: 100%;
+  padding: 22px 14px 8px 14px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+.floating-label input:focus,
+.floating-label textarea:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+.floating-label label {
+  position: absolute;
+  top: 16px; left: 14px;
+  font-size: 14px;
+  color: #888;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.floating-label input:focus ~ label,
+.floating-label input:not(:placeholder-shown) ~ label,
+.floating-label textarea:focus ~ label,
+.floating-label textarea:not(:placeholder-shown) ~ label {
+  top: 6px;
+  font-size: 11px;
+  color: #818cf8;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Global micro-interactions */
+.interactive-button { transition: all 0.15s ease; transform: translateY(0); }
+.interactive-button:hover { transform: translateY(-1px); }
+.interactive-button:active { transform: translateY(0); }
+.interactive-card { transition: all 0.2s ease; transform: translateY(0); }
+.interactive-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+.interactive-input { transition: all 0.2s ease; }
+.interactive-input:focus { border-color: #6366f1 !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+
 /* Skip-to-content link for a11y */
 .skip-link {
   position: absolute; left: -9999px; top: 0;

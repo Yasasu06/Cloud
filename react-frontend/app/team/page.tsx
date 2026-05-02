@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import EmptyState from '@/components/EmptyState'
 import { supabase } from '@/lib/supabase'
 
 interface Invite {
@@ -193,9 +194,11 @@ export default function TeamPage() {
             PENDING INVITES {invites.length > 0 && `(${invites.length})`}
           </div>
           {invites.length === 0 ? (
-            <div style={{ background: '#111118', borderRadius: 12, padding: '32px 24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)', color: '#444', fontSize: 14 }}>
-              No invites sent yet.
-            </div>
+            <EmptyState
+              icon="👥"
+              title="No team members yet"
+              subtitle="Invite teammates to collaborate on cloud decisions."
+            />
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {invites.map(inv => (

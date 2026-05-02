@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserContext } from '@/lib/userContext'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
+import NextActionCards from '@/components/NextActionCards'
 
 const PROVIDERS = ['AWS', 'Azure', 'GCP'] as const
 const COMPANY_SIZES = ['1–10 employees', '11–50 employees', '51–200 employees', '200+ employees'] as const
@@ -326,6 +327,14 @@ export default function SavingsPage() {
               </button>
             </div>
           </div>
+        )}
+
+        {calculated && (
+          <NextActionCards actions={[
+            { icon: '📊', title: 'Visualize Journey',  desc: '12-week trajectory',         href: '/outcome-simulator' },
+            { icon: '🔧', title: 'Implementation Plan', desc: 'Step-by-step wizard',         href: '/optimize' },
+            { icon: '📈', title: 'Track Progress',     desc: 'Log actual savings',           href: '/track-results' },
+          ]} />
         )}
       </div>
     </div>

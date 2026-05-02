@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import NextActionCards from '@/components/NextActionCards'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -443,6 +444,12 @@ export default function InstantAuditPage() {
                 <a href="/savings" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 24px', color: '#a0a0b0', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>Savings Calculator</a>
               </div>
             </div>
+
+            <NextActionCards actions={[
+              { icon: '🛠️', title: 'Start Optimization', desc: 'Run optimization tools',  href: '/optimize' },
+              { icon: '📊', title: 'Track Progress',     desc: 'Visual journey',           href: '/outcome-simulator' },
+              { icon: '👥', title: 'Discuss with Team',  desc: 'Share findings',           href: '/team' },
+            ]} />
           </>
         )}
       </div>

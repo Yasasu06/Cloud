@@ -10,6 +10,7 @@ import RoleAwareToolGrid from '@/components/RoleAwareToolGrid'
 import OnboardingTour from '@/components/OnboardingTour'
 import WeeklyDigestToggle from '@/components/WeeklyDigestToggle'
 import FreeTrialMeter from '@/components/FreeTrialMeter'
+import EmptyState from '@/components/EmptyState'
 
 const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
   founder:    { icon: '🚀', label: 'Founder' },
@@ -680,12 +681,12 @@ export default function DashboardPage() {
             <div style={{ marginBottom: 40 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Recent Analyses</h2>
               {recentRecs.length === 0 ? (
-                <div style={{ background: '#1a1a2e', borderRadius: 16, padding: '48px 24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <p style={{ color: '#a0a0b0', fontSize: 15, marginBottom: 20 }}>No analyses yet. Start your first one.</p>
-                  <button onClick={() => router.push('/analyze')} style={{ background: '#6366f1', border: 'none', borderRadius: 10, padding: '12px 28px', color: 'white', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
-                    Start Analysis →
-                  </button>
-                </div>
+                <EmptyState
+                  icon="✨"
+                  title="No analyses yet"
+                  subtitle="Run your first analysis to see results here."
+                  cta={{ label: 'Start Analysis', href: '/analyze' }}
+                />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {recentRecs.map(rec => (
