@@ -207,14 +207,14 @@ export default function TrackResultsPage() {
 
             {outcome === 'saved_money' && (
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, display: 'block', marginBottom: 6 }}>HOW MUCH PER MONTH? ($)</label>
-                <input type="number" min="0" value={saving} onChange={e => setSaving(e.target.value)} placeholder="e.g. 340" style={inputStyle} />
+                <label htmlFor="tr-saving" style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, display: 'block', marginBottom: 6 }}>HOW MUCH PER MONTH? ($)</label>
+                <input id="tr-saving" type="number" min="0" value={saving} onChange={e => setSaving(e.target.value)} placeholder="e.g. 340" style={inputStyle} />
               </div>
             )}
             {outcome === 'saved_time' && (
               <div>
-                <label style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, display: 'block', marginBottom: 6 }}>HOW MUCH TIME?</label>
-                <input type="text" value={timeSaved} onChange={e => setTimeSaved(e.target.value)} placeholder="e.g. 3 hours/week, 1 day per month" style={inputStyle} />
+                <label htmlFor="tr-timesaved" style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, display: 'block', marginBottom: 6 }}>HOW MUCH TIME?</label>
+                <input id="tr-timesaved" type="text" value={timeSaved} onChange={e => setTimeSaved(e.target.value)} placeholder="e.g. 3 hours/week, 1 day per month" style={inputStyle} />
               </div>
             )}
           </div>

@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
 import DecisionsMade from '@/components/DecisionsMade'
+import RoleAwareToolGrid from '@/components/RoleAwareToolGrid'
 
 const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
   founder:    { icon: '🚀', label: 'Founder' },
@@ -694,6 +695,9 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {/* Role-aware tool grid */}
+            <RoleAwareToolGrid />
 
             {/* Decisions Made */}
             <DecisionsMade />

@@ -138,14 +138,16 @@ export default function TeamPage() {
 
         {/* Invite form */}
         <div style={{ background: '#1a1a2e', borderRadius: 16, padding: '24px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 32, opacity: isFree ? 0.5 : 1, pointerEvents: isFree ? 'none' : 'auto' }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#a0a0b0', marginBottom: 16 }}>SEND INVITE</div>
+          <label htmlFor="invite-email" style={{ fontSize: 13, fontWeight: 700, color: '#a0a0b0', marginBottom: 16, display: 'block' }}>SEND INVITE</label>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <input
+              id="invite-email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendInvite()}
               placeholder="colleague@company.com"
+              aria-label="Colleague email address"
               style={{
                 flex: 1,
                 minWidth: 220,

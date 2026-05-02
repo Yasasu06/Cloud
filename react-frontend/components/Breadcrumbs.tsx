@@ -39,6 +39,8 @@ const PATH_LABELS: Record<string, string> = {
   'weekly-digest':    'Weekly Digest',
   changelog:          'Changelog',
   'white-label':      'White Label',
+  'case-studies':     'Case Studies',
+  'for-you':          'Find Your Toolkit',
   terms:              'Terms',
   privacy:            'Privacy',
 }
