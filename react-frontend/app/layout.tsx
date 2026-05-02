@@ -113,6 +113,7 @@ export default function RootLayout({
                     { label: 'Pricing', href: '/pricing' },
                     { label: 'Dashboard', href: '/dashboard' },
                     { label: 'Weekly Digest', href: '/weekly-digest' },
+                    { label: 'Changelog', href: '/changelog' },
                     { label: 'Sign In', href: '/auth' },
                     { label: 'Terms of Service', href: '/terms' },
                     { label: 'Privacy Policy', href: '/privacy' },
