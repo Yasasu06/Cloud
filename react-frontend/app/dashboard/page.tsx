@@ -630,6 +630,55 @@ export default function DashboardPage() {
               )}
             </div>
 
+            {/* Activity Feed */}
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Activity Feed</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  { dot: '#22c55e', tag: 'TODAY',     text: 'AWS released updated t3 and m6i instance pricing in us-east-1' },
+                  { dot: '#f59e0b', tag: 'YESTERDAY', text: 'New optimization opportunity found: S3 Intelligent-Tiering could apply to 3 buckets' },
+                  { dot: '#818cf8', tag: 'THIS WEEK', text: 'Your industry peers reduced cloud spend by an average of 8% this quarter' },
+                  { dot: '#0ea5e9', tag: 'THIS MONTH',text: '47 founders implemented savings recommendations using this platform' },
+                  { dot: '#a855f7', tag: 'PLATFORM',  text: 'New tool live: Cloud Sanity Check — get a DO IT / WAIT / DON\'T DO IT verdict before any change' },
+                ].map((item, i) => (
+                  <div key={i} style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.dot, flexShrink: 0, marginTop: 4 }} />
+                    <div>
+                      <span style={{ fontSize: 10, fontWeight: 700, color: '#444', letterSpacing: 1, marginRight: 8 }}>{item.tag}</span>
+                      <span style={{ fontSize: 13, color: '#a0a0b0' }}>{item.text}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Achievements */}
+            <div style={{ marginBottom: 40 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Achievements</h2>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {[
+                  { icon: '🔍', title: 'First Analysis',       unlocked: stats.total >= 1,  color: '#6366f1' },
+                  { icon: '💰', title: 'Savings Hunter',        unlocked: false,              color: '#22c55e' },
+                  { icon: '⚡', title: 'Implementation Pro',    unlocked: false,              color: '#f59e0b' },
+                  { icon: '🏆', title: 'Cloud Optimizer',       unlocked: stats.total >= 5,   color: '#a855f7' },
+                  { icon: '🌐', title: 'Vendor Neutral',        unlocked: false,              color: '#0ea5e9' },
+                ].map(a => (
+                  <div key={a.title} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
+                    borderRadius: 10, background: a.unlocked ? `rgba(${hexRgb(a.color)},0.08)` : 'rgba(255,255,255,0.02)',
+                    border: a.unlocked ? `1px solid rgba(${hexRgb(a.color)},0.25)` : '1px solid rgba(255,255,255,0.06)',
+                    opacity: a.unlocked ? 1 : 0.45, transition: 'all 0.2s',
+                  }}>
+                    <span style={{ fontSize: 20, filter: a.unlocked ? 'none' : 'grayscale(1)' }}>{a.icon}</span>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: a.unlocked ? a.color : '#555' }}>{a.title}</div>
+                      <div style={{ fontSize: 10, color: '#444' }}>{a.unlocked ? 'Unlocked' : 'Locked'}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div style={{ marginBottom: 48 }}>
               <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Quick Actions</h2>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -707,6 +756,7 @@ function ActionLink({ href, label, primary }: { href: string; label: string; pri
   )
 }
 
+function hexRgb(hex: string): string { const h = hex.replace('#',''); return `${parseInt(h.slice(0,2),16)},${parseInt(h.slice(2,4),16)},${parseInt(h.slice(4,6),16)}` }
 function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 function formatDate(iso: string) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
 function timeAgo(ts: number): string {

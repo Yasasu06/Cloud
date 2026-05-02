@@ -8,6 +8,7 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 
 import PostHogProvider from '@/components/PostHogProvider'
 import PageTracker from '@/components/PageTracker'
+import PersonalHeader from '@/components/PersonalHeader'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -68,6 +69,7 @@ export default function RootLayout({
           <TooltipProvider>
           <PostHogProvider>
           <PageTracker />
+          <PersonalHeader />
           <main><div className="page-transition">{children}</div></main>
           <footer style={{
             borderTop: '1px solid rgba(255,255,255,0.06)',

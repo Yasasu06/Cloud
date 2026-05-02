@@ -242,6 +242,13 @@ export default function HomePage() {
             </button>
           </div>
 
+          {/* Audit CTA */}
+          <div style={{ marginBottom: 20, textAlign: 'center' }}>
+            <a href="/instant-audit" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 10, padding: '10px 20px', textDecoration: 'none', fontSize: 13, color: '#22c55e', fontWeight: 700, transition: 'all 0.15s' }}>
+              🔍 Get Your Free Cloud Audit in 30 Seconds →
+            </a>
+          </div>
+
           {/* Social proof bar */}
           <div style={{ marginBottom: 40 }}>
             <p style={{ color: '#555', fontSize: 12, marginBottom: 12, letterSpacing: 0.5 }}>

@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 import { JargonText, JargonWrapper } from '@/components/JargonTooltip'
 import JourneyProgress from '@/components/JourneyProgress'
+import ImplementationWizard from '@/components/ImplementationWizard'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -259,6 +260,7 @@ export default function AnalyzePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [quickWins, setQuickWins] = useState<any[]>([])
   const [copied, setCopied] = useState(false)
+  const [showWizard, setShowWizard] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
@@ -677,13 +679,27 @@ Focus on things they can do TODAY.`,
         {/* Related Tools */}
         {done && response && <RelatedTools response={response} />}
 
-        {/* Track results nudge */}
+        {/* Implementation Wizard + Track results */}
         {done && (
-          <div style={{ marginTop: 12, padding: '10px 16px', background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.12)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-            <span style={{ fontSize: 13, color: '#666' }}>Implemented this advice? Tell us what happened.</span>
-            <a href="/track-results" style={{ fontSize: 13, color: '#818cf8', fontWeight: 600, textDecoration: 'none' }}>Share your results →</a>
+          <div style={{ marginTop: 12, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowWizard(true)}
+              style={{
+                background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)',
+                borderRadius: 8, padding: '8px 14px', color: '#22c55e',
+                fontWeight: 700, fontSize: 13, cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              🧭 Start Implementation Wizard
+            </button>
+            <div style={{ flex: 1, padding: '8px 14px', background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.12)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <span style={{ fontSize: 13, color: '#666' }}>Implemented this advice? Tell us what happened.</span>
+              <a href="/track-results" style={{ fontSize: 13, color: '#818cf8', fontWeight: 600, textDecoration: 'none' }}>Share your results →</a>
+            </div>
           </div>
         )}
+
+        {showWizard && <ImplementationWizard onClose={() => setShowWizard(false)} savingEstimate="$200–800/mo" />}
 
         {/* Disclaimer */}
         {done && (
