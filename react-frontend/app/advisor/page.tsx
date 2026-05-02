@@ -5,6 +5,7 @@ import { useJourney } from '@/lib/journeyContext'
 import { supabase } from '@/lib/supabase'
 import { trackEvent } from '@/lib/posthog'
 import JourneyProgress from '@/components/JourneyProgress'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 const INDUSTRIES = [
   { id: 'healthcare', label: '🏥 Healthcare / Medical', compliance: ['HIPAA', 'HITECH'] },
@@ -236,14 +237,14 @@ Respond with ONLY a JSON object in this exact format, no other text:
         <JourneyProgress currentStep={0} />
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 60px' }}>
           <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(99,102,241,0.08)', borderRadius: 12, marginBottom: 16 }}>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', animation: 'pulse 1s infinite', flexShrink: 0 }} />
+          <div className="ai-loading" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', borderRadius: 12, marginBottom: 16 }}>
+            <div className="pulse-ring" style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1', flexShrink: 0 }} />
             <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your situation...</span>
             <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
           </div>
           <div style={{ background: '#111118', borderRadius: 16, padding: 28, border: '1px solid rgba(255,255,255,0.06)' }}>
             {[90, 75, 85, 60, 70, 50].map((w, i) => (
-              <div key={i} style={{ height: 16, background: 'rgba(255,255,255,0.07)', borderRadius: 8, marginBottom: 12, width: `${w}%`, animation: 'pulse 1.5s infinite', animationDelay: `${i * 0.1}s` }} />
+              <div key={i} className="ai-shimmer" style={{ height: 16, marginBottom: 12, width: `${w}%` }} />
             ))}
           </div>
         </div>
@@ -256,6 +257,7 @@ Respond with ONLY a JSON object in this exact format, no other text:
       <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
         <JourneyProgress currentStep={0} />
         <div style={{ maxWidth: 720, margin: '0 auto', padding: '100px 24px 60px' }}>
+          <DisclaimerBanner />
 
           <div style={{ marginBottom: 32 }}>
             <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 8 }}>YOUR CLOUD RECOMMENDATION</div>

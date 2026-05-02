@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 const EXAMPLES = [
   'Enable Aurora Multi-AZ for production database',
@@ -202,6 +203,7 @@ export default function SanityCheckPage() {
         )}
 
         {/* Streaming response */}
+        {response && <DisclaimerBanner />}
         {response && (
           <div className="glass-card" style={{ padding: 28 }}>
             <div style={{

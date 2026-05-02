@@ -38,6 +38,22 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
+    const handle = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY })
+    window.addEventListener('mousemove', handle)
+    return () => window.removeEventListener('mousemove', handle)
+  }, [])
+
+  useEffect(() => {
+    setParticles(Array.from({ length: 20 }, () => ({
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: 1 + Math.random() * 2,
+      dur: 8 + Math.random() * 7,
+      delay: Math.random() * 5,
+    })))
+  }, [])
+
+  useEffect(() => {
     async function loadLastRec() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
@@ -53,6 +69,8 @@ export default function HomePage() {
     loadLastRec()
   }, [])
 
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [particles, setParticles] = useState<Array<{ x: number; y: number; size: number; dur: number; delay: number }>>([])
   const [emailInput, setEmailInput] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const [emailLoading, setEmailLoading] = useState(false)
@@ -112,27 +130,26 @@ export default function HomePage() {
         background: '#050508',
         overflow: 'hidden',
       }}>
-        {/* Orb 1 — top-left, indigo */}
-        <div className="animate-float" style={{
-          position: 'absolute', top: '-100px', left: '-80px',
-          width: 600, height: 600,
-          background: 'rgba(99,102,241,0.15)',
-          borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none',
-        }} />
-        {/* Orb 2 — top-right, purple */}
+        {/* Mouse-follow gradient */}
         <div style={{
-          position: 'absolute', top: '40px', right: '-80px',
-          width: 400, height: 400,
-          background: 'rgba(139,92,246,0.1)',
-          borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none',
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99,102,241,0.05), transparent 70%)`,
+          transition: 'background 0.1s ease',
         }} />
-        {/* Orb 3 — bottom-center, blue */}
-        <div style={{
-          position: 'absolute', bottom: '-80px', left: '50%', transform: 'translateX(-50%)',
-          width: 500, height: 500,
-          background: 'rgba(59,130,246,0.08)',
-          borderRadius: '50%', filter: 'blur(150px)', pointerEvents: 'none',
-        }} />
+        {/* Orb 1 — indigo top-left, 8s */}
+        <div style={{ position: 'absolute', top: '-100px', left: '-80px', width: 600, height: 600, background: 'rgba(99,102,241,0.15)', borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none', animation: 'orbFloat 8s ease-in-out infinite' }} />
+        {/* Orb 2 — purple top-right, 10s */}
+        <div style={{ position: 'absolute', top: '40px', right: '-80px', width: 400, height: 400, background: 'rgba(139,92,246,0.1)', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none', animation: 'orbFloat 10s ease-in-out 2s infinite' }} />
+        {/* Orb 3 — blue center, 12s */}
+        <div style={{ position: 'absolute', bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: 500, height: 500, background: 'rgba(59,130,246,0.08)', borderRadius: '50%', filter: 'blur(150px)', pointerEvents: 'none', animation: 'orbFloat 12s ease-in-out 1s infinite' }} />
+        {/* Orb 4 — pink bottom-left, 14s */}
+        <div style={{ position: 'absolute', bottom: '10%', left: '-60px', width: 350, height: 350, background: 'rgba(236,72,153,0.07)', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none', animation: 'orbFloat 14s ease-in-out 3s infinite' }} />
+        {/* Orb 5 — cyan bottom-right, 9s */}
+        <div style={{ position: 'absolute', bottom: '5%', right: '-60px', width: 300, height: 300, background: 'rgba(6,182,212,0.07)', borderRadius: '50%', filter: 'blur(90px)', pointerEvents: 'none', animation: 'orbFloat 9s ease-in-out 4s infinite' }} />
+        {/* Particles */}
+        {particles.map((p, i) => (
+          <div key={i} className="particle" style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s` }} />
+        ))}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -157,9 +174,10 @@ export default function HomePage() {
             <span className="shimmer-text">Finally Explained.</span>
           </h1>
 
-          <p style={{ fontSize: 14, color: '#555', marginBottom: 32 }}>
-            Trusted by founders managing over{' '}
-            <strong style={{ color: '#a0a0b0' }}>$2.4M</strong> in cloud spend
+          <p style={{ fontSize: 14, color: '#555', marginBottom: 32, overflow: 'hidden' }}>
+            <span className="typewriter" style={{ color: '#555', display: 'inline-block' }}>
+              Trusted by founders managing over $2.4M in cloud spend
+            </span>
           </p>
 
           {/* Feature pills */}

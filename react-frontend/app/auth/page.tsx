@@ -13,6 +13,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [advisoryAccepted, setAdvisoryAccepted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -115,10 +116,25 @@ export default function AuthPage() {
               </div>
             )}
 
+            {mode === 'signup' && (
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={advisoryAccepted}
+                  onChange={e => setAdvisoryAccepted(e.target.checked)}
+                  style={{ marginTop: 2, accentColor: '#6366f1', flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 12, color: '#a0a0b0', lineHeight: 1.5 }}>
+                  I understand recommendations are advisory information, not professional advice
+                </span>
+              </label>
+            )}
+
             <Button
               onClick={handleAuth}
-              disabled={loading}
+              disabled={loading || (mode === 'signup' && !advisoryAccepted)}
               className="w-full bg-[#6366f1] hover:bg-[#4f46e5] text-white font-bold"
+              style={{ opacity: mode === 'signup' && !advisoryAccepted ? 0.5 : 1 } as React.CSSProperties}
             >
               {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </Button>

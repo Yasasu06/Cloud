@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 interface Service {
   name: string
@@ -160,6 +161,7 @@ Include 5–9 services. Use realistic cloud service names. Tier must be one of: 
           </button>
         </div>
 
+        {loading && <DisclaimerBanner />}
         {loading && (
           <>
             <style>{`@keyframes pulse { 0%, 100% { opacity: 0.4 } 50% { opacity: 1 } }`}</style>

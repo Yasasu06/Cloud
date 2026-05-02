@@ -9,6 +9,7 @@ import { trackEvent } from '@/lib/posthog'
 import { JargonText, JargonWrapper } from '@/components/JargonTooltip'
 import JourneyProgress from '@/components/JourneyProgress'
 import ImplementationWizard from '@/components/ImplementationWizard'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
@@ -261,6 +262,15 @@ export default function AnalyzePage() {
   const [quickWins, setQuickWins] = useState<any[]>([])
   const [copied, setCopied] = useState(false)
   const [showWizard, setShowWizard] = useState(false)
+  const [showSparkle, setShowSparkle] = useState(false)
+
+  useEffect(() => {
+    if (done) {
+      setShowSparkle(true)
+      const t = setTimeout(() => setShowSparkle(false), 2000)
+      return () => clearTimeout(t)
+    }
+  }, [done])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
@@ -565,15 +575,25 @@ Focus on things they can do TODAY.`,
 
         {/* Response (streaming + done) */}
         {(response || loading) && (
+          <>
+          <DisclaimerBanner />
           <div
-            className="glass-card"
+            className={`glass-card${loading ? ' animate-glow' : ''}`}
             style={{
               padding: 32,
               marginBottom: done ? 0 : 24,
+              position: 'relative',
               background: 'linear-gradient(#050508, #050508) padding-box, linear-gradient(135deg, #6366f1, transparent) border-box',
               border: '1px solid transparent',
             }}
           >
+            {showSparkle && (
+              <div style={{ position: 'absolute', top: 12, right: 16, display: 'flex', gap: 6, pointerEvents: 'none' }}>
+                {['✦', '✧', '✦'].map((s, i) => (
+                  <span key={i} className="sparkle-icon" style={{ fontSize: 14, color: '#818cf8', animationDelay: `${i * 0.15}s` }}>{s}</span>
+                ))}
+              </div>
+            )}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#6366f1' : '#22c55e' }} />
@@ -651,6 +671,7 @@ Focus on things they can do TODAY.`,
               </div>
             )}
           </div>
+          </>
         )}
 
         {/* Quick Wins */}

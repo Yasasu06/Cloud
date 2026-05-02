@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { UserContext } from '@/lib/userContext'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 const PROVIDERS = ['AWS', 'Azure', 'GCP'] as const
 const COMPANY_SIZES = ['1–10 employees', '11–50 employees', '51–200 employees', '200+ employees'] as const
@@ -175,6 +176,7 @@ export default function SavingsPage() {
           </button>
         </div>
 
+        {calculated && <DisclaimerBanner />}
         {calculated && (
           <div>
             <div style={{

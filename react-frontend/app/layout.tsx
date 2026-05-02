@@ -9,6 +9,8 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import PostHogProvider from '@/components/PostHogProvider'
 import PageTracker from '@/components/PageTracker'
 import PersonalHeader from '@/components/PersonalHeader'
+import Breadcrumbs from '@/components/Breadcrumbs'
+import BackToDashboard from '@/components/BackToDashboard'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -70,7 +72,11 @@ export default function RootLayout({
           <PostHogProvider>
           <PageTracker />
           <PersonalHeader />
-          <main><div className="page-transition">{children}</div></main>
+          <main>
+            <Breadcrumbs />
+            <BackToDashboard />
+            <div className="page-enter">{children}</div>
+          </main>
           <footer style={{
             borderTop: '1px solid rgba(255,255,255,0.06)',
             padding: '60px 24px 0',

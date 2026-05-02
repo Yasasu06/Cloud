@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import DisclaimerBanner from '@/components/DisclaimerBanner'
 
 const QUESTIONS = [
   "What are you building or running on cloud? Give me a quick description.",
@@ -366,6 +367,7 @@ export default function AiAdvisorPage() {
         )}
 
         {/* ── Report phase ── */}
+        {phase === 'report' && <DisclaimerBanner />}
         {phase === 'report' && (
           <div>
             {/* Answer pills */}
