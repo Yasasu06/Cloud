@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { UserContext } from '@/lib/userContext'
 
 const PROVIDERS = ['AWS', 'Azure', 'GCP'] as const
 const COMPANY_SIZES = ['1–10 employees', '11–50 employees', '51–200 employees', '200+ employees'] as const
@@ -55,6 +56,15 @@ export default function SavingsPage() {
   const rafRef = useRef<number | null>(null)
 
   useEffect(() => () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }, [])
+
+  useEffect(() => {
+    const s = UserContext.get('monthlySpend'); if (s) setSpend(s)
+    const p = UserContext.get('provider'); if (p) setProvider(p)
+    const c = UserContext.get('companySize'); if (c) setCompanySize(c)
+  }, [])
+  useEffect(() => { if (spend > 0) UserContext.save('monthlySpend', spend) }, [spend])
+  useEffect(() => { UserContext.save('provider', provider) }, [provider])
+  useEffect(() => { UserContext.save('companySize', companySize) }, [companySize])
 
   function animate(targetSpend: number) {
     if (rafRef.current) cancelAnimationFrame(rafRef.current)

@@ -35,10 +35,10 @@ export default function PageTracker() {
 
     try {
       const key = 'recently_viewed'
-      const existing: { title: string; url: string; emoji: string; desc: string }[] =
+      const existing: { title: string; url: string; emoji: string; desc: string; visitedAt?: number }[] =
         JSON.parse(localStorage.getItem(key) ?? '[]')
 
-      const entry = { title: meta.title, url: pathname, emoji: meta.emoji, desc: meta.desc }
+      const entry = { title: meta.title, url: pathname, emoji: meta.emoji, desc: meta.desc, visitedAt: Date.now() }
       const filtered = existing.filter(e => e.url !== pathname)
       const updated = [entry, ...filtered].slice(0, 5)
       localStorage.setItem(key, JSON.stringify(updated))

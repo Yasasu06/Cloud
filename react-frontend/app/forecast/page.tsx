@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { UserContext } from '@/lib/userContext'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 const GROWTH_RATES = [5, 10, 20, 30, 50] as const
@@ -46,6 +47,11 @@ export default function ForecastPage() {
   const [spend, setSpend] = useState(5000)
   const [growth, setGrowth] = useState<GrowthRate>(10)
   const [period, setPeriod] = useState<Period>(6)
+
+  useEffect(() => {
+    const s = UserContext.get('monthlySpend'); if (s) setSpend(s)
+  }, [])
+  useEffect(() => { if (spend > 0) UserContext.save('monthlySpend', spend) }, [spend])
 
   const data = useMemo(() => buildData(spend, growth, period), [spend, growth, period])
 

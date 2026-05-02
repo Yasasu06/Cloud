@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { UserContext } from '@/lib/userContext'
 
 // ─── animated counter hook ──────────────────────────────────────────────────
 function useAnimatedValue(target: number, duration = 600): number {
@@ -110,6 +111,11 @@ export default function ROICalculatorPage() {
   const [spend, setSpend] = useState<number | ''>(5000)
   const [hours, setHours] = useState<number | ''>(20)
   const [rate, setRate] = useState<number | ''>(85)
+
+  useEffect(() => {
+    const saved = UserContext.get('monthlySpend'); if (saved) setSpend(saved)
+  }, [])
+  useEffect(() => { if (typeof spend === 'number' && spend > 0) UserContext.save('monthlySpend', spend) }, [spend])
 
   const s = spend === '' ? 0 : spend
   const h = hours === '' ? 0 : hours

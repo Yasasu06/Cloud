@@ -431,6 +431,14 @@ export default function DashboardPage() {
   const [awsData, setAwsData] = useState<AWSCostData | null>(null)
   const [awsLastRefresh, setAwsLastRefresh] = useState<Date | null>(null)
   const [awsSpend, setAwsSpend] = useState(2000)
+  const [recentlyViewed, setRecentlyViewed] = useState<{ title: string; url: string; emoji: string; desc: string; visitedAt?: number }[]>([])
+
+  useEffect(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('recently_viewed') ?? '[]')
+      setRecentlyViewed(raw.filter((e: { url: string }) => e.url !== '/dashboard').slice(0, 3))
+    } catch (_e) {}
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -543,6 +551,48 @@ export default function DashboardPage() {
           <>
             {awsConnected && awsData && (
               <LiveAWSSection data={awsData} lastRefresh={awsLastRefresh} onRefresh={refreshAwsData} />
+            )}
+
+            {/* Continue Where You Left Off */}
+            {(recentlyViewed.length > 0 || recentRecs.length > 0) && (
+              <div style={{ marginBottom: 40 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Continue Where You Left Off</h2>
+
+                {/* Last analysis nudge */}
+                {recentRecs.length > 0 && (
+                  <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 14, padding: '14px 18px', marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                    <div style={{ fontSize: 13, color: '#a0a0b0' }}>
+                      Your last analysis: <strong style={{ color: 'white' }}>{recentRecs[0].provider}</strong> · {formatDate(recentRecs[0].created_at)}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => router.push('/analyze')} style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '6px 14px', color: '#818cf8', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>View again</button>
+                      <button onClick={() => router.push('/analyze')} style={{ background: '#6366f1', border: 'none', borderRadius: 8, padding: '6px 14px', color: 'white', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Fresh analysis →</button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Recently viewed pages */}
+                {recentlyViewed.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+                    {recentlyViewed.map(page => (
+                      <div
+                        key={page.url}
+                        onClick={() => router.push(page.url)}
+                        style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', cursor: 'pointer', transition: 'border-color 0.15s' }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}
+                      >
+                        <div style={{ fontSize: 22, marginBottom: 8 }}>{page.emoji}</div>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 3 }}>{page.title}</div>
+                        <div style={{ fontSize: 12, color: '#555', marginBottom: 10 }}>
+                          {page.visitedAt ? timeAgo(page.visitedAt) : 'Recently visited'}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#6366f1', fontWeight: 600 }}>Continue →</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             <div style={{ marginBottom: 40 }}>
@@ -659,3 +709,12 @@ function ActionLink({ href, label, primary }: { href: string; label: string; pri
 
 function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) }
 function formatDate(iso: string) { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
+function timeAgo(ts: number): string {
+  const diff = Date.now() - ts
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return mins <= 1 ? 'Just now' : `${mins} minutes ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return hrs === 1 ? '1 hour ago' : `${hrs} hours ago`
+  const days = Math.floor(hrs / 24)
+  return days === 1 ? 'Yesterday' : `${days} days ago`
+}

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { UserContext } from '@/lib/userContext'
 
 const INDUSTRIES = ['SaaS', 'Healthcare', 'Ecommerce', 'Finance', 'Gaming', 'Education'] as const
 const SIZES = ['1–10 employees', '11–50 employees', '51–200 employees', '200+ employees'] as const
@@ -95,6 +96,15 @@ export default function BenchmarkPage() {
   const [spend, setSpend] = useState(5000)
   const [industry, setIndustry] = useState<Industry>('SaaS')
   const [size, setSize] = useState<Size>('11–50 employees')
+
+  useEffect(() => {
+    const s = UserContext.get('monthlySpend'); if (s) setSpend(s)
+    const i = UserContext.get('industry'); if (i) setIndustry(i)
+    const sz = UserContext.get('companySize'); if (sz) setSize(sz)
+  }, [])
+  useEffect(() => { if (spend > 0) UserContext.save('monthlySpend', spend) }, [spend])
+  useEffect(() => { UserContext.save('industry', industry) }, [industry])
+  useEffect(() => { UserContext.save('companySize', size) }, [size])
 
   const result = useMemo<Result>(() => {
     const s = spend > 0 ? spend : 0

@@ -201,6 +201,38 @@ const MarkdownResponse = ({ content }: { content: string }) => (
   </ReactMarkdown>
 )
 
+const TOOL_SUGGESTIONS = [
+  { keywords: ['reserved instance', 'reserved instances', ' ri '], label: '💎 Reserved Instances', href: '/reserved-instances' },
+  { keywords: ['egress', 'data transfer', 'bandwidth cost'], label: '🔄 Egress Calculator', href: '/migration-cost' },
+  { keywords: ['compliance', 'hipaa', 'gdpr', 'pci', 'fedramp', 'hitrust', 'sox'], label: '✅ Compliance', href: '/compliance' },
+  { keywords: ['architecture', 'stack', 'infrastructure design', 'service design'], label: '🏗️ Architecture', href: '/architecture' },
+  { keywords: ['benchmark', 'industry average', 'peers', 'compare to'], label: '🏆 Cloud Score', href: '/benchmark' },
+]
+
+function RelatedTools({ response }: { response: string }) {
+  const lower = response.toLowerCase()
+  const matches = TOOL_SUGGESTIONS.filter(t => t.keywords.some(k => lower.includes(k)))
+  if (matches.length === 0) return null
+  return (
+    <div style={{ marginTop: 24, padding: 16, background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 12 }}>
+      <div style={{ fontSize: 11, color: '#6366f1', letterSpacing: 2, marginBottom: 12, fontWeight: 700 }}>🔗 RELATED TOOLS</div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {matches.map(m => (
+          <a
+            key={m.href}
+            href={m.href}
+            style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 20, padding: '6px 14px', fontSize: 13, color: '#818cf8', textDecoration: 'none', fontWeight: 600, transition: 'all 0.15s' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(99,102,241,0.2)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(99,102,241,0.1)' }}
+          >
+            {m.label} →
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function AnalyzePage() {
   const router = useRouter()
   const [selectedMode, setSelectedMode] = useState<Mode | null>(null)
@@ -607,6 +639,9 @@ Focus on things they can do TODAY.`,
             ))}
           </div>
         )}
+
+        {/* Related Tools */}
+        {done && response && <RelatedTools response={response} />}
 
         {/* Disclaimer */}
         {done && (
