@@ -16,6 +16,7 @@ const ANALYZE_ITEMS = [
 
 const ADVISE_ITEMS = [
   { href: '/advisor', label: 'Cloud Advisor', desc: 'Get a provider recommendation' },
+  { href: '/ai-advisor', label: 'AI Strategy Session', desc: 'Full cloud strategy in 5 questions' },
   { href: '/report-card', label: 'Report Card', desc: 'Grade your cloud setup' },
   { href: '/roi-calculator', label: 'ROI Calculator', desc: 'Calculate your return on investment' },
 ]
@@ -34,6 +35,7 @@ const MOBILE_LINKS = [
   { href: '/advisor', label: 'Cloud Advisor' },
   { href: '/report-card', label: 'Report Card' },
   { href: '/roi-calculator', label: 'ROI Calculator' },
+  { href: '/ai-advisor', label: 'AI Strategy Session' },
   { href: '/vendor-alerts', label: 'Price Alerts' },
   { href: '/cost-alerts', label: 'Cost Alerts' },
   { href: '/migration-cost', label: 'Egress Calculator' },
@@ -101,7 +103,7 @@ export default function Navbar() {
   }, [])
 
   const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark', '/migration-cost'].includes(pathname)
-  const adviseActive       = ['/advisor', '/report-card', '/roi-calculator'].includes(pathname)
+  const adviseActive       = ['/advisor', '/ai-advisor', '/report-card', '/roi-calculator'].includes(pathname)
   const intelligenceActive = ['/vendor-alerts', '/cost-alerts'].includes(pathname)
 
   return (
