@@ -16,6 +16,8 @@ const ANALYZE_ITEMS = [
   { href: '/forecast',           label: '📈 Cost Forecast',            desc: 'Project your cloud spend' },
   { href: '/multi-cloud',        label: '☁️ Multi-Cloud View',          desc: 'Consolidate all providers' },
   { href: '/terraform-estimator',label: '🏗️ Infrastructure Estimator', desc: 'Estimate infra costs' },
+  { href: '/cost-per-user',      label: '👤 Cost Per User',            desc: 'Benchmark your unit economics' },
+  { href: '/ai-cost-tracker',    label: '🤖 AI Costs',                 desc: 'Optimize LLM spend' },
   { href: '/alternatives',       label: '🌐 All Providers',            desc: 'Beyond AWS, Azure & GCP' },
 ]
 
@@ -27,6 +29,8 @@ const ADVISE_ITEMS = [
   { href: '/roi-calculator',     label: '📈 ROI Calculator',           desc: 'Calculate your ROI' },
   { href: '/compliance',         label: '✅ Compliance',               desc: 'Check requirements' },
   { href: '/reserved-instances', label: '🔒 Reserved Instances',       desc: 'Optimize commitments' },
+  { href: '/credits-tracker',    label: '🎁 Credits Tracker',          desc: 'Track startup credits' },
+  { href: '/sanity-check',       label: '🔍 Sanity Check',             desc: 'Pre-decision review' },
 ]
 
 const INTELLIGENCE_ITEMS = [
@@ -47,12 +51,16 @@ const MOBILE_LINKS = [
   { href: '/forecast',            label: 'Cost Forecast' },
   { href: '/multi-cloud',         label: 'Multi-Cloud View' },
   { href: '/terraform-estimator', label: 'Infrastructure Estimator' },
+  { href: '/cost-per-user',       label: 'Cost Per User' },
+  { href: '/ai-cost-tracker',     label: 'AI Costs' },
   { href: '/advisor',             label: 'Cloud Advisor' },
   { href: '/report-card',         label: 'Report Card' },
   { href: '/ai-advisor',          label: 'AI Strategy' },
   { href: '/roi-calculator',      label: 'ROI Calculator' },
   { href: '/compliance',          label: 'Compliance' },
   { href: '/reserved-instances',  label: 'Reserved Instances' },
+  { href: '/credits-tracker',     label: 'Credits Tracker' },
+  { href: '/sanity-check',        label: 'Sanity Check' },
   { href: '/vendor-alerts',       label: 'Price Alerts' },
   { href: '/benchmark',           label: 'Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
