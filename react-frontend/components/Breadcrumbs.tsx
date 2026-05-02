@@ -41,6 +41,7 @@ const PATH_LABELS: Record<string, string> = {
   'white-label':      'White Label',
   'case-studies':     'Case Studies',
   'for-you':          'Find Your Toolkit',
+  'pricing-explorer': 'Pricing Explorer',
   terms:              'Terms',
   privacy:            'Privacy',
 }
@@ -73,6 +74,7 @@ const SECTION_LABELS: Record<string, string> = {
   'cloud-glossary':   'Intelligence',
   'waste-report':     'Intelligence',
   replaces:           'Intelligence',
+  'pricing-explorer': 'Intelligence',
 }
 
 export default function Breadcrumbs() {

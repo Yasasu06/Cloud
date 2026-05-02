@@ -11,10 +11,32 @@ import JourneyProgress from '@/components/JourneyProgress'
 import ImplementationWizard from '@/components/ImplementationWizard'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
 import { getUserMode, modeInstruction } from '@/lib/userMode'
+import { fetchAllCompute } from '@/lib/pricing/compare'
+
+async function buildPricingContext(userText: string): Promise<string> {
+  const lower = userText.toLowerCase()
+  const mentioned: string[] = []
+  for (const p of ['aws', 'azure', 'gcp', 'google', 'digitalocean', 'hetzner', 'cloudflare', 'linode', 'vultr', 'oracle', 'render', 'railway', 'fly']) {
+    if (lower.includes(p)) mentioned.push(p)
+  }
+  if (mentioned.length === 0) mentioned.push('aws') // default
+  try {
+    const all = await fetchAllCompute()
+    // Top 3 cheapest in each requested provider for context
+    const slim = all
+      .filter(i => mentioned.some(m => i.provider.toLowerCase().includes(m === 'google' ? 'gcp' : m)))
+      .slice(0, 30)
+      .map(i => `${i.provider} ${i.name}: ${i.vcpus}vCPU/${i.ram_gb}GB = $${i.price_monthly_usd}/mo`)
+      .join('\n')
+    if (!slim) return ''
+    return `\n\nLIVE PRICING DATA (use these EXACT numbers — do not estimate):\n${slim}\n`
+  } catch { return '' }
+}
 import SummaryCard from '@/components/analysis/SummaryCard'
 import MetricsRow from '@/components/analysis/MetricsRow'
 import CostBreakdownChart from '@/components/analysis/CostBreakdownChart'
 import RecommendationCard from '@/components/analysis/RecommendationCard'
+import LivePricingBadge from '@/components/LivePricingBadge'
 import AlternativesSection from '@/components/analysis/AlternativesSection'
 import QuickWinsList from '@/components/analysis/QuickWinsList'
 import AnalysisSkeleton from '@/components/analysis/AnalysisSkeleton'
@@ -414,6 +436,8 @@ export default function AnalyzePage() {
     setPerspectives([])
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
+    const pricingContext = await buildPricingContext(userText)
+
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -426,7 +450,7 @@ export default function AnalyzePage() {
           max_tokens: 3000,
           response_format: { type: 'json_object' },
           messages: [
-            { role: 'system', content: mode.systemPrompt + ALT_PROVIDER_INSTRUCTION + JSON_SCHEMA_INSTRUCTION + modeInstruction(getUserMode()) },
+            { role: 'system', content: mode.systemPrompt + ALT_PROVIDER_INSTRUCTION + pricingContext + JSON_SCHEMA_INSTRUCTION + modeInstruction(getUserMode()) },
             { role: 'user', content: userText },
           ],
         }),
@@ -797,7 +821,8 @@ Focus on things they can do TODAY.`,
                 {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
               </span>
             </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                {analysis && <LivePricingBadge compact />}
                 <span style={{ fontSize: 11, color: '#444', padding: '3px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
                   Llama 3.3 70B
                 </span>

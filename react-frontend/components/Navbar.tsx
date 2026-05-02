@@ -36,12 +36,13 @@ const ADVISE_ITEMS = [
 ]
 
 const INTELLIGENCE_ITEMS = [
-  { href: '/vendor-alerts',  label: '💸 Price Alerts',          desc: 'Track price changes' },
-  { href: '/provider-news',  label: '📰 Cloud Updates',         desc: 'Latest provider news' },
-  { href: '/benchmark',      label: '📊 Industry Benchmarks',   desc: 'How you compare to peers' },
-  { href: '/cloud-glossary', label: '📚 Glossary',              desc: 'Cloud terms explained' },
-  { href: '/waste-report',   label: '🗑️ Waste Report',           desc: 'Find what you\'re wasting' },
-  { href: '/replaces',       label: '💡 What We Replace',       desc: '$400K of expertise for $49/mo' },
+  { href: '/pricing-explorer', label: '💰 Pricing Explorer',      desc: 'Compare 12 providers in real time' },
+  { href: '/vendor-alerts',    label: '💸 Price Alerts',          desc: 'Track price changes' },
+  { href: '/provider-news',    label: '📰 Cloud Updates',         desc: 'Latest provider news' },
+  { href: '/benchmark',        label: '📊 Industry Benchmarks',   desc: 'How you compare to peers' },
+  { href: '/cloud-glossary',   label: '📚 Glossary',              desc: 'Cloud terms explained' },
+  { href: '/waste-report',     label: '🗑️ Waste Report',           desc: 'Find what you\'re wasting' },
+  { href: '/replaces',         label: '💡 What We Replace',       desc: '$400K of expertise for $49/mo' },
 ]
 
 const MOBILE_LINKS = [
@@ -66,6 +67,7 @@ const MOBILE_LINKS = [
   { href: '/reserved-instances',  label: 'Reserved Instances' },
   { href: '/credits-tracker',     label: 'Credits Tracker' },
   { href: '/sanity-check',        label: 'Sanity Check' },
+  { href: '/pricing-explorer',    label: 'Pricing Explorer' },
   { href: '/vendor-alerts',       label: 'Price Alerts' },
   { href: '/benchmark',           label: 'Industry Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
