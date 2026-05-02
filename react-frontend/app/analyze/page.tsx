@@ -445,7 +445,7 @@ Focus on things they can do TODAY.`,
 
         {/* Trust bar */}
         <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 32, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
-          {['🔒 Vendor Neutral', '📊 Real pricing data', '⚡ Powered by Llama 3.3 70B', '🌍 Covers 9+ providers'].map(item => (
+          {['🔒 Vendor Neutral', '📊 Real pricing data', '⚡ Powered by Llama 3.3 70B', '🌍 Covers 12+ providers'].map(item => (
             <span key={item} style={{ color: '#666', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>{item}</span>
           ))}
         </div>

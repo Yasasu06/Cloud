@@ -89,7 +89,7 @@ export default function RootLayout({
                     ☁️ Cloud Intelligence
                   </div>
                   <p style={{ color: '#555', fontSize: 13, lineHeight: 1.7 }}>
-                    The cloud advisor for companies that can&apos;t afford a cloud architect.
+                    The cloud advisor for teams that need cloud expertise on demand.
                   </p>
                 </div>
 
@@ -98,10 +98,12 @@ export default function RootLayout({
                   <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>TOOLS</div>
                   {[
                     { label: 'AI Analyze', href: '/analyze' },
+                    { label: 'Instant Audit', href: '/instant-audit' },
                     { label: 'Cloud Advisor', href: '/advisor' },
                     { label: 'Bill Upload', href: '/bill-upload' },
-                    { label: 'Cloud Twin', href: '/cloud-twin' },
                     { label: 'Report Card', href: '/report-card' },
+                    { label: 'Sanity Check', href: '/sanity-check' },
+                    { label: 'What We Replace', href: '/replaces' },
                     { label: 'Glossary', href: '/cloud-glossary' },
                   ].map(l => (
                     <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>

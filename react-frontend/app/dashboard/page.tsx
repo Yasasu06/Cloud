@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
 
-type Tab = 'overview' | 'analyses' | 'team'
+type Tab = 'overview' | 'analyses' | 'team' | 'clients'
 
 interface Rec {
   id: string
@@ -426,6 +426,7 @@ export default function DashboardPage() {
   const [recentRecs, setRecentRecs] = useState<Rec[]>([])
   const [stats, setStats] = useState<Stats>({ total: 0, lastDate: null, topProvider: null, plan: 'Free' })
   const [loading, setLoading] = useState(true)
+  const [loggedOut, setLoggedOut] = useState(false)
   const [awsConnected, setAwsConnected] = useState(false)
   const [showAwsPanel, setShowAwsPanel] = useState(false)
   const [awsData, setAwsData] = useState<AWSCostData | null>(null)
@@ -443,7 +444,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.replace('/auth'); return }
+      if (!session) { setLoggedOut(true); setLoading(false); return }
       setEmail(session.user.email ?? null)
 
       const [{ data: allRecs }, { data: profile }] = await Promise.all([
@@ -480,6 +481,28 @@ export default function DashboardPage() {
     setAwsLastRefresh(new Date())
   }
 
+  if (loggedOut) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', maxWidth: 400, padding: 24 }}>
+          <div style={{ fontSize: 48, marginBottom: 20 }}>🔒</div>
+          <h2 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12 }}>Sign in to see your dashboard</h2>
+          <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 28, lineHeight: 1.6 }}>
+            Your saved analyses, achievements, and progress are waiting for you.
+          </p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a href="/auth" style={{ background: '#6366f1', borderRadius: 10, padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+              Sign In →
+            </a>
+            <a href="/analyze" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 24px', color: '#a0a0b0', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+              Try tools without an account →
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: '#0a0a0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -488,10 +511,13 @@ export default function DashboardPage() {
     )
   }
 
+  const isGrowthOrEnterprise = stats.plan === 'Growth' || stats.plan === 'Enterprise'
+
   const TABS: { id: Tab; label: string }[] = [
     { id: 'overview',  label: 'Overview' },
     { id: 'analyses',  label: `Saved Analyses${stats.total > 0 ? ` (${stats.total})` : ''}` },
     { id: 'team',      label: 'Team' },
+    { id: 'clients',   label: 'Clients' },
   ]
 
   const tabBtnStyle = (active: boolean): React.CSSProperties => ({
@@ -739,6 +765,56 @@ export default function DashboardPage() {
 
         {/* ── Team tab ── */}
         {tab === 'team' && <TeamTab userEmail={email} plan={stats.plan} />}
+
+        {/* ── Clients tab ── */}
+        {tab === 'clients' && (
+          isGrowthOrEnterprise ? (
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <h2 style={{ fontSize: 18, fontWeight: 700 }}>Client Workspaces</h2>
+                <button style={{ background: '#6366f1', border: 'none', borderRadius: 8, padding: '8px 16px', color: 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                  + Add Client
+                </button>
+              </div>
+              {recentRecs.length === 0 ? (
+                <div style={{ background: '#111118', borderRadius: 16, padding: '48px 24px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.06)', color: '#555', fontSize: 14 }}>
+                  No client analyses yet. Run an analysis for a client and it will appear here.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {recentRecs.map(rec => (
+                    <div key={rec.id} style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#818cf8' }}>
+                          {rec.provider.charAt(0)}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: 'white' }}>{rec.provider}</div>
+                          <div style={{ fontSize: 12, color: '#555' }}>{rec.workload} · {formatDate(rec.created_at)}</div>
+                        </div>
+                      </div>
+                      <button onClick={() => router.push('/analyze')} style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 7, padding: '6px 14px', color: '#818cf8', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+                        View →
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 20, padding: '48px 32px', textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>💼</div>
+              <h3 style={{ fontSize: 20, fontWeight: 900, marginBottom: 10 }}>Multi-client management</h3>
+              <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 24, maxWidth: 380, margin: '0 auto 24px', lineHeight: 1.6 }}>
+                Organize analyses by client, switch between workspaces, and generate reports per client.
+                Available on <strong style={{ color: 'white' }}>Growth</strong> and <strong style={{ color: 'white' }}>Enterprise</strong> plans.
+              </p>
+              <a href="/pricing" style={{ background: '#6366f1', borderRadius: 10, padding: '12px 24px', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
+                Upgrade to Growth →
+              </a>
+            </div>
+          )
+        )}
 
       </div>
     </div>

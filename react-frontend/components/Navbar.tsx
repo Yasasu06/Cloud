@@ -9,6 +9,7 @@ import GlobalSearch from './GlobalSearch'
 
 const ANALYZE_ITEMS = [
   { href: '/analyze',            label: '🔍 AI Analyze',              desc: 'Explain any cloud situation' },
+  { href: '/instant-audit',      label: '⚡ Instant Audit',            desc: 'Free 30-second cloud audit' },
   { href: '/architecture',       label: '🏗️ Architecture',             desc: 'Visualize your stack' },
   { href: '/bill-upload',        label: '📊 Bill Upload',              desc: 'Analyze your actual bill' },
   { href: '/savings',            label: '💰 Savings Calculator',       desc: 'Find your savings' },
@@ -24,7 +25,7 @@ const ANALYZE_ITEMS = [
 const ADVISE_ITEMS = [
   { href: '/advisor',            label: '🎯 Cloud Advisor',            desc: 'Get a recommendation' },
   { href: '/report-card',        label: '📋 Report Card',              desc: 'Grade your setup' },
-  { href: '/benchmark',          label: '🏆 Cloud Score',              desc: 'Maturity assessment' },
+  { href: '/cloud-score',        label: '🏆 Cloud Score',              desc: 'Maturity assessment' },
   { href: '/ai-advisor',         label: '💼 AI Strategy',              desc: 'Full strategy session' },
   { href: '/roi-calculator',     label: '📈 ROI Calculator',           desc: 'Calculate your ROI' },
   { href: '/compliance',         label: '✅ Compliance',               desc: 'Check requirements' },
@@ -35,16 +36,16 @@ const ADVISE_ITEMS = [
 
 const INTELLIGENCE_ITEMS = [
   { href: '/vendor-alerts',  label: '💸 Price Alerts',        desc: 'Track price changes' },
-  { href: '/weekly-digest',  label: '📰 Cloud Updates',       desc: 'Latest provider news' },
-  { href: '/benchmark',      label: '📊 Benchmarks',          desc: 'Compare to industry' },
+  { href: '/provider-news',  label: '📰 Cloud Updates',       desc: 'Latest provider news' },
   { href: '/cloud-glossary', label: '📚 Glossary',            desc: 'Cloud terms explained' },
   { href: '/waste-report',   label: '🗑️ Waste Report',         desc: 'Find what you\'re wasting' },
-  { href: '/replaces',       label: '💡 What We Replace',     desc: 'Roles replaced by AI' },
+  { href: '/replaces',       label: '💡 What We Replace',     desc: '$400K of expertise for $49/mo' },
 ]
 
 const MOBILE_LINKS = [
   { href: '/',                    label: 'Home' },
   { href: '/analyze',             label: 'AI Analyze' },
+  { href: '/instant-audit',       label: 'Instant Audit' },
   { href: '/architecture',        label: 'Architecture' },
   { href: '/bill-upload',         label: 'Bill Upload' },
   { href: '/savings',             label: 'Savings Calculator' },
@@ -56,6 +57,7 @@ const MOBILE_LINKS = [
   { href: '/ai-cost-tracker',     label: 'AI Costs' },
   { href: '/advisor',             label: 'Cloud Advisor' },
   { href: '/report-card',         label: 'Report Card' },
+  { href: '/cloud-score',         label: 'Cloud Score' },
   { href: '/ai-advisor',          label: 'AI Strategy' },
   { href: '/roi-calculator',      label: 'ROI Calculator' },
   { href: '/compliance',          label: 'Compliance' },
@@ -63,10 +65,9 @@ const MOBILE_LINKS = [
   { href: '/credits-tracker',     label: 'Credits Tracker' },
   { href: '/sanity-check',        label: 'Sanity Check' },
   { href: '/vendor-alerts',       label: 'Price Alerts' },
-  { href: '/benchmark',           label: 'Benchmarks' },
   { href: '/cloud-glossary',      label: 'Glossary' },
   { href: '/waste-report',        label: 'Waste Report' },
-  { href: '/alternatives',         label: 'All Providers' },
+  { href: '/alternatives',        label: 'All Providers' },
   { href: '/replaces',            label: 'What We Replace' },
   { href: '/pricing',             label: 'Pricing' },
 ]
