@@ -7,6 +7,7 @@ import { JourneyProvider } from '@/lib/journeyContext'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import PostHogProvider from '@/components/PostHogProvider'
+import PageTracker from '@/components/PageTracker'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -66,6 +67,7 @@ export default function RootLayout({
         <JourneyProvider>
           <TooltipProvider>
           <PostHogProvider>
+          <PageTracker />
           <main><div className="page-transition">{children}</div></main>
           <footer style={{
             borderTop: '1px solid rgba(255,255,255,0.06)',

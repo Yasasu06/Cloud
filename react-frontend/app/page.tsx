@@ -243,22 +243,22 @@ export default function HomePage() {
           </div>
 
           {/* Social proof bar */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 40 }}>
-            <div style={{ display: 'flex' }}>
-              {(['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#a78bfa'] as const).map((color, i) => (
-                <div key={i} style={{
-                  width: 28, height: 28, background: color, borderRadius: '50%',
-                  border: '2px solid #050508', marginLeft: i > 0 ? -8 : 0,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 9, fontWeight: 800, color: 'white',
+          <div style={{ marginBottom: 40 }}>
+            <p style={{ color: '#555', fontSize: 12, marginBottom: 12, letterSpacing: 0.5 }}>
+              Used by cloud teams at startups worldwide
+            </p>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+              {['SaaS Startup', 'Healthcare Tech', 'E-commerce', 'FinTech', 'DevOps Team'].map(badge => (
+                <span key={badge} style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 20, padding: '5px 14px',
+                  fontSize: 12, color: '#666', fontWeight: 500,
                 }}>
-                  {['JD', 'MK', 'SR', 'AL', 'PB'][i]}
-                </div>
+                  {badge}
+                </span>
               ))}
             </div>
-            <span style={{ color: '#555', fontSize: 13 }}>
-              Join <strong style={{ color: '#a0a0b0' }}>2,400+</strong> founders already saving on cloud
-            </span>
           </div>
 
           {/* Email capture */}
