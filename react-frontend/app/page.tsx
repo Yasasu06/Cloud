@@ -127,166 +127,147 @@ export default function HomePage() {
       {/* HERO */}
       <section style={{
         position: 'relative',
-        minHeight: '85vh',
+        minHeight: '90vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '60px 24px',
+        padding: '80px 24px 60px',
         textAlign: 'center',
-        background: 'radial-gradient(ellipse at top, #1a1040 0%, #050508 70%), radial-gradient(circle, #ffffff08 1px, transparent 1px)',
-        backgroundSize: 'auto, 32px 32px',
+        background: '#050508',
         overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute',
-          top: '-200px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '600px',
-          height: '600px',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          filter: 'blur(40px)',
+        {/* Orb 1 — top-left, indigo */}
+        <div className="animate-float" style={{
+          position: 'absolute', top: '-100px', left: '-80px',
+          width: 600, height: 600,
+          background: 'rgba(99,102,241,0.15)',
+          borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none',
         }} />
+        {/* Orb 2 — top-right, purple */}
+        <div style={{
+          position: 'absolute', top: '40px', right: '-80px',
+          width: 400, height: 400,
+          background: 'rgba(139,92,246,0.1)',
+          borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none',
+        }} />
+        {/* Orb 3 — bottom-center, blue */}
+        <div style={{
+          position: 'absolute', bottom: '-80px', left: '50%', transform: 'translateX(-50%)',
+          width: 500, height: 500,
+          background: 'rgba(59,130,246,0.08)',
+          borderRadius: '50%', filter: 'blur(150px)', pointerEvents: 'none',
+        }} />
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          style={{ maxWidth: 720 }}
+          style={{ maxWidth: 720, position: 'relative', zIndex: 1 }}
         >
           <div style={{
             display: 'inline-block',
             background: 'rgba(34,197,94,0.1)',
             border: '1px solid rgba(34,197,94,0.3)',
-            borderRadius: 20,
-            padding: '6px 16px',
-            fontSize: 12,
-            color: '#22c55e',
-            fontWeight: 600,
-            marginBottom: 24,
-            letterSpacing: 2,
+            borderRadius: 20, padding: '6px 16px',
+            fontSize: 12, color: '#22c55e', fontWeight: 600,
+            marginBottom: 24, letterSpacing: 2,
           }}>
             100% VENDOR NEUTRAL · NO AWS/AZURE/GCP SPONSORSHIP
           </div>
 
-          <h1 style={{
-            fontSize: 'clamp(36px, 6vw, 64px)',
-            fontWeight: 900,
-            lineHeight: 1.1,
-            marginBottom: 24,
-          }}>
-            Your cloud bill explained.
+          <h1 style={{ fontSize: 'clamp(36px, 6vw, 72px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 16 }}>
+            Your Cloud Bill,
             <br />
-            <span className="gradient-text">Your waste eliminated.</span>
-            <br />
-            In plain English.
+            <span className="shimmer-text">Finally Explained.</span>
           </h1>
 
-          <p style={{
-            fontSize: 'clamp(16px, 2vw, 20px)',
-            color: '#a0a0b0',
-            marginBottom: 40,
-            lineHeight: 1.6,
-          }}>
-            Describe your cloud situation and get a specific, actionable
-            analysis — not generic advice. Built for founders and IT managers
-            who can&apos;t afford a $300/hour cloud consultant.
+          <p style={{ fontSize: 14, color: '#555', marginBottom: 32 }}>
+            Trusted by founders managing over{' '}
+            <strong style={{ color: '#a0a0b0' }}>$2.4M</strong> in cloud spend
           </p>
 
+          {/* Feature pills */}
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
+            {['⚡ Results in 30 seconds', '🔒 Vendor Neutral', '🆓 Always Free to Start'].map(pill => (
+              <span key={pill} style={{
+                background: 'rgba(255,255,255,0.05)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: 20, padding: '6px 14px',
+                fontSize: 12, color: '#a0a0b0', fontWeight: 500,
+              }}>
+                {pill}
+              </span>
+            ))}
+          </div>
+
+          {/* Premium input */}
           <div style={{
             background: '#1a1a2e',
             borderRadius: 16,
             padding: '8px 8px 8px 20px',
-            border: '1px solid #ffffff15',
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            maxWidth: 640,
-            margin: '0 auto 16px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', flexWrap: 'wrap', gap: 12,
+            maxWidth: 640, margin: '0 auto 20px',
+            minHeight: 56, alignItems: 'center',
           }}>
             <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                placeholder=""
                 style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: 'none',
-                  outline: 'none',
-                  color: 'white',
-                  fontSize: 15,
-                  padding: '8px 0',
-                  boxSizing: 'border-box',
+                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
+                  color: 'white', fontSize: 15, padding: '8px 0', boxSizing: 'border-box',
                 }}
               />
               {!input && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    display: 'flex',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                    color: '#666',
-                    fontSize: 14,
-                    opacity: scenarioVisible ? 1 : 0,
-                    transition: 'opacity 0.3s ease',
-                    overflow: 'hidden',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
+                <div style={{
+                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+                  display: 'flex', alignItems: 'center',
+                  pointerEvents: 'none', color: '#555', fontSize: 14,
+                  opacity: scenarioVisible ? 1 : 0, transition: 'opacity 0.3s ease',
+                  overflow: 'hidden', whiteSpace: 'nowrap',
+                }}>
                   {SCENARIOS[scenarioIndex]}
                 </div>
               )}
             </div>
             <button
               onClick={handleSubmit}
-              className="btn-primary"
+              className="btn-primary animate-glow"
               style={{ whiteSpace: 'nowrap', padding: '12px 24px', fontSize: 15 }}
             >
               Analyze →
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 48 }}>
-            {[
-              '🔒 Vendor Neutral — No AWS/Azure/GCP partnerships',
-              '⚡ Results in 30 seconds',
-              '🆓 Free — No credit card required',
-            ].map(badge => (
-              <span key={badge} style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 20,
-                padding: '6px 14px',
-                fontSize: 12,
-                color: '#a0a0b0',
-                fontWeight: 500,
-              }}>
-                {badge}
-              </span>
-            ))}
+          {/* Social proof bar */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 40 }}>
+            <div style={{ display: 'flex' }}>
+              {(['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#a78bfa'] as const).map((color, i) => (
+                <div key={i} style={{
+                  width: 28, height: 28, background: color, borderRadius: '50%',
+                  border: '2px solid #050508', marginLeft: i > 0 ? -8 : 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 9, fontWeight: 800, color: 'white',
+                }}>
+                  {['JD', 'MK', 'SR', 'AL', 'PB'][i]}
+                </div>
+              ))}
+            </div>
+            <span style={{ color: '#555', fontSize: 13 }}>
+              Join <strong style={{ color: '#a0a0b0' }}>2,400+</strong> founders already saving on cloud
+            </span>
           </div>
 
           {/* Email capture */}
           <div style={{ marginBottom: 40, textAlign: 'center' }}>
             {!emailSubmitted ? (
               <div style={{
-                display: 'inline-flex',
-                gap: 8,
-                background: '#1a1a2e',
-                borderRadius: 12,
-                padding: '6px 6px 6px 16px',
-                border: '1px solid #ffffff0d',
-                maxWidth: 380,
-                width: '100%',
+                display: 'inline-flex', gap: 8, background: '#1a1a2e',
+                borderRadius: 12, padding: '6px 6px 6px 16px',
+                border: '1px solid #ffffff0d', maxWidth: 380, width: '100%',
               }}>
                 <input
                   value={emailInput}
@@ -295,29 +276,18 @@ export default function HomePage() {
                   placeholder="Get weekly cloud cost tips"
                   type="email"
                   style={{
-                    flex: 1,
-                    background: 'transparent',
-                    border: 'none',
-                    outline: 'none',
-                    color: '#a0a0b0',
-                    fontSize: 13,
-                    minWidth: 0,
+                    flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                    color: '#a0a0b0', fontSize: 13, minWidth: 0,
                   }}
                 />
                 <button
                   onClick={handleEmailSubmit}
                   disabled={emailLoading || !emailInput.trim()}
                   style={{
-                    background: '#6366f1',
-                    border: 'none',
-                    borderRadius: 8,
-                    padding: '8px 14px',
-                    color: 'white',
-                    fontSize: 12,
-                    fontWeight: 600,
+                    background: '#6366f1', border: 'none', borderRadius: 8,
+                    padding: '8px 14px', color: 'white', fontSize: 12, fontWeight: 600,
                     cursor: emailLoading || !emailInput.trim() ? 'not-allowed' : 'pointer',
-                    opacity: emailLoading || !emailInput.trim() ? 0.5 : 1,
-                    whiteSpace: 'nowrap',
+                    opacity: emailLoading || !emailInput.trim() ? 0.5 : 1, whiteSpace: 'nowrap',
                   }}
                 >
                   Subscribe
@@ -328,13 +298,7 @@ export default function HomePage() {
             )}
           </div>
 
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 32,
-            flexWrap: 'wrap',
-            marginBottom: 60,
-          }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', marginBottom: 20 }}>
             {[
               { icon: '🔍', text: 'Bill explanation' },
               { icon: '💸', text: 'Waste identification' },
@@ -342,13 +306,7 @@ export default function HomePage() {
               { icon: '📊', text: 'Cost projections' },
               { icon: '🛡️', text: 'Compliance guidance' },
             ].map(item => (
-              <div key={item.text} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                color: '#a0a0b0',
-                fontSize: 14,
-              }}>
+              <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a0a0b0', fontSize: 14 }}>
                 <span>{item.icon}</span>
                 <span>{item.text}</span>
               </div>

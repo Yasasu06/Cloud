@@ -3,43 +3,49 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Cloud, Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 const ANALYZE_ITEMS = [
-  { href: '/analyze', label: 'AI Analyze', desc: 'Explain your cloud situation' },
-  { href: '/bill-upload', label: 'Bill Upload', desc: 'Upload your cloud bill' },
-  { href: '/cloud-twin', label: 'Cloud Twin', desc: 'Build your cloud profile' },
-  { href: '/benchmark', label: 'Benchmark', desc: 'Compare your spend to industry averages' },
-  { href: '/migration-cost', label: 'Egress Calculator', desc: 'Cost to switch cloud providers' },
+  { href: '/analyze',       label: '🔍 AI Analyze',          desc: 'Explain any cloud situation' },
+  { href: '/architecture',  label: '🏗️ Architecture',         desc: 'Visualize your stack' },
+  { href: '/bill-upload',   label: '📊 Bill Upload',          desc: 'Analyze your actual bill' },
+  { href: '/savings',       label: '💰 Savings Calculator',   desc: 'Find your savings' },
+  { href: '/migration-cost',label: '🔄 Egress Calculator',    desc: 'Cost to switch providers' },
 ]
 
 const ADVISE_ITEMS = [
-  { href: '/advisor', label: 'Cloud Advisor', desc: 'Get a provider recommendation' },
-  { href: '/ai-advisor', label: 'AI Strategy Session', desc: 'Full cloud strategy in 5 questions' },
-  { href: '/report-card', label: 'Report Card', desc: 'Grade your cloud setup' },
-  { href: '/roi-calculator', label: 'ROI Calculator', desc: 'Calculate your return on investment' },
+  { href: '/advisor',       label: '🎯 Cloud Advisor',        desc: 'Get a recommendation' },
+  { href: '/report-card',   label: '📋 Report Card',          desc: 'Grade your setup' },
+  { href: '/benchmark',     label: '🏆 Cloud Score',          desc: 'Maturity assessment' },
+  { href: '/ai-advisor',    label: '💼 AI Strategy',          desc: 'Full strategy session' },
+  { href: '/roi-calculator',label: '📈 ROI Calculator',       desc: 'Calculate your ROI' },
+  { href: '/compliance',    label: '✅ Compliance',           desc: 'Check requirements' },
 ]
 
 const INTELLIGENCE_ITEMS = [
-  { href: '/vendor-alerts', label: 'Price Alerts', desc: 'Track AWS, Azure & GCP price changes' },
-  { href: '/cost-alerts', label: 'Cost Alerts', desc: 'Set up cloud budget alerts' },
+  { href: '/vendor-alerts',  label: '💸 Price Alerts',        desc: 'Track price changes' },
+  { href: '/weekly-digest',  label: '📰 Cloud Updates',       desc: 'Latest provider news' },
+  { href: '/benchmark',      label: '📊 Benchmarks',          desc: 'Compare to industry' },
+  { href: '/cloud-glossary', label: '📚 Glossary',            desc: 'Cloud terms explained' },
 ]
 
 const MOBILE_LINKS = [
-  { href: '/', label: 'Home' },
-  { href: '/analyze', label: 'AI Analyze' },
-  { href: '/bill-upload', label: 'Bill Upload' },
-  { href: '/cloud-twin', label: 'Cloud Twin' },
-  { href: '/benchmark', label: 'Benchmark' },
-  { href: '/advisor', label: 'Cloud Advisor' },
-  { href: '/report-card', label: 'Report Card' },
-  { href: '/roi-calculator', label: 'ROI Calculator' },
-  { href: '/ai-advisor', label: 'AI Strategy Session' },
-  { href: '/vendor-alerts', label: 'Price Alerts' },
-  { href: '/cost-alerts', label: 'Cost Alerts' },
+  { href: '/',               label: 'Home' },
+  { href: '/analyze',        label: 'AI Analyze' },
+  { href: '/architecture',   label: 'Architecture' },
+  { href: '/bill-upload',    label: 'Bill Upload' },
+  { href: '/savings',        label: 'Savings Calculator' },
   { href: '/migration-cost', label: 'Egress Calculator' },
-  { href: '/pricing', label: 'Pricing' },
+  { href: '/advisor',        label: 'Cloud Advisor' },
+  { href: '/report-card',    label: 'Report Card' },
+  { href: '/ai-advisor',     label: 'AI Strategy' },
+  { href: '/roi-calculator', label: 'ROI Calculator' },
+  { href: '/compliance',     label: 'Compliance' },
+  { href: '/vendor-alerts',  label: 'Price Alerts' },
+  { href: '/benchmark',      label: 'Benchmarks' },
+  { href: '/cloud-glossary', label: 'Glossary' },
+  { href: '/pricing',        label: 'Pricing' },
 ]
 
 function DropdownMenu({ items, open }: { items: typeof ANALYZE_ITEMS; open: boolean }) {
@@ -58,7 +64,7 @@ function DropdownMenu({ items, open }: { items: typeof ANALYZE_ITEMS; open: bool
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
       padding: 8,
-      minWidth: 220,
+      minWidth: 240,
       zIndex: 100,
       boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
     }}>
@@ -67,17 +73,14 @@ function DropdownMenu({ items, open }: { items: typeof ANALYZE_ITEMS; open: bool
           key={item.href}
           href={item.href}
           style={{
-            display: 'block',
-            padding: '10px 14px',
-            borderRadius: 10,
-            textDecoration: 'none',
-            transition: 'background 0.1s ease',
+            display: 'block', padding: '10px 14px', borderRadius: 10,
+            textDecoration: 'none', transition: 'background 0.1s ease',
           }}
           onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.1)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
         >
           <div style={{ fontSize: 13, fontWeight: 600, color: '#ffffff', marginBottom: 2 }}>{item.label}</div>
-          <div style={{ fontSize: 11, color: '#666' }}>{item.desc}</div>
+          <div style={{ fontSize: 11, color: '#555' }}>{item.desc}</div>
         </Link>
       ))}
     </div>
@@ -93,18 +96,16 @@ export default function Navbar() {
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setLoggedIn(!!session)
-    })
+    supabase.auth.getSession().then(({ data: { session } }) => setLoggedIn(!!session))
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setLoggedIn(!!session)
     })
     return () => subscription.unsubscribe()
   }, [])
 
-  const analyzeActive      = ['/analyze', '/bill-upload', '/cloud-twin', '/benchmark', '/migration-cost'].includes(pathname)
-  const adviseActive       = ['/advisor', '/ai-advisor', '/report-card', '/roi-calculator'].includes(pathname)
-  const intelligenceActive = ['/vendor-alerts', '/cost-alerts'].includes(pathname)
+  const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost'].includes(pathname)
+  const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance'].includes(pathname)
+  const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary'].includes(pathname)
 
   return (
     <nav
@@ -120,14 +121,20 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #a855f7)' }}
+          <Link href="/" className="flex items-center gap-2 group" style={{ textDecoration: 'none' }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 16, transition: 'transform 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)' }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
             >
-              <Cloud size={16} className="text-white" />
+              ⚡
             </div>
-            <span className="font-bold text-white text-sm tracking-wide hidden sm:block">
+            <span style={{ fontWeight: 800, color: 'white', fontSize: 14, letterSpacing: '-0.01em' }}
+              className="hidden sm:block">
               Cloud Intelligence
             </span>
           </Link>
@@ -135,25 +142,19 @@ export default function Navbar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-1">
 
-            {/* Home */}
-            <Link
-              href="/"
-              style={{
-                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
-                color: pathname === '/' ? '#fff' : '#a0a0b0',
-                background: pathname === '/' ? 'rgba(99,102,241,0.15)' : 'transparent',
-                textDecoration: 'none', transition: 'all 0.15s',
-              }}
-            >
+            <Link href="/" style={{
+              fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+              color: pathname === '/' ? '#fff' : '#a0a0b0',
+              background: pathname === '/' ? 'rgba(99,102,241,0.15)' : 'transparent',
+              textDecoration: 'none', transition: 'all 0.15s',
+            }}>
               Home
             </Link>
 
             {/* Analyze dropdown */}
-            <div
-              style={{ position: 'relative' }}
+            <div style={{ position: 'relative' }}
               onMouseEnter={() => setOpenDropdown('analyze')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
+              onMouseLeave={() => setOpenDropdown(null)}>
               <button style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
@@ -167,11 +168,9 @@ export default function Navbar() {
             </div>
 
             {/* Advise dropdown */}
-            <div
-              style={{ position: 'relative' }}
+            <div style={{ position: 'relative' }}
               onMouseEnter={() => setOpenDropdown('advise')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
+              onMouseLeave={() => setOpenDropdown(null)}>
               <button style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
@@ -185,11 +184,9 @@ export default function Navbar() {
             </div>
 
             {/* Intelligence dropdown */}
-            <div
-              style={{ position: 'relative' }}
+            <div style={{ position: 'relative' }}
               onMouseEnter={() => setOpenDropdown('intelligence')}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
+              onMouseLeave={() => setOpenDropdown(null)}>
               <button style={{
                 display: 'flex', alignItems: 'center', gap: 4,
                 fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
@@ -202,50 +199,40 @@ export default function Navbar() {
               <DropdownMenu items={INTELLIGENCE_ITEMS} open={openDropdown === 'intelligence'} />
             </div>
 
-            <Link
-              href="/pricing"
-              style={{
-                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
-                color: pathname === '/pricing' ? '#fff' : '#a0a0b0',
-                background: pathname === '/pricing' ? 'rgba(99,102,241,0.15)' : 'transparent',
-                textDecoration: 'none', transition: 'all 0.15s',
-              }}
-            >
+            <Link href="/pricing" style={{
+              fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+              color: pathname === '/pricing' ? '#fff' : '#a0a0b0',
+              background: pathname === '/pricing' ? 'rgba(99,102,241,0.15)' : 'transparent',
+              textDecoration: 'none', transition: 'all 0.15s',
+            }}>
               Pricing
             </Link>
           </div>
 
-          {/* CTA + mobile toggle */}
+          {/* Right side */}
           <div className="flex items-center gap-3">
             {loggedIn ? (
-              <Link
-                href="/dashboard"
-                className="hidden sm:block text-sm font-medium transition-colors duration-200"
-                style={{
-                  color: pathname === '/dashboard' ? '#fff' : '#a0a0b0',
-                  padding: '6px 12px',
-                  textDecoration: 'none',
-                  background: pathname === '/dashboard' ? 'rgba(99,102,241,0.15)' : 'transparent',
-                  borderRadius: 8,
-                }}
-              >
+              <Link href="/dashboard" className="hidden sm:block text-sm font-medium" style={{
+                color: pathname === '/dashboard' ? '#fff' : '#a0a0b0',
+                padding: '6px 12px', textDecoration: 'none',
+                background: pathname === '/dashboard' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                borderRadius: 8,
+              }}>
                 Dashboard
               </Link>
             ) : (
-              <Link
-                href="/auth"
-                className="hidden sm:block text-sm font-medium transition-colors duration-200"
-                style={{ color: '#a0a0b0', padding: '6px 12px', textDecoration: 'none' }}
-              >
+              <Link href="/auth" className="hidden sm:block text-sm font-medium" style={{
+                color: '#a0a0b0', padding: '6px 12px', textDecoration: 'none',
+              }}>
                 Sign In
               </Link>
             )}
             <Link
-              href="/chat"
-              className="hidden sm:block btn-primary accent-glow"
+              href="/analyze"
+              className="hidden sm:block btn-primary animate-glow"
               style={{ fontSize: 13, padding: '8px 18px' }}
             >
-              Ask AI
+              Get Started Free
             </Link>
             <button
               className="md:hidden p-2 rounded-md text-gray-400 hover:text-white transition-colors"
@@ -280,31 +267,25 @@ export default function Navbar() {
             </Link>
           ))}
           {loggedIn ? (
-            <Link
-              href="/dashboard"
-              onClick={() => setMenuOpen(false)}
+            <Link href="/dashboard" onClick={() => setMenuOpen(false)}
               className="block px-3 py-2 rounded-md text-sm font-medium"
-              style={{ color: '#a0a0b0', textDecoration: 'none' }}
-            >
+              style={{ color: '#a0a0b0', textDecoration: 'none' }}>
               Dashboard
             </Link>
           ) : (
-            <Link
-              href="/auth"
-              onClick={() => setMenuOpen(false)}
+            <Link href="/auth" onClick={() => setMenuOpen(false)}
               className="block px-3 py-2 rounded-md text-sm font-medium"
-              style={{ color: '#a0a0b0', textDecoration: 'none' }}
-            >
+              style={{ color: '#a0a0b0', textDecoration: 'none' }}>
               Sign In
             </Link>
           )}
           <Link
-            href="/chat"
+            href="/analyze"
             onClick={() => setMenuOpen(false)}
             className="block px-3 py-2 rounded-md text-sm font-semibold text-white text-center mt-2"
-            style={{ background: '#6366f1', textDecoration: 'none' }}
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', textDecoration: 'none' }}
           >
-            Ask AI
+            Get Started Free
           </Link>
         </div>
       )}

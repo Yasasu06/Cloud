@@ -11,6 +11,12 @@ import JourneyProgress from '@/components/JourneyProgress'
 
 type Mode = 'finops' | 'architect' | 'migration'
 
+const MODE_CHIPS: Record<Mode, string[]> = {
+  finops:    ['Bill spike', 'Find waste', 'Explain charges'],
+  architect: ['New startup', 'Healthcare app', 'Scale to 1M users'],
+  migration: ['AWS to Azure', 'Cut costs 40%', 'Avoid lock-in'],
+}
+
 interface ModeConfig {
   id: Mode
   icon: string
@@ -205,6 +211,7 @@ export default function AnalyzePage() {
   const [saved, setSaved] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [quickWins, setQuickWins] = useState<any[]>([])
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
@@ -387,29 +394,63 @@ Focus on things they can do TODAY.`,
           </p>
         </div>
 
+        {/* Trust bar */}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 32, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
+          {['🔒 Vendor Neutral', '📊 Real pricing data', '⚡ Powered by Llama 3.3 70B', '🌍 Covers 9+ providers'].map(item => (
+            <span key={item} style={{ color: '#666', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>{item}</span>
+          ))}
+        </div>
+
         {/* Mode selection */}
         {!done && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, marginBottom: 32 }}>
             {MODES.map(mode => (
               <button
                 key={mode.id}
-                onClick={() => {
-                  setSelectedMode(mode.id)
-                  reset()
-                }}
+                onClick={() => { setSelectedMode(mode.id); reset() }}
                 className={`glass-card mode-${mode.id}`}
                 style={{
                   background: selectedMode === mode.id ? `${mode.color}15` : undefined,
                   border: selectedMode === mode.id ? `2px solid ${mode.color}` : undefined,
-                  padding: '20px 20px',
+                  padding: '24px 20px',
                   cursor: 'pointer',
                   textAlign: 'left',
                   width: '100%',
+                  minHeight: 200,
+                  position: 'relative',
                 }}
               >
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{mode.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: 'white', marginBottom: 4 }}>{mode.title}</div>
-                <div style={{ fontSize: 12, color: '#a0a0b0', lineHeight: 1.5 }}>{mode.subtitle}</div>
+                {mode.id === 'finops' && (
+                  <div style={{
+                    position: 'absolute', top: 12, right: 12,
+                    background: '#f59e0b', color: '#000',
+                    fontSize: 9, fontWeight: 800, padding: '3px 8px', borderRadius: 6, letterSpacing: 0.5,
+                  }}>
+                    MOST POPULAR
+                  </div>
+                )}
+                <div style={{ fontSize: 48, marginBottom: 12, lineHeight: 1 }}>{mode.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'white', marginBottom: 6 }}>{mode.title}</div>
+                <div style={{ fontSize: 12, color: '#a0a0b0', lineHeight: 1.5, marginBottom: 14 }}>{mode.subtitle}</div>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {MODE_CHIPS[mode.id].map(chip => (
+                    <span
+                      key={chip}
+                      onClick={e => { e.stopPropagation(); setSelectedMode(mode.id); setInput(chip) }}
+                      style={{
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 20, padding: '3px 10px',
+                        fontSize: 11, color: '#888', cursor: 'pointer',
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(99,102,241,0.15)'; e.currentTarget.style.color = '#a0a0f0' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = '#888' }}
+                    >
+                      {chip}
+                    </span>
+                  ))}
+                </div>
               </button>
             ))}
           </div>
@@ -484,16 +525,26 @@ Focus on things they can do TODAY.`,
               border: '1px solid transparent',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-              <div style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: loading ? '#6366f1' : '#22c55e',
-              }} />
-              <span style={{ color: '#a0a0b0', fontSize: 13 }}>
-                {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: loading ? '#6366f1' : '#22c55e' }} />
+                <span style={{ color: '#a0a0b0', fontSize: 13 }}>
+                  {loading ? 'Analyzing your situation...' : `Analysis complete${saved ? ' · Saved to your account' : ''}`}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ fontSize: 11, color: '#444', padding: '3px 10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
+                  Llama 3.3 70B
+                </span>
+                {done && (
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(response); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                    style={{ fontSize: 12, color: copied ? '#22c55e' : '#666', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '3px 10px', cursor: 'pointer' }}
+                  >
+                    {copied ? '✓ Copied' : 'Copy'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {loading && !response && (
@@ -532,8 +583,9 @@ Focus on things they can do TODAY.`,
         {/* Quick Wins */}
         {quickWins.length > 0 && (
           <div style={{ marginTop: 24 }}>
-            <div style={{ fontSize: 11, color: '#22c55e', letterSpacing: 2, marginBottom: 12, fontWeight: 700 }}>
-              ⚡ QUICK WINS — DO TODAY
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e', animation: 'pulse 2s ease-in-out infinite' }} />
+              <span style={{ fontSize: 11, color: '#22c55e', letterSpacing: 2, fontWeight: 700 }}>⚡ QUICK WINS — DO TODAY</span>
             </div>
             {quickWins.map((w, i) => (
               <div key={i} className="glass-card" style={{ padding: 16, marginBottom: 12, borderLeft: '3px solid #22c55e' }}>
@@ -548,6 +600,15 @@ Focus on things they can do TODAY.`,
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Disclaimer */}
+        {done && (
+          <div style={{ marginTop: 16, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #333' }}>
+            <p style={{ color: '#555', fontSize: 11, margin: 0 }}>
+              ℹ️ Recommendations are based on published cloud provider pricing and industry benchmarks. Actual savings may vary. Always verify recommendations with your cloud provider before making changes to production infrastructure.
+            </p>
           </div>
         )}
 

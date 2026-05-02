@@ -441,6 +441,12 @@ Respond with ONLY a JSON object in this exact format, no other text:
             </div>
           )}
 
+          <div style={{ marginBottom: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #333' }}>
+            <p style={{ color: '#555', fontSize: 11, margin: 0 }}>
+              ℹ️ Recommendations are based on published cloud provider pricing and industry benchmarks. Actual savings may vary. Always verify recommendations with your cloud provider before making changes to production infrastructure.
+            </p>
+          </div>
+
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <button
               onClick={() => router.push('/planner')}
@@ -494,6 +500,13 @@ Respond with ONLY a JSON object in this exact format, no other text:
     <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
       <JourneyProgress currentStep={0} />
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '100px 24px 60px' }}>
+
+        {/* Trust bar */}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 32, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
+          {['🔒 Vendor Neutral', '📊 Real pricing data', '⚡ Powered by Llama 3.3 70B', '🌍 Covers 9+ providers'].map(item => (
+            <span key={item} style={{ color: '#666', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>{item}</span>
+          ))}
+        </div>
 
         <div style={{ position: 'relative', marginBottom: 8 }}>
           {step > 0 && (

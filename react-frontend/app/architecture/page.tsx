@@ -133,6 +133,13 @@ Include 5–9 services. Use realistic cloud service names. Tier must be one of: 
           </p>
         </div>
 
+        {/* Trust bar */}
+        <div style={{ display: 'flex', gap: 24, alignItems: 'center', marginBottom: 32, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', flexWrap: 'wrap' }}>
+          {['🔒 Vendor Neutral', '📊 Real pricing data', '⚡ Powered by Llama 3.3 70B', '🌍 Covers 9+ providers'].map(item => (
+            <span key={item} style={{ color: '#666', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}>{item}</span>
+          ))}
+        </div>
+
         <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 32 }}>
           <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 12 }}>
             DESCRIBE YOUR PROJECT
@@ -229,6 +236,11 @@ Include 5–9 services. Use realistic cloud service names. Tier must be one of: 
               <button onClick={() => router.push('/analyze?mode=architect')} style={{ background: '#6366f1', border: 'none', borderRadius: 12, padding: '13px 28px', color: 'white', fontWeight: 700, fontSize: 15, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
                 Analyze This Architecture →
               </button>
+            </div>
+            <div style={{ marginTop: 24, padding: 16, background: 'rgba(255,255,255,0.02)', borderRadius: 8, borderLeft: '3px solid #333' }}>
+              <p style={{ color: '#555', fontSize: 11, margin: 0 }}>
+                ℹ️ Recommendations are based on published cloud provider pricing and industry benchmarks. Actual savings may vary. Always verify recommendations with your cloud provider before making changes to production infrastructure.
+              </p>
             </div>
           </div>
         )}

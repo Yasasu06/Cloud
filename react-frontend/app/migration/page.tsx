@@ -1,7 +1,159 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+
+type Tab = 'planner' | 'egress'
+
+// ─── Egress Calculator (tab 2) ────────────────────────────────────────────────
+
+type EgressProvider = 'AWS' | 'Azure' | 'GCP' | 'DigitalOcean'
+const EGRESS_PROVIDERS: EgressProvider[] = ['AWS', 'Azure', 'GCP', 'DigitalOcean']
+const EGRESS_TIERS: Record<EgressProvider, { limit: number; rate: number }[]> = {
+  AWS:          [{ limit: 10_000, rate: 0.09 }, { limit: 50_000, rate: 0.085 }, { limit: Infinity, rate: 0.07 }],
+  Azure:        [{ limit: 10_000, rate: 0.087 }, { limit: 50_000, rate: 0.083 }, { limit: Infinity, rate: 0.07 }],
+  GCP:          [{ limit: 10_000, rate: 0.08 }, { limit: 150_000, rate: 0.06 }, { limit: Infinity, rate: 0.05 }],
+  DigitalOcean: [{ limit: Infinity, rate: 0.01 }],
+}
+const EGRESS_PROVIDER_COLOR: Record<EgressProvider, string> = {
+  AWS: '#f59e0b', Azure: '#3b82f6', GCP: '#22c55e', DigitalOcean: '#0080ff',
+}
+const MONTHLY_SAVINGS: Record<EgressProvider, Record<EgressProvider, number>> = {
+  AWS:          { AWS: 0, Azure: 0.003, GCP: 0.004, DigitalOcean: 0.015 },
+  Azure:        { AWS: 0.002, Azure: 0, GCP: 0.003, DigitalOcean: 0.014 },
+  GCP:          { AWS: 0.001, Azure: 0.002, GCP: 0, DigitalOcean: 0.013 },
+  DigitalOcean: { AWS: -0.01, Azure: -0.009, GCP: -0.008, DigitalOcean: 0 },
+}
+
+function calcEgress(provider: EgressProvider, gb: number): number {
+  const tiers = EGRESS_TIERS[provider]
+  let cost = 0, remaining = gb, prevLimit = 0
+  for (const tier of tiers) {
+    const tierGB = Math.min(remaining, tier.limit - prevLimit)
+    if (tierGB <= 0) break
+    cost += tierGB * tier.rate
+    remaining -= tierGB
+    prevLimit = tier.limit
+    if (remaining <= 0) break
+  }
+  return cost
+}
+
+function useAnimVal(target: number, duration = 500): number {
+  const [v, setV] = useState(target)
+  const raf = useRef<number | null>(null)
+  const prev = useRef(target)
+  useEffect(() => {
+    const from = prev.current, to = target
+    if (from === to) return
+    const start = performance.now()
+    const tick = (now: number) => {
+      const t = Math.min((now - start) / duration, 1)
+      const e = 1 - Math.pow(1 - t, 3)
+      setV(from + (to - from) * e)
+      if (t < 1) raf.current = requestAnimationFrame(tick)
+      else { prev.current = to; setV(to) }
+    }
+    raf.current = requestAnimationFrame(tick)
+    return () => { if (raf.current) cancelAnimationFrame(raf.current) }
+  }, [target, duration])
+  return v
+}
+
+function fmtE(n: number) {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+}
+
+function EgressCalculator() {
+  const [from, setFrom] = useState<EgressProvider>('AWS')
+  const [to, setTo] = useState<EgressProvider>('GCP')
+  const [gb, setGb] = useState(5000)
+
+  const egress = calcEgress(from, gb)
+  const monthlySaving = Math.max(0, MONTHLY_SAVINGS[from][to] * gb)
+  const breakEven = monthlySaving > 0 ? egress / monthlySaving : Infinity
+  const animEgress = useAnimVal(egress)
+  const animSaving = useAnimVal(monthlySaving)
+
+  const selStyle: React.CSSProperties = {
+    background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 10, padding: '12px 14px', color: 'white',
+    fontSize: 15, fontWeight: 600, outline: 'none', cursor: 'pointer', flex: 1,
+  }
+
+  const verdictColor = breakEven <= 6 ? '#22c55e' : breakEven <= 12 ? '#f59e0b' : '#ef4444'
+  const verdictLabel = monthlySaving <= 0 ? 'No savings — destination costs more'
+    : breakEven <= 6 ? 'Worth it — migrate now'
+    : breakEven <= 12 ? 'Consider carefully'
+    : 'Probably not worth it'
+
+  return (
+    <div>
+      <div style={{ background: '#1a1a2e', borderRadius: 16, padding: '24px 24px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 24 }}>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: 140 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 8 }}>CURRENT PROVIDER</label>
+            <select value={from} onChange={e => { const v = e.target.value as EgressProvider; setFrom(v); if (v === to) setTo(EGRESS_PROVIDERS.find(p => p !== v) ?? 'GCP') }} style={selStyle}>
+              {EGRESS_PROVIDERS.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: 140 }}>
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 8 }}>DESTINATION</label>
+            <select value={to} onChange={e => setTo(e.target.value as EgressProvider)} style={selStyle}>
+              {EGRESS_PROVIDERS.filter(p => p !== from).map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+        </div>
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1 }}>DATA VOLUME</label>
+            <span style={{ fontSize: 18, fontWeight: 900, color: 'white' }}>{gb >= 1000 ? `${(gb / 1000).toFixed(1)} TB` : `${gb} GB`}</span>
+          </div>
+          <input type="range" min={0} max={100000} step={100} value={gb} onChange={e => setGb(Number(e.target.value))} style={{ width: '100%', accentColor: '#6366f1', cursor: 'pointer', height: 6 }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#333', marginTop: 4 }}>
+            <span>0</span><span>25 TB</span><span>50 TB</span><span>75 TB</span><span>100 TB</span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 16 }}>
+        <div className="glass-card" style={{ padding: '20px 22px' }}>
+          <div style={{ fontSize: 11, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>EGRESS FROM {from}</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: EGRESS_PROVIDER_COLOR[from] }}>{fmtE(animEgress)}</div>
+          <div style={{ fontSize: 11, color: '#444', marginTop: 4 }}>one-time migration fee</div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px 22px' }}>
+          <div style={{ fontSize: 11, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>MONTHLY SAVINGS</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: monthlySaving > 0 ? '#22c55e' : '#ef4444' }}>
+            {monthlySaving > 0 ? '+' : ''}{fmtE(animSaving)}
+          </div>
+          <div style={{ fontSize: 11, color: '#444', marginTop: 4 }}>at {to} vs {from}</div>
+        </div>
+        <div className="glass-card" style={{ padding: '20px 22px' }}>
+          <div style={{ fontSize: 11, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 8 }}>BREAK-EVEN</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: 'white' }}>
+            {monthlySaving > 0 ? (breakEven < 999 ? `${breakEven.toFixed(1)}mo` : '∞') : '—'}
+          </div>
+          <div style={{ fontSize: 11, color: '#444', marginTop: 4 }}>months to recover cost</div>
+        </div>
+      </div>
+
+      <div style={{ background: `rgba(${verdictColor === '#22c55e' ? '34,197,94' : verdictColor === '#f59e0b' ? '245,158,11' : '239,68,68'},0.08)`, border: `1px solid ${verdictColor}30`, borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <span style={{ fontSize: 22 }}>{verdictColor === '#22c55e' ? '✓' : verdictColor === '#f59e0b' ? '⚠' : '✗'}</span>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: verdictColor }}>{verdictLabel}</div>
+          {monthlySaving > 0 && breakEven < 999 && (
+            <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+              {fmtE(egress)} upfront · recover in {breakEven.toFixed(1)} months of {fmtE(monthlySaving)}/mo savings
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Migration Planner types ───────────────────────────────────────────────────
 
 const FROM_PROVIDERS = ['AWS', 'Azure', 'GCP', 'On-premise'] as const
 const TO_PROVIDERS = ['AWS', 'Azure', 'GCP', 'DigitalOcean', 'Hetzner'] as const
@@ -211,6 +363,7 @@ const selectStyle: React.CSSProperties = {
 
 export default function MigrationPage() {
   const router = useRouter()
+  const [tab, setTab] = useState<Tab>('planner')
   const [from, setFrom] = useState<FromProvider>('AWS')
   const [to, setTo] = useState<ToProvider>('Azure')
 
@@ -233,6 +386,24 @@ export default function MigrationPage() {
             Complexity, costs, savings, and risks for every migration path.
           </p>
         </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 32, background: '#111118', borderRadius: 12, padding: 4, width: 'fit-content', border: '1px solid rgba(255,255,255,0.06)' }}>
+          {([['planner', 'Migration Planner'], ['egress', 'Egress Calculator']] as [Tab, string][]).map(([id, label]) => (
+            <button key={id} onClick={() => setTab(id)} style={{
+              padding: '8px 20px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600,
+              background: tab === id ? '#6366f1' : 'transparent',
+              color: tab === id ? 'white' : '#555',
+              transition: 'all 0.15s',
+            }}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {tab === 'egress' && <EgressCalculator />}
+
+        {tab === 'planner' && (<>
 
         {/* Dropdowns */}
         <div style={{
@@ -384,6 +555,7 @@ export default function MigrationPage() {
             </div>
           </div>
         )}
+        </>)}
       </div>
     </div>
   )
