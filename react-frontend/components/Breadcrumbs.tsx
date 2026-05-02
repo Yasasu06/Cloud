@@ -43,6 +43,13 @@ const PATH_LABELS: Record<string, string> = {
   'for-you':          'Find Your Toolkit',
   'pricing-explorer': 'Pricing Explorer',
   stats:              'Live Stats',
+  'cost-intelligence':'Cost Intelligence',
+  optimize:           'Optimize',
+  migrate:            'Migrate',
+  intelligence:       'Intelligence Hub',
+  learn:              'Learn',
+  'for-consultants':  'For Consultants',
+  'outcome-simulator':'Outcome Simulator',
   terms:              'Terms',
   privacy:            'Privacy',
 }
@@ -77,6 +84,13 @@ const SECTION_LABELS: Record<string, string> = {
   replaces:           'Intelligence',
   'pricing-explorer': 'Intelligence',
   stats:              'Intelligence',
+  'cost-intelligence':'Optimize',
+  optimize:           'Optimize',
+  migrate:            'Optimize',
+  'outcome-simulator':'Optimize',
+  intelligence:       'Intelligence',
+  learn:              'Learn',
+  'for-consultants':  'Consultants',
 }
 
 export default function Breadcrumbs() {

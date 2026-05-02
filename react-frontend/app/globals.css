@@ -4,14 +4,15 @@
 
 :root {
   --bg-primary: #050508;
-  --bg-card: rgba(255,255,255,0.03);
-  --bg-card-hover: rgba(255,255,255,0.06);
-  --border: rgba(255,255,255,0.08);
-  --border-bright: rgba(255,255,255,0.15);
+  --bg-card: rgba(255,255,255,0.025);
+  --bg-card-hover: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.05);
+  --border-bright: rgba(99,102,241,0.15);
   --text-primary: #ffffff;
   --text-secondary: #a0a0b0;
   --text-muted: #555566;
   --accent: #6366f1;
+  --accent-hover: #818cf8;
   --accent-glow: rgba(99,102,241,0.3);
   --green: #22c55e;
   --amber: #f59e0b;
@@ -20,7 +21,36 @@
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-xl: 28px;
+  /* 8-point grid spacing system */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+  --space-4xl: 96px;
 }
+
+/* Skeleton classes */
+.skeleton-text   { width: 80%; height: 14px; border-radius: 4px; }
+.skeleton-title  { width: 60%; height: 28px; border-radius: 6px; }
+.skeleton-card   { width: 100%; height: 200px; border-radius: 14px; }
+.skeleton-circle { width: 40px; height: 40px; border-radius: 50%; }
+.skeleton-text, .skeleton-title, .skeleton-card, .skeleton-circle {
+  background: linear-gradient(to right, rgba(255,255,255,0.04) 8%, rgba(99,102,241,0.12) 38%, rgba(255,255,255,0.04) 54%);
+  background-size: 1000px 100%;
+  animation: shimmerSlow 2.5s linear infinite;
+}
+
+/* Skip-to-content link for a11y */
+.skip-link {
+  position: absolute; left: -9999px; top: 0;
+  background: #6366f1; color: white; padding: 10px 16px;
+  border-radius: 0 0 8px 0; font-weight: 700; font-size: 13px;
+  z-index: 10000; text-decoration: none;
+}
+.skip-link:focus { left: 0; }
 
 @layer base {
   :root {

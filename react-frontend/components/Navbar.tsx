@@ -9,41 +9,41 @@ import GlobalSearch from './GlobalSearch'
 import ModeToggle from './ModeToggle'
 
 const ANALYZE_ITEMS = [
-  { href: '/analyze',            label: '🔍 AI Analyze',              desc: 'Explain any cloud situation' },
-  { href: '/instant-audit',      label: '⚡ Instant Audit',            desc: 'Free 30-second cloud audit' },
-  { href: '/architecture',       label: '🏗️ Architecture',             desc: 'Visualize your stack' },
-  { href: '/bill-upload',        label: '📊 Bill Upload',              desc: 'Analyze your actual bill' },
-  { href: '/savings',            label: '💰 Savings Calculator',       desc: 'Find your savings' },
-  { href: '/migration-cost',     label: '🔄 Egress Calculator',        desc: 'Cost to switch providers' },
-  { href: '/forecast',           label: '📈 Cost Forecast',            desc: 'Project your cloud spend' },
-  { href: '/multi-cloud',        label: '☁️ Multi-Cloud View',          desc: 'Consolidate all providers' },
-  { href: '/terraform-estimator',label: '🏗️ Infrastructure Estimator', desc: 'Estimate infra costs' },
-  { href: '/cost-per-user',      label: '👤 Cost Per User',            desc: 'Benchmark your unit economics' },
-  { href: '/ai-cost-tracker',    label: '🤖 AI Costs',                 desc: 'Optimize LLM spend' },
-  { href: '/alternatives',       label: '🌐 All Providers',            desc: 'Beyond AWS, Azure & GCP' },
+  { href: '/analyze',         label: '🔍 AI Analyze',       desc: 'Explain any cloud situation' },
+  { href: '/instant-audit',   label: '⚡ Instant Audit',     desc: 'Free 30-second cloud audit' },
+  { href: '/architecture',    label: '🏗️ Architecture',      desc: 'Visualize your stack' },
+  { href: '/bill-upload',     label: '📊 Bill Upload',       desc: 'Analyze your actual bill' },
+]
+
+const OPTIMIZE_ITEMS = [
+  { href: '/optimize',           label: '💰 Optimize',           desc: 'Savings, waste, RI, quick wins' },
+  { href: '/cost-intelligence',  label: '📊 Cost Intelligence',  desc: 'Forecast, per-user, credits, AI cost' },
+  { href: '/migrate',            label: '🔄 Migrate',            desc: 'Plan, egress, repatriation' },
+  { href: '/outcome-simulator',  label: '🔮 Outcome Simulator',  desc: 'Visual journey current → optimized' },
 ]
 
 const ADVISE_ITEMS = [
-  { href: '/advisor',            label: '🎯 Cloud Advisor',            desc: 'Get a recommendation' },
-  { href: '/report-card',        label: '📋 Report Card',              desc: 'Grade your setup' },
-  { href: '/cloud-score',        label: '🏆 Cloud Score',              desc: 'Maturity assessment' },
-  { href: '/ai-advisor',         label: '💼 AI Strategy',              desc: 'Full strategy session' },
-  { href: '/roi-calculator',     label: '📈 ROI Calculator',           desc: 'Calculate your ROI' },
-  { href: '/compliance',         label: '✅ Compliance',               desc: 'Check requirements' },
-  { href: '/reserved-instances', label: '🔒 Reserved Instances',       desc: 'Optimize commitments' },
-  { href: '/credits-tracker',    label: '🎁 Credits Tracker',          desc: 'Track startup credits' },
-  { href: '/sanity-check',       label: '🔍 Sanity Check',             desc: 'Pre-decision review' },
+  { href: '/advisor',         label: '🎯 Cloud Advisor',  desc: 'Get a recommendation' },
+  { href: '/cloud-score',     label: '🏆 Cloud Score',    desc: 'Maturity assessment' },
+  { href: '/report-card',     label: '📋 Report Card',    desc: 'Grade your setup' },
+  { href: '/ai-advisor',      label: '💼 AI Strategy',    desc: 'Full strategy session' },
+  { href: '/sanity-check',    label: '🛟 Sanity Check',   desc: 'Pre-decision review' },
+  { href: '/compliance',      label: '✅ Compliance',     desc: 'Check requirements' },
 ]
 
 const INTELLIGENCE_ITEMS = [
-  { href: '/pricing-explorer', label: '💰 Pricing Explorer',      desc: 'Compare 12 providers in real time' },
-  { href: '/stats',            label: '📊 Live Stats',            desc: 'Aggregated user results' },
-  { href: '/vendor-alerts',    label: '💸 Price Alerts',          desc: 'Track price changes' },
-  { href: '/provider-news',    label: '📰 Cloud Updates',         desc: 'Latest provider news' },
-  { href: '/benchmark',        label: '📊 Industry Benchmarks',   desc: 'How you compare to peers' },
-  { href: '/cloud-glossary',   label: '📚 Glossary',              desc: 'Cloud terms explained' },
-  { href: '/waste-report',     label: '🗑️ Waste Report',           desc: 'Find what you\'re wasting' },
-  { href: '/replaces',         label: '💡 What We Replace',       desc: '$400K of expertise for $49/mo' },
+  { href: '/pricing-explorer', label: '💰 Live Pricing',     desc: 'Compare 12 providers in real time' },
+  { href: '/compare',          label: '⚖️ Compare',           desc: 'Side-by-side qualitative comparison' },
+  { href: '/intelligence',     label: '📰 Intelligence Hub', desc: 'News, alerts, weekly digest' },
+  { href: '/stats',            label: '📊 Live Stats',       desc: 'Aggregated user results' },
+]
+
+const LEARN_ITEMS = [
+  { href: '/learn',            label: '📚 Learn',            desc: 'Glossary, benchmarks, cloud twin' },
+]
+
+const CONSULTANTS_ITEMS = [
+  { href: '/for-consultants',  label: '💼 For Consultants',  desc: 'White label, experts, performance pricing' },
 ]
 
 const MOBILE_LINKS = [
@@ -234,6 +234,23 @@ export default function Navbar() {
               <DropdownMenu items={ANALYZE_ITEMS} open={openDropdown === 'analyze'} onClose={() => setOpenDropdown(null)} />
             </div>
 
+            {/* Optimize dropdown */}
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('optimize') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: openDropdown === 'optimize' ? '#fff' : '#a0a0b0',
+                  background: openDropdown === 'optimize' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
+                Optimize <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'optimize' ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              <DropdownMenu items={OPTIMIZE_ITEMS} open={openDropdown === 'optimize'} onClose={() => setOpenDropdown(null)} />
+            </div>
+
             {/* Advise dropdown */}
             <div data-dropdown style={{ position: 'relative' }}>
               <button
@@ -266,6 +283,40 @@ export default function Navbar() {
                 Intelligence <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'intelligence' ? 'rotate(180deg)' : 'none' }} />
               </button>
               <DropdownMenu items={INTELLIGENCE_ITEMS} open={openDropdown === 'intelligence'} onClose={() => setOpenDropdown(null)} />
+            </div>
+
+            {/* Learn dropdown */}
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('learn') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: openDropdown === 'learn' ? '#fff' : '#a0a0b0',
+                  background: openDropdown === 'learn' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
+                Learn <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'learn' ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              <DropdownMenu items={LEARN_ITEMS} open={openDropdown === 'learn'} onClose={() => setOpenDropdown(null)} />
+            </div>
+
+            {/* Consultants dropdown */}
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('consultants') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: openDropdown === 'consultants' ? '#fff' : '#a0a0b0',
+                  background: openDropdown === 'consultants' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
+                Consultants <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'consultants' ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              <DropdownMenu items={CONSULTANTS_ITEMS} open={openDropdown === 'consultants'} onClose={() => setOpenDropdown(null)} />
             </div>
 
             <Link href="/pricing" style={{
