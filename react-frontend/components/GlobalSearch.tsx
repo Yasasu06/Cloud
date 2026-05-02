@@ -55,6 +55,22 @@ export default function GlobalSearch({ onClose }: Props) {
     setTimeout(() => inputRef.current?.focus(), 50)
   }, [])
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        // already open — do nothing (parent controls open)
+      }
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onClose()
+        setQuery('')
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   // Reset selection when results change
   useEffect(() => {
     setSelectedIndex(-1)
@@ -164,7 +180,13 @@ export default function GlobalSearch({ onClose }: Props) {
             placeholder="Search tools, ask anything..."
             style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: 'white', fontSize: 16, fontFamily: 'inherit' }}
           />
-          <kbd style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 6, padding: '2px 8px', fontSize: 12, color: '#666' }}>ESC</kbd>
+          <button
+            onClick={() => { onClose(); setQuery('') }}
+            style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '4px 10px', fontSize: 12, color: '#888', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}
+          >
+            <span style={{ fontSize: 14 }}>✕</span>
+            <span>ESC</span>
+          </button>
         </div>
 
         {/* Results */}

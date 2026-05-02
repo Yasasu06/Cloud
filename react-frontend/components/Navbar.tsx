@@ -74,41 +74,48 @@ const MOBILE_LINKS = [
   { href: '/pricing',             label: 'Pricing' },
 ]
 
-function DropdownMenu({ items, open }: { items: typeof ANALYZE_ITEMS; open: boolean }) {
+function DropdownMenu({ items, open, onClose }: { items: typeof ANALYZE_ITEMS; open: boolean; onClose: () => void }) {
+  if (!open) return null
   return (
-    <div style={{
-      position: 'absolute',
-      top: 'calc(100% + 8px)',
-      left: '50%',
-      transform: open ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(-8px)',
-      opacity: open ? 1 : 0,
-      pointerEvents: open ? 'auto' : 'none',
-      transition: 'all 0.15s ease',
-      background: 'rgba(5,5,8,0.98)',
-      border: '1px solid rgba(255,255,255,0.1)',
-      borderRadius: 16,
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
-      padding: 8,
-      minWidth: 240,
-      zIndex: 100,
-      boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
-    }}>
-      {items.map(item => (
-        <Link
-          key={item.href}
-          href={item.href}
-          style={{
-            display: 'block', padding: '10px 14px', borderRadius: 10,
-            textDecoration: 'none', transition: 'background 0.1s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.1)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-        >
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#ffffff', marginBottom: 2 }}>{item.label}</div>
-          <div style={{ fontSize: 11, color: '#555' }}>{item.desc}</div>
-        </Link>
-      ))}
+    <div
+      data-dropdown
+      style={{
+        position: 'absolute',
+        top: '100%',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        paddingTop: 8,
+        zIndex: 100,
+      }}
+    >
+      <div style={{
+        background: 'rgba(5,5,8,0.98)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: 16,
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        padding: 8,
+        minWidth: 240,
+        boxShadow: '0 16px 48px rgba(0,0,0,0.6)',
+        animation: 'pageEnter 0.15s ease-out',
+      }}>
+        {items.map(item => (
+          <Link
+            key={item.href}
+            href={item.href}
+            onClick={onClose}
+            style={{
+              display: 'block', padding: '10px 14px', borderRadius: 10,
+              textDecoration: 'none', transition: 'background 0.1s ease',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(99,102,241,0.1)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#ffffff', marginBottom: 2 }}>{item.label}</div>
+            <div style={{ fontSize: 11, color: '#555' }}>{item.desc}</div>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
@@ -120,7 +127,19 @@ export default function Navbar() {
   const [loggedIn, setLoggedIn] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
 
-  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => { setMenuOpen(false); setOpenDropdown(null) }, [pathname])
+
+  // Click-outside closes dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      if (!target.closest('[data-dropdown]')) {
+        setOpenDropdown(null)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
 
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
@@ -144,6 +163,10 @@ export default function Navbar() {
   const analyzeActive      = ['/analyze', '/architecture', '/bill-upload', '/savings', '/migration-cost', '/forecast', '/multi-cloud', '/terraform-estimator'].includes(pathname)
   const adviseActive       = ['/advisor', '/report-card', '/benchmark', '/ai-advisor', '/roi-calculator', '/compliance', '/reserved-instances'].includes(pathname)
   const intelligenceActive = ['/vendor-alerts', '/weekly-digest', '/cloud-glossary', '/waste-report'].includes(pathname)
+
+  function toggle(name: string) {
+    setOpenDropdown(prev => prev === name ? null : name)
+  }
 
   return (
     <nav
@@ -190,51 +213,54 @@ export default function Navbar() {
             </Link>
 
             {/* Analyze dropdown */}
-            <div style={{ position: 'relative' }}
-              onMouseEnter={() => setOpenDropdown('analyze')}
-              onMouseLeave={() => setOpenDropdown(null)}>
-              <button style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
-                color: analyzeActive ? '#fff' : '#a0a0b0',
-                background: analyzeActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-              }}>
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('analyze') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: analyzeActive || openDropdown === 'analyze' ? '#fff' : '#a0a0b0',
+                  background: analyzeActive || openDropdown === 'analyze' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
                 Analyze <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'analyze' ? 'rotate(180deg)' : 'none' }} />
               </button>
-              <DropdownMenu items={ANALYZE_ITEMS} open={openDropdown === 'analyze'} />
+              <DropdownMenu items={ANALYZE_ITEMS} open={openDropdown === 'analyze'} onClose={() => setOpenDropdown(null)} />
             </div>
 
             {/* Advise dropdown */}
-            <div style={{ position: 'relative' }}
-              onMouseEnter={() => setOpenDropdown('advise')}
-              onMouseLeave={() => setOpenDropdown(null)}>
-              <button style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
-                color: adviseActive ? '#fff' : '#a0a0b0',
-                background: adviseActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-              }}>
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('advise') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: adviseActive || openDropdown === 'advise' ? '#fff' : '#a0a0b0',
+                  background: adviseActive || openDropdown === 'advise' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
                 Advise <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'advise' ? 'rotate(180deg)' : 'none' }} />
               </button>
-              <DropdownMenu items={ADVISE_ITEMS} open={openDropdown === 'advise'} />
+              <DropdownMenu items={ADVISE_ITEMS} open={openDropdown === 'advise'} onClose={() => setOpenDropdown(null)} />
             </div>
 
             {/* Intelligence dropdown */}
-            <div style={{ position: 'relative' }}
-              onMouseEnter={() => setOpenDropdown('intelligence')}
-              onMouseLeave={() => setOpenDropdown(null)}>
-              <button style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
-                color: intelligenceActive ? '#fff' : '#a0a0b0',
-                background: intelligenceActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
-              }}>
+            <div data-dropdown style={{ position: 'relative' }}>
+              <button
+                data-dropdown
+                onClick={(e) => { e.stopPropagation(); toggle('intelligence') }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  fontSize: 14, fontWeight: 500, padding: '6px 12px', borderRadius: 8,
+                  color: intelligenceActive || openDropdown === 'intelligence' ? '#fff' : '#a0a0b0',
+                  background: intelligenceActive || openDropdown === 'intelligence' ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                }}>
                 Intelligence <ChevronDown size={12} style={{ opacity: 0.6, transition: 'transform 0.15s', transform: openDropdown === 'intelligence' ? 'rotate(180deg)' : 'none' }} />
               </button>
-              <DropdownMenu items={INTELLIGENCE_ITEMS} open={openDropdown === 'intelligence'} />
+              <DropdownMenu items={INTELLIGENCE_ITEMS} open={openDropdown === 'intelligence'} onClose={() => setOpenDropdown(null)} />
             </div>
 
             <Link href="/pricing" style={{

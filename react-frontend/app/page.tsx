@@ -1,41 +1,38 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 
-interface LastRec {
-  provider: string
-  confidence: number
-}
+interface LastRec { provider: string; confidence: number }
 
-const SCENARIOS = [
-  "We're on AWS spending $12k/month. Bill doubled last quarter and we don't know why.",
-  "Starting a healthcare app. Which cloud do I need for HIPAA compliance?",
-  "Running on GCP for ML. Spending $8k/month but models only train twice a week.",
+const DEMO_LINES = [
+  { text: 'Analyzing your AWS bill...', color: '#a0a0b0', delay: 0 },
+  { text: '🔍 Found 18% waste in EC2 instances (14 underutilized)', color: '#f59e0b', delay: 1400 },
+  { text: '💡 Recommend: Reserved Instances for db.t3.large (3 found)', color: '#818cf8', delay: 2800 },
+  { text: '💰 Estimated savings: $1,847/month · $22,164/year', color: '#22c55e', delay: 4200 },
+  { text: '📋 Generating your 30-day action plan...', color: '#a0a0b0', delay: 5400 },
+  { text: '✅ Analysis complete', color: '#22c55e', delay: 6400 },
 ]
 
-export default function HomePage() {
-  const router = useRouter()
-  const [input, setInput] = useState('')
-  const [lastRec, setLastRec] = useState<LastRec | null>(null)
-  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
-  const [scenarioIndex, setScenarioIndex] = useState(0)
-  const [scenarioVisible, setScenarioVisible] = useState(true)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setScenarioVisible(false)
-      setTimeout(() => {
-        setScenarioIndex(i => (i + 1) % SCENARIOS.length)
-        setScenarioVisible(true)
-      }, 300)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
+function FadeInSection({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, delay }}
+      viewport={{ once: true }}
+    >
+      {children}
+    </motion.div>
+  )
+}
 
-  useEffect(() => {
-    setHasProfile(!!localStorage.getItem('cloud_twin_profile'))
-  }, [])
+export default function HomePage() {
+  const [lastRec, setLastRec] = useState<LastRec | null>(null)
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [particles, setParticles] = useState<Array<{ x: number; y: number; size: number; dur: number; delay: number }>>([])
+  const [visibleLines, setVisibleLines] = useState(0)
+  const demoRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const handle = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY })
@@ -45,11 +42,8 @@ export default function HomePage() {
 
   useEffect(() => {
     setParticles(Array.from({ length: 20 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 1 + Math.random() * 2,
-      dur: 8 + Math.random() * 7,
-      delay: Math.random() * 5,
+      x: Math.random() * 100, y: Math.random() * 100,
+      size: 1 + Math.random() * 2, dur: 8 + Math.random() * 7, delay: Math.random() * 5,
     })))
   }, [])
 
@@ -57,523 +51,291 @@ export default function HomePage() {
     async function loadLastRec() {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
-      const { data } = await supabase
-        .from('saved_recommendations')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single()
+      const { data } = await supabase.from('saved_recommendations')
+        .select('*').eq('user_id', session.user.id)
+        .order('created_at', { ascending: false }).limit(1).single()
       if (data) setLastRec(data)
     }
     loadLastRec()
   }, [])
 
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [particles, setParticles] = useState<Array<{ x: number; y: number; size: number; dur: number; delay: number }>>([])
-  const [emailInput, setEmailInput] = useState('')
-  const [emailSubmitted, setEmailSubmitted] = useState(false)
-  const [emailLoading, setEmailLoading] = useState(false)
-
-  function handleSubmit() {
-    if (input.trim()) {
-      window.location.href = `/analyze?q=${encodeURIComponent(input)}`
-    }
-  }
-
-  async function handleEmailSubmit() {
-    if (!emailInput.trim() || emailLoading) return
-    setEmailLoading(true)
-    try {
-      await supabase.from('email_subscribers').insert({
-        email: emailInput.trim(),
-        source: 'homepage',
+  // Cycling demo animation
+  useEffect(() => {
+    function runDemo() {
+      setVisibleLines(0)
+      DEMO_LINES.forEach((line, i) => {
+        const t = setTimeout(() => setVisibleLines(i + 1), line.delay + 300)
+        return t
       })
-      // errors (e.g. table not existing) are returned as { error }, not thrown
-    } catch {
-      // network-level failure — fail silently
-    } finally {
-      setEmailSubmitted(true)
-      setEmailLoading(false)
+      // Reset and loop after all lines shown + pause
+      demoRef.current = setTimeout(runDemo, 9500)
     }
-  }
+    runDemo()
+    return () => { if (demoRef.current) clearTimeout(demoRef.current) }
+  }, [])
 
   return (
     <div style={{ minHeight: '100vh', background: '#050508', color: 'white' }}>
+
+      {/* Returning user banner */}
       {lastRec && (
-        <div style={{
-          background: 'rgba(99,102,241,0.08)',
-          borderBottom: '1px solid rgba(99,102,241,0.15)',
-          padding: '10px 24px',
-          textAlign: 'center',
-          fontSize: 14,
-        }}>
+        <div style={{ background: 'rgba(99,102,241,0.08)', borderBottom: '1px solid rgba(99,102,241,0.15)', padding: '10px 24px', textAlign: 'center', fontSize: 14 }}>
           Welcome back — your last recommendation was{' '}
-          <strong style={{ color: '#6366f1' }}>{lastRec.provider}</strong>
-          {' '}({lastRec.confidence}% match){' '}
-          <a href="/dashboard" style={{ color: '#6366f1', marginLeft: 8 }}>
-            View Dashboard →
-          </a>
+          <strong style={{ color: '#6366f1' }}>{lastRec.provider}</strong>{' '}
+          ({lastRec.confidence}% match){' '}
+          <a href="/dashboard" style={{ color: '#6366f1', marginLeft: 8 }}>View Dashboard →</a>
         </div>
       )}
 
-      {/* HERO */}
+      {/* ── SECTION 1: HERO ──────────────────────────────────────────── */}
       <section style={{
-        position: 'relative',
-        minHeight: '90vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '80px 24px 60px',
-        textAlign: 'center',
-        background: '#050508',
-        overflow: 'hidden',
+        position: 'relative', minHeight: '92vh',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        padding: '100px 24px 80px', textAlign: 'center', overflow: 'hidden',
+        background: 'radial-gradient(ellipse at 20% 40%, rgba(99,102,241,0.18) 0%, transparent 60%), radial-gradient(ellipse at 80% 10%, rgba(139,92,246,0.12) 0%, transparent 55%), #050508',
       }}>
-        {/* Mouse-follow gradient */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-          background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99,102,241,0.05), transparent 70%)`,
-          transition: 'background 0.1s ease',
-        }} />
-        {/* Orb 1 — indigo top-left, 8s */}
-        <div style={{ position: 'absolute', top: '-100px', left: '-80px', width: 600, height: 600, background: 'rgba(99,102,241,0.15)', borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none', animation: 'orbFloat 8s ease-in-out infinite' }} />
-        {/* Orb 2 — purple top-right, 10s */}
+        {/* Mouse-follow glow */}
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(99,102,241,0.06), transparent 70%)` }} />
+        {/* 5 Orbs */}
+        <div style={{ position: 'absolute', top: '-100px', left: '-80px', width: 600, height: 600, background: 'rgba(99,102,241,0.14)', borderRadius: '50%', filter: 'blur(120px)', pointerEvents: 'none', animation: 'orbFloat 8s ease-in-out infinite' }} />
         <div style={{ position: 'absolute', top: '40px', right: '-80px', width: 400, height: 400, background: 'rgba(139,92,246,0.1)', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none', animation: 'orbFloat 10s ease-in-out 2s infinite' }} />
-        {/* Orb 3 — blue center, 12s */}
         <div style={{ position: 'absolute', bottom: '-80px', left: '50%', transform: 'translateX(-50%)', width: 500, height: 500, background: 'rgba(59,130,246,0.08)', borderRadius: '50%', filter: 'blur(150px)', pointerEvents: 'none', animation: 'orbFloat 12s ease-in-out 1s infinite' }} />
-        {/* Orb 4 — pink bottom-left, 14s */}
-        <div style={{ position: 'absolute', bottom: '10%', left: '-60px', width: 350, height: 350, background: 'rgba(236,72,153,0.07)', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none', animation: 'orbFloat 14s ease-in-out 3s infinite' }} />
-        {/* Orb 5 — cyan bottom-right, 9s */}
-        <div style={{ position: 'absolute', bottom: '5%', right: '-60px', width: 300, height: 300, background: 'rgba(6,182,212,0.07)', borderRadius: '50%', filter: 'blur(90px)', pointerEvents: 'none', animation: 'orbFloat 9s ease-in-out 4s infinite' }} />
+        <div style={{ position: 'absolute', bottom: '10%', left: '-60px', width: 350, height: 350, background: 'rgba(236,72,153,0.06)', borderRadius: '50%', filter: 'blur(100px)', pointerEvents: 'none', animation: 'orbFloat 14s ease-in-out 3s infinite' }} />
+        <div style={{ position: 'absolute', bottom: '5%', right: '-60px', width: 300, height: 300, background: 'rgba(6,182,212,0.06)', borderRadius: '50%', filter: 'blur(90px)', pointerEvents: 'none', animation: 'orbFloat 9s ease-in-out 4s infinite' }} />
         {/* Particles */}
         {particles.map((p, i) => (
           <div key={i} className="particle" style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size, animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s` }} />
         ))}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{ maxWidth: 720, position: 'relative', zIndex: 1 }}
-        >
-          <div style={{
-            display: 'inline-block',
-            background: 'rgba(34,197,94,0.1)',
-            border: '1px solid rgba(34,197,94,0.3)',
-            borderRadius: 20, padding: '6px 16px',
-            fontSize: 12, color: '#22c55e', fontWeight: 600,
-            marginBottom: 24, letterSpacing: 2,
-          }}>
-            100% VENDOR NEUTRAL · NO AWS/AZURE/GCP SPONSORSHIP
+        <motion.div initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} style={{ maxWidth: 760, position: 'relative', zIndex: 1 }}>
+          {/* Badge */}
+          <div style={{ display: 'inline-block', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '6px 18px', fontSize: 12, color: '#818cf8', fontWeight: 700, marginBottom: 28, letterSpacing: 1 }}>
+            ⚡ BUILT FOR THE AI ERA OF CLOUD COMPUTING
           </div>
 
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.05, marginBottom: 16 }}>
-            Your Cloud Bill,
+          {/* Headline */}
+          <h1 style={{ fontSize: 'clamp(40px, 7vw, 88px)', fontWeight: 900, lineHeight: 1.0, marginBottom: 24, letterSpacing: '-0.02em' }}>
+            <span className="shimmer-text">Stop flying blind</span>
             <br />
-            <span className="shimmer-text">Finally Explained.</span>
+            <span style={{ color: 'white' }}>on your cloud bill.</span>
           </h1>
 
-          <p style={{ fontSize: 14, color: '#555', marginBottom: 32, overflow: 'hidden' }}>
-            <span className="typewriter" style={{ color: '#555', display: 'inline-block' }}>
-              Trusted by founders managing over $2.4M in cloud spend
-            </span>
+          {/* Subheadline */}
+          <p style={{ fontSize: 'clamp(16px, 2.5vw, 20px)', color: '#a0a0b0', lineHeight: 1.6, maxWidth: 600, margin: '0 auto 40px' }}>
+            AI-powered cloud advisor that explains your spend, finds waste, and gives you a 30-day action plan. In plain English. In 30 seconds.
           </p>
 
-          {/* Feature pills */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 24 }}>
-            {['⚡ Results in 30 seconds', '🔒 Vendor Neutral', '🆓 Always Free to Start', '🌐 12 providers covered'].map(pill => (
-              <span key={pill} style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 20, padding: '6px 14px',
-                fontSize: 12, color: '#a0a0b0', fontWeight: 500,
-              }}>
-                {pill}
-              </span>
-            ))}
-          </div>
-
-          {/* Premium input */}
-          <div style={{
-            background: '#1a1a2e',
-            borderRadius: 16,
-            padding: '8px 8px 8px 20px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex', flexWrap: 'wrap', gap: 12,
-            maxWidth: 640, margin: '0 auto 20px',
-            minHeight: 56, alignItems: 'center',
-          }}>
-            <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
-              <input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                style={{
-                  width: '100%', background: 'transparent', border: 'none', outline: 'none',
-                  color: 'white', fontSize: 15, padding: '8px 0', boxSizing: 'border-box',
-                }}
-              />
-              {!input && (
-                <div style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-                  display: 'flex', alignItems: 'center',
-                  pointerEvents: 'none', color: '#555', fontSize: 14,
-                  opacity: scenarioVisible ? 1 : 0, transition: 'opacity 0.3s ease',
-                  overflow: 'hidden', whiteSpace: 'nowrap',
-                }}>
-                  {SCENARIOS[scenarioIndex]}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={handleSubmit}
-              className="btn-primary animate-glow"
-              style={{ whiteSpace: 'nowrap', padding: '12px 24px', fontSize: 15 }}
-            >
-              Analyze →
-            </button>
-          </div>
-
-          {/* Audit CTA */}
-          <div style={{ marginBottom: 20, textAlign: 'center' }}>
-            <a href="/instant-audit" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 10, padding: '10px 20px', textDecoration: 'none', fontSize: 13, color: '#22c55e', fontWeight: 700, transition: 'all 0.15s' }}>
-              🔍 Get Your Free Cloud Audit in 30 Seconds →
+          {/* Two CTAs */}
+          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}>
+            <a href="/instant-audit" className="btn-primary animate-glow" style={{ fontSize: 16, padding: '14px 32px', display: 'inline-block' }}>
+              Start Free Audit →
+            </a>
+            <a href="#demo-preview" className="btn-secondary" style={{ fontSize: 16, padding: '14px 32px', display: 'inline-block' }}>
+              Watch 60s Demo
             </a>
           </div>
 
-          {/* Social proof bar */}
-          <div style={{ marginBottom: 40 }}>
-            <p style={{ color: '#555', fontSize: 12, marginBottom: 12, letterSpacing: 0.5 }}>
-              Used by cloud teams at startups worldwide
-            </p>
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-              {['SaaS Startup', 'Healthcare Tech', 'E-commerce', 'FinTech', 'DevOps Team'].map(badge => (
-                <span key={badge} style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 20, padding: '5px 14px',
-                  fontSize: 12, color: '#666', fontWeight: 500,
-                }}>
-                  {badge}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Email capture */}
-          <div style={{ marginBottom: 40, textAlign: 'center' }}>
-            {!emailSubmitted ? (
-              <div style={{
-                display: 'inline-flex', gap: 8, background: '#1a1a2e',
-                borderRadius: 12, padding: '6px 6px 6px 16px',
-                border: '1px solid #ffffff0d', maxWidth: 380, width: '100%',
-              }}>
-                <input
-                  value={emailInput}
-                  onChange={e => setEmailInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleEmailSubmit()}
-                  placeholder="Get weekly cloud cost tips"
-                  type="email"
-                  style={{
-                    flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                    color: '#a0a0b0', fontSize: 13, minWidth: 0,
-                  }}
-                />
-                <button
-                  onClick={handleEmailSubmit}
-                  disabled={emailLoading || !emailInput.trim()}
-                  style={{
-                    background: '#6366f1', border: 'none', borderRadius: 8,
-                    padding: '8px 14px', color: 'white', fontSize: 12, fontWeight: 600,
-                    cursor: emailLoading || !emailInput.trim() ? 'not-allowed' : 'pointer',
-                    opacity: emailLoading || !emailInput.trim() ? 0.5 : 1, whiteSpace: 'nowrap',
-                  }}
-                >
-                  Subscribe
-                </button>
-              </div>
-            ) : (
-              <p style={{ color: '#22c55e', fontSize: 13 }}>✓ Thanks! Check your inbox.</p>
-            )}
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, flexWrap: 'wrap', marginBottom: 20 }}>
-            {[
-              { icon: '🔍', text: 'Bill explanation' },
-              { icon: '💸', text: 'Waste identification' },
-              { icon: '🗺️', text: 'Migration planning' },
-              { icon: '📊', text: 'Cost projections' },
-              { icon: '🛡️', text: 'Compliance guidance' },
-            ].map(item => (
-              <div key={item.text} style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#a0a0b0', fontSize: 14 }}>
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
+          {/* Trust line */}
+          <p style={{ color: '#555', fontSize: 13 }}>
+            No credit card &nbsp;·&nbsp; 12 providers covered &nbsp;·&nbsp; Trusted by founders managing $2.4M cloud spend
+          </p>
         </motion.div>
       </section>
 
-      {/* WHERE TO START — new users only */}
-      {hasProfile === false && (
-        <section style={{ padding: '72px 24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ maxWidth: 860, margin: '0 auto' }}>
-            <div style={{ textAlign: 'center', marginBottom: 40 }}>
-              <h2 style={{ fontSize: 'clamp(22px, 3vw, 32px)', fontWeight: 800, marginBottom: 10 }}>
-                Where do you want to start?
-              </h2>
-              <p style={{ color: '#a0a0b0', fontSize: 15 }}>Pick what fits your situation best.</p>
+      {/* ── SECTION 2: PROOF ────────────────────────────────��────────── */}
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'linear-gradient(180deg, #050508 0%, #080810 100%)' }}>
+        <div style={{ maxWidth: 860, margin: '0 auto' }}>
+          <FadeInSection>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <div style={{ fontSize: 'clamp(52px, 9vw, 96px)', fontWeight: 900, color: '#6366f1', lineHeight: 1, marginBottom: 8 }}>$2.4M+</div>
+              <div style={{ fontSize: 18, color: '#a0a0b0', fontWeight: 500 }}>in cloud spend analyzed by founders using this platform</div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+          </FadeInSection>
+          <FadeInSection delay={0.1}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
               {[
-                { icon: '🌱', title: "I'm new to cloud", desc: 'Help me choose the right cloud for my project', href: '/advisor' },
-                { icon: '💸', title: 'I have a bill problem', desc: 'Explain my bill and find waste', href: '/analyze' },
-                { icon: '🔄', title: 'I want to switch providers', desc: 'Evaluate my options', href: '/analyze' },
-              ].map(card => (
-                <button
-                  key={card.title}
-                  onClick={() => router.push(card.href)}
-                  className="glass-card"
-                  style={{ padding: '32px 24px', cursor: 'pointer', textAlign: 'left', width: '100%' }}
-                >
-                  <div style={{ fontSize: 36, marginBottom: 16 }}>{card.icon}</div>
-                  <div style={{ fontSize: 17, fontWeight: 700, color: 'white', marginBottom: 8 }}>{card.title}</div>
-                  <div style={{ fontSize: 14, color: '#a0a0b0', lineHeight: 1.5 }}>{card.desc}</div>
-                  <div style={{ marginTop: 20, fontSize: 13, color: '#6366f1', fontWeight: 600 }}>Get started →</div>
-                </button>
+                { value: '28%', label: 'Average waste found', sub: 'Of monthly cloud spend' },
+                { value: '30s', label: 'Average analysis time', sub: 'From input to action plan' },
+                { value: '12+', label: 'Providers covered', sub: 'Including alternatives' },
+              ].map(s => (
+                <div key={s.label} style={{ padding: '28px 24px', borderRadius: 16, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: 900, color: 'white', lineHeight: 1, marginBottom: 8 }}>{s.value}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 12, color: '#555' }}>{s.sub}</div>
+                </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
-
-      {/* SOCIAL PROOF / CREDIBILITY */}
-      <section style={{ padding: '60px 24px', borderTop: '1px solid #ffffff08', textAlign: 'center' }}>
-        <p style={{ color: '#666', fontSize: 13, marginBottom: 32, letterSpacing: 2 }}>
-          TRUSTED DATA SOURCES
-        </p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 48, flexWrap: 'wrap' }}>
-          {[
-            'SEC Filings & Earnings Reports',
-            'Synergy Research Group',
-            'FinOps Foundation 2025',
-            'Flexera State of Cloud',
-          ].map(source => (
-            <div key={source} style={{ color: '#a0a0b0', fontSize: 14 }}>{source}</div>
-          ))}
+          </FadeInSection>
         </div>
       </section>
 
-      {/* TRUST BADGES */}
-      <section style={{ padding: '72px 24px', borderTop: '1px solid #ffffff08' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <p style={{ color: '#666', fontSize: 13, letterSpacing: 2, textAlign: 'center', marginBottom: 40 }}>
-            WHY FOUNDERS TRUST CLOUD INTELLIGENCE
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
-            {[
-              {
-                icon: '🛡️',
-                title: '100% Vendor Neutral',
-                desc: 'We never take partner commissions from AWS, Azure, or GCP. Our advice favors what\'s best for you, including recommending cheaper alternatives.',
-                color: '#6366f1',
-              },
-              {
-                icon: '📊',
-                title: 'Verified Pricing Data',
-                desc: `Every dollar amount we cite is backed by the cloud provider's published pricing as of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`,
-                color: '#22c55e',
-              },
-              {
-                icon: '✅',
-                title: 'Performance Guarantee Available',
-                desc: 'With our Pay-Per-Saving plan, you only pay when we deliver verified savings. Zero risk — if we don\'t save you money, you pay nothing.',
-                color: '#f59e0b',
-              },
-            ].map(badge => (
-              <div key={badge.title} style={{
-                padding: '24px 22px', borderRadius: 16,
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}>
-                <div style={{ fontSize: 32, marginBottom: 14 }}>{badge.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: 'white', marginBottom: 8 }}>{badge.title}</div>
-                <div style={{ fontSize: 13, color: '#a0a0b0', lineHeight: 1.6 }}>{badge.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* THE PROBLEM WE SOLVE */}
-      <section style={{ padding: '80px 24px', maxWidth: 900, margin: '0 auto' }}>
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-        >
-          <h2 style={{
-            fontSize: 'clamp(28px, 4vw, 40px)',
-            fontWeight: 800,
-            marginBottom: 16,
-            textAlign: 'center',
-          }}>
-            Sound familiar?
-          </h2>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
-            gap: 20,
-            marginTop: 40,
-          }}>
-            {[
-              {
-                quote: '"The bill is a complete black box. I can see EC2 and S3 but when I see Data Transfer costing $2,000 I have no idea which microservice caused it."',
-                role: 'CTO, SaaS Startup',
-              },
-              {
-                quote: '"We had a $4,000 spike in one weekend because a developer left a NAT Gateway running in staging. It took weeks to get a refund from AWS."',
-                role: 'Founder, B2B Platform',
-              },
-              {
-                quote: '"I know we have orphaned resources wasting money every month. But finding them in the AWS Console is like finding a needle in a haystack."',
-                role: 'IT Manager, 80-person company',
-              },
-            ].map((item, i) => (
-              <div key={i} className="glass-card" style={{ padding: 24, borderLeft: '4px solid #6366f1' }}>
-                <p style={{
-                  color: '#e0e0e0',
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  marginBottom: 16,
-                  fontStyle: 'italic',
-                }}>
-                  {item.quote}
-                </p>
-                <p style={{ color: '#666', fontSize: 12 }}>{item.role}</p>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section style={{ padding: '80px 24px', background: '#0d0d16', borderTop: '1px solid #ffffff08' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, marginBottom: 16 }}>
-            How it works
-          </h2>
-          <p style={{ color: '#a0a0b0', marginBottom: 60, fontSize: 16 }}>
-            No setup. No account connection required. Results in 30 seconds.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24 }}>
-            {[
-              {
-                step: '01', href: '/analyze',
-                title: 'Describe your situation',
-                desc: 'Tell us your cloud provider, monthly spend, team size, and biggest frustration. Plain English — no forms.',
-                icon: '💬',
-              },
-              {
-                step: '02', href: '/analyze',
-                title: 'Get your analysis',
-                desc: "Our AI gives you a specific breakdown — what you're paying for, where you're wasting money, and exactly what to do next.",
-                icon: '🔍',
-              },
-              {
-                step: '03', href: '/advisor',
-                title: 'Take action',
-                desc: 'Follow your personalized plan. Every recommendation includes the specific steps, services, and expected savings.',
-                icon: '⚡',
-              },
-              {
-                step: '04', href: '/dashboard',
-                title: 'Track progress',
-                desc: 'Save your analysis, share with your team, and come back as your situation changes.',
-                icon: '📈',
-              },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                className="glass-card"
-                onClick={() => router.push(item.href)}
-                style={{ padding: 28, textAlign: 'left', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s' }}
-                whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(99,102,241,0.18)' }}
-              >
-                <div style={{ fontSize: 32, marginBottom: 16 }}>{item.icon}</div>
-                <div style={{ color: '#6366f1', fontSize: 11, fontWeight: 700, letterSpacing: 2, marginBottom: 8 }}>
-                  STEP {item.step}
-                </div>
-                <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 10 }}>{item.title}</h3>
-                <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.6 }}>{item.desc}</p>
-                <div style={{ marginTop: 16, fontSize: 12, color: '#6366f1', fontWeight: 600 }}>Open →</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EVERYTHING YOU NEED */}
-      <section style={{ padding: '80px 24px', borderTop: '1px solid #ffffff08' }}>
-        <div style={{ maxWidth: 900, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 48 }}>
-            <h2 style={{ fontSize: 'clamp(28px, 4vw, 40px)', fontWeight: 800, marginBottom: 12 }}>
-              Everything you need
-            </h2>
-            <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 440, margin: '0 auto' }}>
-              A full toolkit for cloud clarity — analysis, benchmarking, compliance, and more.
-            </p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 14 }}>
-            {[
-              { icon: '🤖', title: 'AI Analyze',     href: '/analyze',      desc: 'Explain any cloud situation' },
-              { icon: '🧭', title: 'Cloud Advisor',  href: '/advisor',      desc: 'Get a provider recommendation' },
-              { icon: '📄', title: 'Bill Upload',    href: '/bill-upload',  desc: 'Analyze your actual bill' },
-              { icon: '📊', title: 'Report Card',    href: '/report-card',  desc: 'Grade your cloud setup' },
-              { icon: '🏗️', title: 'Architecture',   href: '/architecture', desc: 'Visualize your stack' },
-              { icon: '💰', title: 'Savings Calc',   href: '/savings',      desc: 'See your potential savings' },
-              { icon: '🛡️', title: 'Compliance',     href: '/compliance',   desc: 'Check your requirements' },
-              { icon: '📈', title: 'Benchmark',      href: '/benchmark',    desc: 'Compare to industry averages' },
-            ].map(tool => (
-              <motion.div
-                key={tool.href}
-                className="glass-card"
-                onClick={() => router.push(tool.href)}
-                style={{ padding: '20px', cursor: 'pointer' }}
-                whileHover={{ y: -3, boxShadow: '0 8px 32px rgba(99,102,241,0.15)' }}
-                transition={{ duration: 0.15 }}
-              >
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{tool.icon}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 4 }}>{tool.title}</div>
-                <div style={{ fontSize: 12, color: '#555', lineHeight: 1.5 }}>{tool.desc}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MARKET PULSE — condensed */}
-      <section style={{ padding: '60px 24px', maxWidth: 900, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-          {[
-            { animated: '$855B',  label: 'Cloud market 2026',   sub: 'Growing 19% annually' },
-            { animated: '28%',    label: 'Average cloud waste', sub: 'Of monthly spend wasted' },
-            { animated: '$0',     label: 'Cost to start',       sub: 'No credit card required' },
-            { animated: '12+',    label: 'Providers compared',  sub: 'Including alternatives' },
-          ].map(stat => (
-            <div key={stat.label} className="glass-card" style={{ padding: 20, textAlign: 'center' }}>
-              <div style={{ fontSize: 32, fontWeight: 900, color: '#6366f1', marginBottom: 4 }}>
-                {stat.animated}
-              </div>
-              <div style={{ fontWeight: 600, marginBottom: 4, fontSize: 14 }}>{stat.label}</div>
-              <div style={{ color: '#666', fontSize: 12 }}>{stat.sub}</div>
+      {/* ── SECTION 3: LIVE DEMO PREVIEW ───────────────────────────��─── */}
+      <section id="demo-preview" style={{ padding: '80px 24px', background: '#080810', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <FadeInSection>
+            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+              <p style={{ color: '#555', fontSize: 13, letterSpacing: 2, marginBottom: 12 }}>LIVE PREVIEW</p>
+              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, marginBottom: 12 }}>See it in action</h2>
+              <p style={{ color: '#a0a0b0', fontSize: 15 }}>This is what your analysis looks like — before you even sign up.</p>
             </div>
+          </FadeInSection>
+          <FadeInSection delay={0.15}>
+            <div style={{ background: '#0d0d18', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 20, padding: 28, fontFamily: 'monospace', boxShadow: '0 0 60px rgba(99,102,241,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20, paddingBottom: 16, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#f59e0b' }} />
+                <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
+                <span style={{ marginLeft: 8, color: '#555', fontSize: 12 }}>cloud-intelligence — analysis</span>
+              </div>
+              <div style={{ minHeight: 180 }}>
+                {DEMO_LINES.slice(0, visibleLines).map((line, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12, animation: 'pageEnter 0.3s ease-out' }}>
+                    <span style={{ color: '#333', fontSize: 12, userSelect: 'none', flexShrink: 0, marginTop: 2 }}>$</span>
+                    <span style={{ color: line.color, fontSize: 14, lineHeight: 1.5 }}>{line.text}</span>
+                  </div>
+                ))}
+                {visibleLines > 0 && visibleLines < DEMO_LINES.length && (
+                  <div style={{ display: 'flex', gap: 8, paddingLeft: 22 }}>
+                    <span style={{ display: 'inline-block', width: 8, height: 16, background: '#6366f1', borderRadius: 2, animation: 'pulseRing 1s ease-out infinite' }} />
+                  </div>
+                )}
+              </div>
+              <div style={{ marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'center' }}>
+                <a href="/instant-audit" style={{ background: '#6366f1', borderRadius: 10, padding: '10px 24px', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none', display: 'inline-block' }}>
+                  Run this on your actual bill →
+                </a>
+              </div>
+            </div>
+          </FadeInSection>
+        </div>
+      </section>
+
+      {/* ── SECTION 4: HOW IT WORKS (3 steps) ───────────────────────── */}
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <FadeInSection>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <p style={{ color: '#555', fontSize: 13, letterSpacing: 2, marginBottom: 12 }}>HOW IT WORKS</p>
+              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, marginBottom: 12 }}>Three steps to clarity</h2>
+              <p style={{ color: '#a0a0b0', fontSize: 15 }}>No account required. No credit card. No setup.</p>
+            </div>
+          </FadeInSection>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 24 }}>
+            {[
+              { step: '01', icon: '💬', title: 'Describe your setup', desc: 'Tell us your cloud provider, monthly spend, and biggest frustration. Plain English — no forms or integrations required.', href: '/analyze' },
+              { step: '02', icon: '🔍', title: 'Get AI analysis in 30 seconds', desc: 'Our AI breaks down your bill, identifies waste, and gives you specific dollar amounts for every savings opportunity.', href: '/analyze' },
+              { step: '03', icon: '⚡', title: 'Follow your action plan', desc: 'Every recommendation includes step-by-step console instructions, expected savings, and effort level.', href: '/advisor' },
+            ].map((item, i) => (
+              <FadeInSection key={i} delay={i * 0.1}>
+                <a href={item.href} style={{ textDecoration: 'none', display: 'block' }}>
+                  <div className="glass-card" style={{ padding: 32, height: '100%' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(99,102,241,0.3)' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                      <span style={{ fontSize: 36 }}>{item.icon}</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: '#6366f1', letterSpacing: 2 }}>STEP {item.step}</span>
+                    </div>
+                    <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12, color: 'white' }}>{item.title}</h3>
+                    <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.65 }}>{item.desc}</p>
+                    <div style={{ marginTop: 20, fontSize: 13, color: '#6366f1', fontWeight: 600 }}>Get started →</div>
+                  </div>
+                </a>
+              </FadeInSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 5: WHO USES THIS ─────────────────────────────────── */}
+      <section style={{ padding: '80px 24px', background: '#080810', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <FadeInSection>
+            <div style={{ textAlign: 'center', marginBottom: 56 }}>
+              <p style={{ color: '#555', fontSize: 13, letterSpacing: 2, marginBottom: 12 }}>BUILT FOR</p>
+              <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900 }}>Who uses Cloud Intelligence</h2>
+            </div>
+          </FadeInSection>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 20 }}>
+            {[
+              { icon: '🚀', role: 'Startup Founders', tagline: 'Stop wasting credits', desc: 'You have $25K in AWS credits and a growing bill you can\'t explain. Get a clear breakdown and stop burning runway.', href: '/advisor', cta: 'Get founder advice', color: '#6366f1' },
+              { icon: '🏢', role: 'IT Managers', tagline: 'Clarity on your bill', desc: 'Monthly cloud costs are rising faster than your revenue. Identify waste, justify the bill to leadership, and build a savings plan.', href: '/instant-audit', cta: 'Run an audit', color: '#22c55e' },
+              { icon: '💼', role: 'Consultants', tagline: 'White-label reports', desc: 'Deliver professional cloud cost analysis to clients under your brand. Generate reports in seconds, not weeks.', href: '/white-label', cta: 'Explore white label', color: '#f59e0b' },
+            ].map((card, i) => (
+              <FadeInSection key={i} delay={i * 0.1}>
+                <a href={card.href} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+                  <div style={{
+                    padding: 32, borderRadius: 20, height: '100%', boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.07)`,
+                    transition: 'all 0.2s ease', display: 'flex', flexDirection: 'column',
+                  }}
+                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = `${card.color}40`; el.style.background = `${card.color}08` }}
+                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'rgba(255,255,255,0.07)'; el.style.background = 'rgba(255,255,255,0.02)' }}
+                  >
+                    <div style={{ fontSize: 40, marginBottom: 16 }}>{card.icon}</div>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: card.color, letterSpacing: 2, marginBottom: 8 }}>FOR {card.role.toUpperCase()}</p>
+                    <h3 style={{ fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 12 }}>{card.tagline}</h3>
+                    <p style={{ color: '#a0a0b0', fontSize: 14, lineHeight: 1.65, flex: 1, marginBottom: 24 }}>{card.desc}</p>
+                    <span style={{ color: card.color, fontSize: 13, fontWeight: 700 }}>{card.cta} →</span>
+                  </div>
+                </a>
+              </FadeInSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 6: TRUST BADGES ──────────────────────────────────── */}
+      <section style={{ padding: '80px 24px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
+          <FadeInSection>
+            <p style={{ color: '#555', fontSize: 13, letterSpacing: 2, textAlign: 'center', marginBottom: 48 }}>WHY FOUNDERS TRUST CLOUD INTELLIGENCE</p>
+          </FadeInSection>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+            {[
+              { icon: '🛡️', title: '100% Vendor Neutral', desc: 'We never take partner commissions from AWS, Azure, or GCP. Our advice favors what\'s best for you — including recommending cheaper alternatives.', color: '#6366f1' },
+              { icon: '📊', title: 'Verified Pricing Data', desc: `Every dollar amount we cite is backed by the cloud provider's published pricing as of ${new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`, color: '#22c55e' },
+              { icon: '✅', title: 'Performance Guarantee', desc: "With our Pay-Per-Saving plan, you only pay when we deliver verified savings. Zero risk — if we don't save you money, you pay nothing.", color: '#f59e0b' },
+            ].map(badge => (
+              <FadeInSection key={badge.title}>
+                <div style={{ padding: '32px 28px', borderRadius: 20, background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.07)`, transition: 'border-color 0.2s' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = `${badge.color}40` }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)' }}
+                >
+                  <div style={{ width: 52, height: 52, borderRadius: 14, background: `${badge.color}15`, border: `1px solid ${badge.color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, marginBottom: 20 }}>
+                    {badge.icon}
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 700, color: 'white', marginBottom: 10 }}>{badge.title}</div>
+                  <div style={{ fontSize: 14, color: '#a0a0b0', lineHeight: 1.65 }}>{badge.desc}</div>
+                </div>
+              </FadeInSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 7: FINAL CTA ─────────────────────────────────────── */}
+      <section style={{ padding: '100px 24px', background: 'radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%), #080810', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+        <FadeInSection>
+          <div style={{ maxWidth: 560, margin: '0 auto' }}>
+            <h2 style={{ fontSize: 'clamp(28px, 5vw, 52px)', fontWeight: 900, lineHeight: 1.1, marginBottom: 16 }}>
+              Ready to find your<br /><span className="shimmer-text">cloud waste?</span>
+            </h2>
+            <p style={{ color: '#a0a0b0', fontSize: 17, marginBottom: 40 }}>Get your free 30-second audit. No signup required to try.</p>
+            <a href="/instant-audit" className="btn-primary animate-glow" style={{ fontSize: 18, padding: '16px 40px', display: 'inline-block', marginBottom: 16 }}>
+              Start Free Audit →
+            </a>
+            <p style={{ color: '#555', fontSize: 13 }}>No signup required &nbsp;·&nbsp; Results in 30 seconds &nbsp;·&nbsp; 100% free</p>
+          </div>
+        </FadeInSection>
+      </section>
+
+      {/* ── TRUSTED DATA SOURCES ─────────────────────��───────────────── */}
+      <section style={{ padding: '40px 24px 60px', textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+        <p style={{ color: '#333', fontSize: 12, marginBottom: 20, letterSpacing: 2 }}>TRUSTED DATA SOURCES</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 40, flexWrap: 'wrap' }}>
+          {['SEC Filings & Earnings Reports', 'Synergy Research Group', 'FinOps Foundation 2025', 'Flexera State of Cloud'].map(s => (
+            <div key={s} style={{ color: '#444', fontSize: 13 }}>{s}</div>
           ))}
         </div>
       </section>
