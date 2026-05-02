@@ -204,6 +204,7 @@ export default function AnalyzePage() {
   const [done, setDone] = useState(false)
   const [saved, setSaved] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [quickWins, setQuickWins] = useState<any[]>([])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
@@ -236,6 +237,7 @@ export default function AnalyzePage() {
     setResponse('')
     setDone(false)
     setSaved(false)
+    setQuickWins([])
     trackEvent('analyze_started', { mode: modeId, input_length: userText.length })
 
     try {
@@ -285,6 +287,7 @@ export default function AnalyzePage() {
 
       setDone(true)
       trackEvent('analyze_completed', { mode: modeId })
+      void fetchQuickWins(userText)
 
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
@@ -312,6 +315,47 @@ export default function AnalyzePage() {
     setDone(false)
     setSaved(false)
     setInput('')
+    setQuickWins([])
+  }
+
+  async function fetchQuickWins(userInput: string) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 400,
+          messages: [
+            { role: 'system', content: 'Return only valid JSON array.' },
+            {
+              role: 'user',
+              content: `For this cloud situation: "${userInput}"
+Return exactly 3 quick wins as JSON:
+[
+  {
+    "action": "Short action title",
+    "description": "One sentence plain English",
+    "saving": "$X/month",
+    "effort": "5 minutes" or "30 minutes" or "1 hour",
+    "where": "Exact console location"
+  }
+]
+Focus on things they can do TODAY.`,
+            },
+          ],
+        }),
+      })
+      const data = await res.json()
+      const text = data.choices?.[0]?.message?.content || '[]'
+      const clean = text.replace(/```json|```/g, '').trim()
+      setQuickWins(JSON.parse(clean))
+    } catch {
+      setQuickWins([])
+    }
   }
 
   return (
@@ -482,6 +526,28 @@ export default function AnalyzePage() {
                 verticalAlign: 'text-bottom',
               }} />
             )}
+          </div>
+        )}
+
+        {/* Quick Wins */}
+        {quickWins.length > 0 && (
+          <div style={{ marginTop: 24 }}>
+            <div style={{ fontSize: 11, color: '#22c55e', letterSpacing: 2, marginBottom: 12, fontWeight: 700 }}>
+              ⚡ QUICK WINS — DO TODAY
+            </div>
+            {quickWins.map((w, i) => (
+              <div key={i} className="glass-card" style={{ padding: 16, marginBottom: 12, borderLeft: '3px solid #22c55e' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <strong style={{ color: 'white', fontSize: 14 }}>{w.action}</strong>
+                  <span style={{ color: '#22c55e', fontSize: 13, fontWeight: 700 }}>{w.saving}</span>
+                </div>
+                <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 8 }}>{w.description}</p>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <span style={{ color: '#666', fontSize: 12 }}>⏱ {w.effort}</span>
+                  <span style={{ color: '#666', fontSize: 12 }}>📍 {w.where}</span>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
