@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
 import { routeForQuery } from '@/lib/smartRouter'
@@ -66,6 +67,23 @@ export default function HomePage() {
     if (!q.trim()) return
     router.push(routeForQuery(q.trim()))
   }
+
+  function clearQuery() {
+    setQuery('')
+    if (typeof window !== 'undefined') localStorage.removeItem('homepage_query')
+  }
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const saved = localStorage.getItem('homepage_query')
+    if (saved) setQuery(saved)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (query) localStorage.setItem('homepage_query', query)
+    else localStorage.removeItem('homepage_query')
+  }, [query])
 
   useEffect(() => {
     const handle = (e: MouseEvent) => setMousePos({ x: e.clientX, y: e.clientY })
@@ -167,12 +185,27 @@ export default function HomePage() {
               onKeyDown={(e) => e.key === 'Enter' && submit(query)}
               placeholder="Describe your cloud situation in plain English..."
               style={{
-                width: '100%', padding: '20px 130px 20px 24px', fontSize: 17,
+                width: '100%', padding: '20px 200px 20px 24px', fontSize: 17,
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(99,102,241,0.25)',
                 borderRadius: 16, color: 'white', outline: 'none', boxSizing: 'border-box',
               }}
             />
+            {query.trim() && (
+              <button
+                onClick={clearQuery}
+                aria-label="Clear input"
+                style={{
+                  position: 'absolute', right: 110, top: 8, bottom: 8,
+                  padding: '0 14px', borderRadius: 12, fontSize: 13, fontWeight: 600,
+                  background: 'rgba(255,255,255,0.06)',
+                  color: '#a0a0b0', border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer',
+                }}
+              >
+                Clear
+              </button>
+            )}
             <button
               onClick={() => submit(query)}
               disabled={!query.trim()}
@@ -187,6 +220,38 @@ export default function HomePage() {
             >
               Go →
             </button>
+          </div>
+
+          {/* Startup CTA */}
+          <div style={{
+            maxWidth: 640,
+            margin: '32px auto 0',
+            padding: 24,
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.08))',
+            border: '1px solid rgba(99,102,241,0.2)',
+            borderRadius: 16,
+            textAlign: 'center',
+          }}>
+            <p style={{ fontSize: 11, letterSpacing: 2, color: '#a5b4fc', marginBottom: 8, fontWeight: 700 }}>
+              🚀 NEW TO CLOUD?
+            </p>
+            <h3 style={{ fontSize: 20, color: 'white', marginBottom: 12, fontWeight: 700 }}>
+              Building a startup or new project?
+            </h3>
+            <p style={{ color: '#a0a0b0', marginBottom: 16, fontSize: 14 }}>
+              Get a personalized plan in 60 seconds — no cloud experience needed
+            </p>
+            <Link href="/advisor" style={{
+              display: 'inline-block',
+              padding: '12px 24px',
+              background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+              color: 'white',
+              borderRadius: 12,
+              fontWeight: 600,
+              textDecoration: 'none',
+            }}>
+              Start Cloud Advisor →
+            </Link>
           </div>
 
           {/* Example chips */}

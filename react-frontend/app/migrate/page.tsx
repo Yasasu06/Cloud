@@ -19,6 +19,7 @@ export default function MigratePage() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const [activeTab, setActiveTab] = useState<TabId>('migration')
+  const initialQuery = searchParams.get('q') || ''
 
   useEffect(() => {
     const t = searchParams.get('tab')
@@ -47,6 +48,14 @@ export default function MigratePage() {
             Migration planning + egress calculation + cloud-to-bare-metal repatriation modeling.
           </p>
         </div>
+
+        {initialQuery && (
+          <div style={{ marginBottom: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)' }}>
+            <div style={{ fontSize: 11, color: '#818cf8', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>YOUR QUESTION</div>
+            <div style={{ fontSize: 14, color: 'white' }}>&ldquo;{initialQuery}&rdquo;</div>
+            <div style={{ fontSize: 12, color: '#a0a0b0', marginTop: 6 }}>Pick the tool below that matches what you need.</div>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 28, overflowX: 'auto' }}>
           {TABS.map(t => (

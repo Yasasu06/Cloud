@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import DisclaimerBanner from '@/components/DisclaimerBanner'
 import NextActionCards from '@/components/NextActionCards'
 
@@ -64,13 +64,23 @@ function connPath(x1: number, y1: number, x2: number, y2: number) {
 
 export default function ArchitecturePage() {
   const router = useRouter()
-  const [description, setDescription] = useState('')
+  const searchParams = useSearchParams()
+  const initialQuery = searchParams.get('q') || ''
+  const [description, setDescription] = useState(initialQuery)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ArchResult | null>(null)
   const [error, setError] = useState('')
 
-  async function generate() {
-    if (!description.trim()) return
+  useEffect(() => {
+    if (initialQuery && !result && !loading) {
+      generate(initialQuery)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  async function generate(overrideText?: string) {
+    const text = (overrideText ?? description).trim()
+    if (!text) return
     setLoading(true)
     setError('')
     setResult(null)
@@ -101,7 +111,7 @@ Include 5–9 services. Use realistic cloud service names. Tier must be one of: 
 
 ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare for CDN/edge/zero-egress, Hetzner for cost-sensitive servers (60–80% cheaper than AWS), Render for PaaS, Railway for indie/startup deploys, DigitalOcean for simplicity. Don't default to AWS/Azure/GCP for everything.`,
             },
-            { role: 'user', content: description },
+            { role: 'user', content: text },
           ],
         }),
       })
@@ -161,7 +171,7 @@ ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare f
             style={{ width: '100%', background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '14px 16px', color: 'white', fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box', lineHeight: 1.6 }}
           />
           <button
-            onClick={generate}
+            onClick={() => generate()}
             disabled={loading || !description.trim()}
             style={{ marginTop: 16, background: loading ? '#333' : '#6366f1', border: 'none', borderRadius: 12, padding: '14px 32px', color: 'white', fontWeight: 700, fontSize: 15, cursor: loading || !description.trim() ? 'not-allowed' : 'pointer', opacity: !description.trim() ? 0.5 : 1, transition: 'background 0.15s' }}
           >
