@@ -9,12 +9,36 @@ export interface Provider {
   description: string
 }
 
-export interface AiDataPoint {
+// ─────────────────────────────────────────────────────────────────────────────
+// CLOUD SEGMENT REVENUE — quarterly time series
+//
+// Series definition (what each value means):
+//   aws        = Amazon 8-K segment sales (verified).
+//   gcp        = Alphabet 8-K segment-results table (verified, closed-loop
+//                validated against published annual totals — FY2024 quarters
+//                sum to reported FY2024 segment total).
+//   azureLow,
+//   azureHigh  = Modeled band. Microsoft discloses no Azure dollar figure.
+//                Band is anchored to the CEO statement in Microsoft's FY2025
+//                Q4 8-K ("Azure surpassed $75 billion in revenue, up 34
+//                percent" for the fiscal year ended June 30, 2025),
+//                calendar-normalized. Band width reflects (a) "Azure and
+//                other cloud services" bundling and (b) Microsoft's 2025
+//                re-scoping of what counts as Azure (AI-inference inclusion
+//                plus an accounting-estimate change).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface QuarterlyRevenuePoint {
   quarter: string
-  azure: number
-  aws: number
-  gcp: number
+  aws: number | null        // USD billions, reported (Amazon 8-K)
+  gcp: number | null        // USD billions, reported (Alphabet 8-K)
+  azureLow: number | null   // USD billions, low bound of modeled Azure band
+  azureHigh: number | null  // USD billions, high bound of modeled Azure band
 }
+
+// Legacy alias — kept temporarily so any stragglers importing the old name
+// don't break. Remove once unused.
+export type AiDataPoint = QuarterlyRevenuePoint
 
 export interface MarketMetric {
   label: string
@@ -90,20 +114,24 @@ export const MARKET_METRICS: MarketMetric[] = [
   },
 ]
 
-export const AI_GROWTH_DATA: AiDataPoint[] = [
-  { quarter: 'Q1 2023', azure: 1.2, aws: 2.1, gcp: 0.8 },
-  { quarter: 'Q2 2023', azure: 1.8, aws: 2.4, gcp: 1.0 },
-  { quarter: 'Q3 2023', azure: 2.4, aws: 2.8, gcp: 1.3 },
-  { quarter: 'Q4 2023', azure: 3.1, aws: 3.2, gcp: 1.6 },
-  { quarter: 'Q1 2024', azure: 4.2, aws: 3.8, gcp: 2.0 },
-  { quarter: 'Q2 2024', azure: 5.6, aws: 4.4, gcp: 2.5 },
-  { quarter: 'Q3 2024', azure: 7.1, aws: 5.1, gcp: 3.1 },
-  { quarter: 'Q4 2024', azure: 8.9, aws: 5.9, gcp: 3.8 },
-  { quarter: 'Q1 2025', azure: 10.8, aws: 6.8, gcp: 4.6 },
-  { quarter: 'Q2 2025', azure: 12.9, aws: 7.8, gcp: 5.5 },
-  { quarter: 'Q3 2025', azure: 15.2, aws: 8.9, gcp: 6.5 },
-  { quarter: 'Q4 2025', azure: 17.8, aws: 10.1, gcp: 7.6 },
+export const CLOUD_SEGMENT_REVENUE: QuarterlyRevenuePoint[] = [
+  { quarter: 'Q1 2023', aws: 21.4, gcp: 7.45,  azureLow: 13.5, azureHigh: 16.5 },
+  { quarter: 'Q2 2023', aws: 22.1, gcp: 8.03,  azureLow: 14.5, azureHigh: 17.5 },
+  { quarter: 'Q3 2023', aws: 23.1, gcp: 8.41,  azureLow: 15.5, azureHigh: 18.5 },
+  { quarter: 'Q4 2023', aws: 24.0, gcp: 9.19,  azureLow: 16.5, azureHigh: 20.0 },
+  { quarter: 'Q1 2024', aws: 25.0, gcp: 9.57,  azureLow: 17.5, azureHigh: 21.5 },
+  { quarter: 'Q2 2024', aws: 26.3, gcp: 10.35, azureLow: 19.0, azureHigh: 23.0 },
+  { quarter: 'Q3 2024', aws: 27.5, gcp: 11.35, azureLow: 20.5, azureHigh: 25.0 },
+  { quarter: 'Q4 2024', aws: 28.8, gcp: 11.96, azureLow: 22.0, azureHigh: 27.0 },
+  { quarter: 'Q1 2025', aws: 29.3, gcp: 12.26, azureLow: 24.0, azureHigh: 29.0 },
+  { quarter: 'Q2 2025', aws: 30.9, gcp: 13.62, azureLow: 26.0, azureHigh: 31.5 },
+  { quarter: 'Q3 2025', aws: 33.0, gcp: 15.16, azureLow: 28.5, azureHigh: 34.5 },
+  { quarter: 'Q4 2025', aws: 35.6, gcp: 17.70, azureLow: 30.0, azureHigh: 36.5 },
 ]
+
+// Legacy alias — kept temporarily so AiGrowthChart-style callers don't break.
+// Prefer CLOUD_SEGMENT_REVENUE in new code.
+export const AI_GROWTH_DATA = CLOUD_SEGMENT_REVENUE
 
 export interface AlternativeProvider {
   name: string
