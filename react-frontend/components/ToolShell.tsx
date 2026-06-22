@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 // ─── ToolShell ───────────────────────────────────────────────────────────────
@@ -10,7 +9,7 @@ import Link from 'next/link'
 //   • hides the global app chrome (navbar, ticker, breadcrumbs, back-to-dashboard,
 //     global footer) for this page only — same technique as /demo, without
 //     touching layout.tsx.
-//   • paints the animated aurora background + drifting particle field.
+//   • paints the flowing Stripe-style mesh-gradient background (no blobs/particles).
 //   • renders a sticky top bar with a "← Back to Tools" link to /demo so each
 //     tool is self-contained: land, do one thing, get the answer, go back.
 //
@@ -25,8 +24,6 @@ const HIDE_GLOBAL_CHROME = `
   div:has(> a[href="/dashboard"]) { display: none !important; }
 `
 
-interface Particle { x: number; y: number; size: number; dur: number; delay: number }
-
 export default function ToolShell({
   label,
   children,
@@ -34,38 +31,13 @@ export default function ToolShell({
   label: string            // short tool name shown in the top bar (e.g. "Bill Analyzer")
   children: React.ReactNode
 }) {
-  const [particles, setParticles] = useState<Particle[]>([])
-
-  // Client-only particle field — generated after mount to avoid hydration drift.
-  useEffect(() => {
-    setParticles(Array.from({ length: 16 }, () => ({
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 1 + Math.random() * 2,
-      dur: 10 + Math.random() * 8,
-      delay: Math.random() * 6,
-    })))
-  }, [])
-
   return (
     <div style={{ minHeight: '100vh', position: 'relative', color: 'white', overflow: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: HIDE_GLOBAL_CHROME }} />
 
-      {/* Animated aurora background + glow blobs (fixed, behind everything) */}
-      <div className="aurora-bg" />
-      <div className="aurora-blob aurora-blob-1" />
-      <div className="aurora-blob aurora-blob-2" />
-      <div className="aurora-blob aurora-blob-3" />
-
-      {/* Drifting particle field */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-        {particles.map((p, i) => (
-          <div key={i} className="particle" style={{
-            left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size,
-            animationDuration: `${p.dur}s`, animationDelay: `${p.delay}s`,
-          }} />
-        ))}
-      </div>
+      {/* Flowing mesh-gradient background (fixed, behind everything) */}
+      <div className="mesh-bg" />
+      <div className="mesh-veil" />
 
       {/* Sticky top bar — Back to Tools + branding */}
       <header style={{
