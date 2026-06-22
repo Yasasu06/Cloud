@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { parseBill, buildAnalysisPrompt, NO_CSV_PROVIDERS, type ParsedBill } from '@/lib/billParsers'
+import ToolShell from '@/components/ToolShell'
 
 // CSV parsing + multi-provider detection lives in lib/billParsers.ts.
 
@@ -13,7 +13,6 @@ import { parseBill, buildAnalysisPrompt, NO_CSV_PROVIDERS, type ParsedBill } fro
 type Tab = 'paste' | 'csv'
 
 export default function BillUploadPage() {
-  const router = useRouter()
   const [tab, setTab] = useState<Tab>('csv')
   const [billText, setBillText] = useState('')
   const [csvRaw, setCsvRaw] = useState('')
@@ -100,25 +99,25 @@ export default function BillUploadPage() {
   const hasContent = tab === 'paste' ? billText.trim().length > 0 : csvRaw.length > 0
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
-      <div style={{ maxWidth: 860, margin: '0 auto', padding: '96px 24px 64px' }}>
+    <ToolShell label="Bill Analyzer">
+      <div style={{ maxWidth: 860, margin: '0 auto', padding: '40px 24px 72px' }}>
 
         {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{ display: 'inline-block', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '6px 16px', fontSize: 12, color: '#f59e0b', fontWeight: 700, marginBottom: 16, letterSpacing: 1 }}>
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ display: 'inline-block', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '6px 16px', fontSize: 12, color: '#f59e0b', fontWeight: 700, marginBottom: 18, letterSpacing: 1 }}>
             BILL ANALYZER
           </div>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 40px)', fontWeight: 900, marginBottom: 12 }}>
-            Understand your cloud bill instantly
+          <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 52px)', fontWeight: 900, marginBottom: 14, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+            Where is your cloud<br /><span className="shimmer-text">money actually going?</span>
           </h1>
-          <p style={{ color: '#a0a0b0', fontSize: 16 }}>
-            Upload any AWS, Azure, GCP, DigitalOcean or Oracle billing CSV for a detailed breakdown and plain-English analysis.
+          <p style={{ color: '#b4b4c4', fontSize: 17, maxWidth: 600, margin: '0 auto' }}>
+            Upload any AWS, Azure, GCP, DigitalOcean or Oracle billing CSV for a detailed breakdown and a plain-English action plan.
           </p>
         </div>
 
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
-          💡 <strong style={{ color: 'white', fontWeight: 600 }}>No CSV file?</strong> Try{' '}
-          <a href="/analyze" style={{ color: '#818cf8' }}>/analyze</a> with just your spend amount instead.
+          💡 <strong style={{ color: 'white', fontWeight: 600 }}>No CSV file?</strong> Switch to the{' '}
+          <strong style={{ color: '#818cf8' }}>Paste Bill Text</strong> tab below and paste your line items instead.
         </div>
 
         {/* Multi-provider instructions banner */}
@@ -144,7 +143,7 @@ export default function BillUploadPage() {
         </div>
 
         {/* Tab switcher */}
-        <div style={{ display: 'flex', background: '#1a1a2e', borderRadius: 12, padding: 4, marginBottom: 24, border: '1px solid #ffffff0d' }}>
+        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 4, marginBottom: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
           {(['csv', 'paste'] as Tab[]).map(t => (
             <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, transition: 'all 0.2s', background: tab === t ? '#6366f1' : 'transparent', color: tab === t ? 'white' : '#a0a0b0' }}>
               {t === 'csv' ? '📂  Upload CSV' : '📋  Paste Bill Text'}
@@ -158,7 +157,7 @@ export default function BillUploadPage() {
             <div>
               <div
                 onClick={() => fileRef.current?.click()}
-                style={{ background: '#1a1a2e', border: `2px dashed ${parsed ? '#22c55e' : parseError ? '#ef4444' : '#ffffff20'}`, borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: `2px dashed ${parsed ? '#22c55e' : parseError ? '#ef4444' : '#ffffff20'}`, borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}
               >
                 <div style={{ fontSize: 40, marginBottom: 12 }}>
                   {parsed ? '✅' : parseError ? '❌' : '📂'}
@@ -227,7 +226,7 @@ export default function BillUploadPage() {
                   </div>
 
                   {/* Breakdown table */}
-                  <div style={{ background: '#111118', borderRadius: 16, border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
                     <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: '1fr 120px 90px', gap: 8 }}>
                       <span style={{ fontSize: 11, color: '#444', fontWeight: 700, letterSpacing: 1 }}>SERVICE</span>
                       <span style={{ fontSize: 11, color: '#444', fontWeight: 700, letterSpacing: 1, textAlign: 'right' }}>TOTAL COST</span>
@@ -284,7 +283,7 @@ export default function BillUploadPage() {
               value={billText}
               onChange={e => setBillText(e.target.value)}
               placeholder={`Paste your cloud bill here — AWS Cost Explorer export, Azure invoice, or line items.\n\nExample:\nEC2 instances: $3,200\nRDS: $890\nData Transfer: $1,100\nS3: $240\nNAT Gateway: $680`}
-              style={{ width: '100%', minHeight: 240, background: '#1a1a2e', border: '1px solid #ffffff15', borderRadius: 12, padding: '16px', color: 'white', fontSize: 14, lineHeight: 1.6, resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ width: '100%', minHeight: 240, background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '16px', color: 'white', fontSize: 14, lineHeight: 1.6, resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
           )}
         </div>
@@ -292,14 +291,15 @@ export default function BillUploadPage() {
         <button
           onClick={analyze}
           disabled={!hasContent || loading}
-          style={{ width: '100%', padding: '14px 0', background: '#6366f1', border: 'none', borderRadius: 12, color: 'white', fontWeight: 700, fontSize: 16, cursor: hasContent && !loading ? 'pointer' : 'not-allowed', opacity: hasContent && !loading ? 1 : 0.5, transition: 'opacity 0.2s' }}
+          className="btn-gradient"
+          style={{ width: '100%', padding: '15px 0', fontSize: 16 }}
         >
           {loading ? 'Analyzing…' : parsed ? `Analyze $${parsed.grandTotal.toLocaleString(undefined, { maximumFractionDigits: 0 })} Bill →` : 'Analyze My Bill →'}
         </button>
 
         {/* AI Response */}
         {response && (
-          <div style={{ marginTop: 32, background: '#1a1a2e', borderRadius: 16, padding: '28px 32px', border: '1px solid #ffffff0d', lineHeight: 1.7, fontSize: 15 }}>
+          <div style={{ marginTop: 28, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderRadius: 16, padding: '28px 32px', border: '1px solid rgba(255,255,255,0.09)', lineHeight: 1.7, fontSize: 15 }}>
             <p style={{ fontSize: 11, color: '#6366f1', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>AI ANALYSIS</p>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
@@ -319,16 +319,12 @@ export default function BillUploadPage() {
         )}
 
         {response && !loading && (
-          <div style={{ marginTop: 32 }}>
-            <p style={{ color: '#666', fontSize: 13, marginBottom: 12, letterSpacing: 1 }}>WHAT&apos;S NEXT</p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <button className="btn-secondary" onClick={() => router.push('/report-card')}>📊 Grade My Setup</button>
-              <button className="btn-secondary" onClick={() => router.push('/optimize?tab=savings')}>💰 Savings Calculator</button>
-              <button className="btn-secondary" onClick={() => router.push('/chat')}>💬 Ask AI Questions</button>
-            </div>
+          <div style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', fontSize: 13, color: '#a0a0b0', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 16 }}>✅</span>
+            <span>Analysis complete. Upload another bill above to compare months — or use <strong style={{ color: '#a5b4fc' }}>← Back to Tools</strong> for the compliance and pricing tools.</span>
           </div>
         )}
       </div>
-    </div>
+    </ToolShell>
   )
 }

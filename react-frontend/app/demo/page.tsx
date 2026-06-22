@@ -96,8 +96,10 @@ function ToolCard({ tool, index, onOpen }: { tool: Tool; index: number; onOpen: 
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
-        background: hover ? 'rgba(255,255,255,0.035)' : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${hover ? `${tool.accent}66` : 'rgba(255,255,255,0.07)'}`,
+        background: hover ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(16px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(140%)',
+        border: `1px solid ${hover ? `${tool.accent}66` : 'rgba(255,255,255,0.09)'}`,
         borderRadius: 20,
         padding: '32px 28px',
         boxShadow: hover ? `0 24px 60px rgba(0,0,0,0.45), 0 0 0 1px ${tool.accent}22, 0 0 48px ${tool.accent}22` : '0 1px 2px rgba(0,0,0,0.2)',
@@ -194,8 +196,16 @@ export default function DemoPage() {
   const open = (href: string) => router.push(href)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050508', color: 'white', position: 'relative', zIndex: 1 }}>
+    <div style={{ minHeight: '100vh', color: 'white', position: 'relative', overflow: 'hidden' }}>
       <style dangerouslySetInnerHTML={{ __html: HIDE_GLOBAL_CHROME }} />
+
+      {/* Animated aurora background + drifting glow blobs */}
+      <div className="aurora-bg" />
+      <div className="aurora-blob aurora-blob-1" />
+      <div className="aurora-blob aurora-blob-2" />
+      <div className="aurora-blob aurora-blob-3" />
+
+      <div style={{ position: 'relative', zIndex: 1 }}>
 
       {/* ── SECTION 1: Minimal isolated header ─────────────────────────────── */}
       <header style={{
@@ -247,7 +257,7 @@ export default function DemoPage() {
           </div>
 
           {/* Headline */}
-          <h1 style={{ fontSize: 'clamp(34px, 6vw, 64px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em', marginBottom: 22 }}>
+          <h1 style={{ fontSize: 'clamp(38px, 7vw, 74px)', fontWeight: 900, lineHeight: 1.03, letterSpacing: '-0.03em', marginBottom: 22 }}>
             <span style={{ color: 'white' }}>Three tools. Real problems.</span>
             <br />
             <span className="shimmer-text">Results in 60 seconds.</span>
@@ -307,6 +317,7 @@ export default function DemoPage() {
             <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.39 1.24-3.23-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z" />
           </SocialLink>
         </div>
+      </div>
       </div>
     </div>
   )

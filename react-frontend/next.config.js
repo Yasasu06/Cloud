@@ -4,6 +4,10 @@ const nextConfig = {
 
   async redirects() {
     return [
+      // Focused entry point — the homepage now routes to the /demo tools hub.
+      // permanent:false (307) so it isn't hard-cached by browsers if the focus changes.
+      { source: '/', destination: '/demo', permanent: false },
+
       // Cost Intelligence hub (4)
       { source: '/forecast',           destination: '/cost-intelligence?tab=forecast', permanent: true },
       { source: '/cost-per-user',      destination: '/cost-intelligence?tab=per-user', permanent: true },

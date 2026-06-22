@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import ToolShell from '@/components/ToolShell'
 
 const INDUSTRIES = ['Healthcare', 'Finance', 'Government', 'Education', 'SaaS', 'Other'] as const
 const PROVIDERS = ['AWS', 'Azure', 'GCP'] as const
@@ -219,13 +219,12 @@ const SEVERITY_BG: Record<ComplianceInfo['severity'], string> = {
 }
 
 const selectStyle: React.CSSProperties = {
-  width: '100%', background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)',
+  width: '100%', background: 'rgba(10,10,22,0.7)', border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 10, padding: '12px 16px', color: 'white', fontSize: 15,
   outline: 'none', cursor: 'pointer', boxSizing: 'border-box',
 }
 
 export default function CompliancePage() {
-  const router = useRouter()
   const [industry, setIndustry] = useState<Industry>('Healthcare')
   const [provider, setProvider] = useState<Provider>('AWS')
   const [checked, setChecked] = useState<Set<number>>(new Set())
@@ -256,24 +255,24 @@ export default function CompliancePage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0f', color: 'white' }}>
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: '100px 24px 80px' }}>
+    <ToolShell label="Compliance Checker">
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '40px 24px 88px' }}>
 
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{
             display: 'inline-block', background: 'rgba(99,102,241,0.1)',
             border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '6px 16px',
-            fontSize: 12, color: '#818cf8', fontWeight: 700, marginBottom: 16, letterSpacing: 1,
+            fontSize: 12, color: '#818cf8', fontWeight: 700, marginBottom: 18, letterSpacing: 1,
           }}>COMPLIANCE CHECKER</div>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, marginBottom: 12 }}>
-            Are you actually compliant?
+          <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 52px)', fontWeight: 900, marginBottom: 14, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+            Are you <span className="shimmer-text">actually compliant?</span>
           </h1>
-          <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 460, margin: '0 auto' }}>
-            Select your industry and cloud provider to see exactly what you need.
+          <p style={{ color: '#b4b4c4', fontSize: 17, maxWidth: 480, margin: '0 auto' }}>
+            Select your industry and cloud provider to see exactly what you need — frameworks, controls, services, and cost.
           </p>
         </div>
 
-        <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 32 }}>
+        <div className="glass-premium" style={{ padding: '24px', marginBottom: 28 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 8 }}>INDUSTRY</label>
@@ -291,22 +290,36 @@ export default function CompliancePage() {
         </div>
 
         {!data && (
-          <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '48px 28px', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-            <div style={{ fontSize: 32, marginBottom: 16 }}>🔍</div>
-            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>No specific framework data for this combination</h3>
-            <p style={{ color: '#a0a0b0', fontSize: 14, maxWidth: 380, margin: '0 auto 24px' }}>
-              {industry} workloads on {provider} typically follow general security best practices.
+          <div className="glass-premium" style={{ padding: '32px 28px' }}>
+            <div style={{ fontSize: 30, marginBottom: 12, textAlign: 'center' }}>🛡️</div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8, textAlign: 'center' }}>
+              No framework-specific data for {industry} on {provider} — but the universal baseline still applies
+            </h3>
+            <p style={{ color: '#a0a0b0', fontSize: 14, maxWidth: 460, margin: '0 auto 22px', textAlign: 'center' }}>
+              Almost every {industry} workload on {provider} should have these foundational controls in place:
             </p>
-            <button onClick={() => router.push('/analyze')} style={{ background: '#6366f1', border: 'none', borderRadius: 12, padding: '13px 28px', color: 'white', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
-              Get AI Compliance Assessment →
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 560, margin: '0 auto' }}>
+              {[
+                'Encrypt data at rest (AES-256) and in transit (TLS 1.2+)',
+                'Enforce multi-factor authentication on every privileged account',
+                'Turn on full audit logging (CloudTrail / Azure Monitor / Cloud Audit Logs)',
+                'Apply least-privilege IAM roles — no standing admin access',
+                'Automate encrypted backups and test your restores',
+                'Restrict data to the regions you actually operate in',
+              ].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: 11, padding: '12px 16px', borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <span style={{ flexShrink: 0, marginTop: 1, width: 18, height: 18, borderRadius: '50%', background: 'rgba(34,197,94,0.2)', color: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900 }}>✓</span>
+                  <span style={{ fontSize: 14, color: '#d0d0e0', lineHeight: 1.5 }}>{item}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {data && (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 16, marginBottom: 24 }}>
-              <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '24px', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="glass-premium" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <p style={{ fontSize: 11, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 12 }}>COMPLIANCE SCORE</p>
                 <div style={{ width: 100, height: 100, borderRadius: '50%', background: `conic-gradient(${scoreColor} ${score * 3.6}deg, #1a1a2e 0deg)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
                   <div style={{ width: 76, height: 76, borderRadius: '50%', background: '#1a1a2e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
@@ -319,7 +332,7 @@ export default function CompliancePage() {
                 </span>
               </div>
 
-              <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '24px', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="glass-premium" style={{ padding: '24px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: SEVERITY_COLOR[data.severity], background: SEVERITY_BG[data.severity], padding: '3px 10px', borderRadius: 6, letterSpacing: 0.5 }}>
                     {data.severity.toUpperCase()} RISK
@@ -339,7 +352,7 @@ export default function CompliancePage() {
               </div>
             </div>
 
-            <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 16 }}>
+            <div className="glass-premium" style={{ padding: '28px', marginBottom: 16 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Requirements Checklist</h2>
               <p style={{ color: '#555', fontSize: 13, marginBottom: 20 }}>Check off requirements you have implemented. Each confirmed control raises your score by 10 points.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -352,7 +365,7 @@ export default function CompliancePage() {
               </div>
             </div>
 
-            <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '24px 28px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 16 }}>
+            <div className="glass-premium" style={{ padding: '24px 28px', marginBottom: 16 }}>
               <h2 style={{ fontSize: 15, fontWeight: 700, marginBottom: 14 }}>Key Services to Enable</h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {data.services.map(s => (
@@ -361,19 +374,16 @@ export default function CompliancePage() {
               </div>
             </div>
 
-            <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #1a1a2e)', borderRadius: 16, padding: '24px 28px', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-              <div>
-                <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 6, letterSpacing: 1 }}>NEXT STEP</div>
-                <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Get your personalized compliance plan</h3>
-                <p style={{ color: '#a0a0b0', fontSize: 13 }}>AI analysis tailored to your {industry} workload on {provider}.</p>
-              </div>
-              <button onClick={() => router.push('/analyze')} style={{ background: '#6366f1', border: 'none', borderRadius: 12, padding: '13px 28px', color: 'white', fontWeight: 700, fontSize: 15, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                Get Compliance Plan →
-              </button>
+            <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(139,92,246,0.08))', borderRadius: 16, padding: '24px 28px', border: '1px solid rgba(99,102,241,0.3)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
+              <div style={{ fontSize: 12, color: '#a5b4fc', marginBottom: 6, letterSpacing: 1, fontWeight: 700 }}>✅ YOUR COMPLIANCE BASELINE</div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>{data.frameworks.join(' · ')} for {industry} on {provider}</h3>
+              <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6 }}>
+                Work through the {data.requirements.length} controls above and enable the listed services. Re-run this for each provider you use — requirements differ across AWS, Azure, and GCP. Budget about <strong style={{ color: '#f59e0b' }}>{data.extraCost}/month</strong> for the extra tooling.
+              </p>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </ToolShell>
   )
 }
