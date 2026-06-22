@@ -452,11 +452,10 @@ export default function AnalyzePage() {
     const pricingContext = await buildPricingContext(userText)
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
@@ -513,9 +512,9 @@ export default function AnalyzePage() {
 
   async function fetchRiskProfile(userInput: string) {
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 400,
@@ -545,9 +544,9 @@ Return JSON:
 
   async function fetchCounterArguments(userInput: string, recsSummary: string) {
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 600,
@@ -589,9 +588,9 @@ Return JSON:
     ]
     try {
       const results = await Promise.all(PERSONAS.map(async p => {
-        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const res = await fetch('/api/groq', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             model: 'llama-3.3-70b-versatile',
             max_tokens: 350,
@@ -627,11 +626,10 @@ Return JSON:
 
   async function fetchQuickWins(userInput: string) {
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
         },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',

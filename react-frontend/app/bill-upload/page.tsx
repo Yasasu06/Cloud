@@ -4,104 +4,9 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { parseBill, buildAnalysisPrompt, NO_CSV_PROVIDERS, type ParsedBill } from '@/lib/billParsers'
 
-// ─── CSV parsing ─────────────────────────────────────────────────────────────
-
-interface ServiceRow {
-  service: string
-  cost: number
-  region: string
-}
-
-interface ParsedBill {
-  rows: ServiceRow[]
-  byService: { service: string; total: number; pct: number }[]
-  grandTotal: number
-  dateRange: string
-}
-
-const COST_COLS    = ['UnblendedCost', 'BlendedCost', 'AmortizedCost', 'Cost', 'lineItem/UnblendedCost']
-const SERVICE_COLS = ['ProductName', 'ServiceName', 'product/ProductName', 'lineItem/ProductCode', 'Service']
-const DATE_COLS    = ['UsageStartDate', 'bill/BillingPeriodStartDate', 'lineItem/UsageStartDate', 'InvoiceDate']
-const REGION_COLS  = ['Region', 'product/region', 'lineItem/AvailabilityZone', 'ProductRegion']
-
-function findCol(headers: string[], candidates: string[]): number {
-  for (const c of candidates) {
-    const i = headers.findIndex(h => h.trim().replace(/^["']|["']$/g, '') === c)
-    if (i !== -1) return i
-  }
-  // fuzzy: match any header that contains the first candidate keyword (case-insensitive)
-  const keyword = candidates[0].toLowerCase().replace(/[^a-z]/g, '')
-  return headers.findIndex(h => h.toLowerCase().replace(/[^a-z]/g, '').includes(keyword))
-}
-
-function parseCSV(raw: string): ParsedBill {
-  const lines = raw.split('\n').filter(l => l.trim())
-  if (lines.length < 2) throw new Error('CSV too short')
-
-  // detect delimiter
-  const delim = lines[0].includes('\t') ? '\t' : ','
-
-  const splitLine = (line: string) => {
-    const result: string[] = []
-    let cur = '', inQuote = false
-    for (const ch of line) {
-      if (ch === '"') { inQuote = !inQuote; continue }
-      if (ch === delim && !inQuote) { result.push(cur.trim()); cur = ''; continue }
-      cur += ch
-    }
-    result.push(cur.trim())
-    return result
-  }
-
-  const headers = splitLine(lines[0])
-  const costIdx    = findCol(headers, COST_COLS)
-  const serviceIdx = findCol(headers, SERVICE_COLS)
-  const dateIdx    = findCol(headers, DATE_COLS)
-  const regionIdx  = findCol(headers, REGION_COLS)
-
-  const rows: ServiceRow[] = []
-  const dates: string[] = []
-
-  for (let i = 1; i < lines.length; i++) {
-    const cols = splitLine(lines[i])
-    const rawCost = costIdx >= 0 ? cols[costIdx] : ''
-    const cost = parseFloat(rawCost.replace(/[^0-9.-]/g, ''))
-    if (isNaN(cost) || cost === 0) continue
-
-    const service = (serviceIdx >= 0 ? cols[serviceIdx] : '') || 'Unknown'
-    const region  = (regionIdx  >= 0 ? cols[regionIdx]  : '') || '—'
-    const date    = (dateIdx    >= 0 ? cols[dateIdx]    : '')
-
-    if (date) dates.push(date)
-    rows.push({ service: service.replace(/^Amazon\s+|^AWS\s+/i, ''), cost, region })
-  }
-
-  if (rows.length === 0) throw new Error('No cost rows found. Make sure the file is an AWS Cost and Usage Report.')
-
-  // aggregate by service
-  const totals: Record<string, number> = {}
-  for (const r of rows) {
-    totals[r.service] = (totals[r.service] ?? 0) + r.cost
-  }
-
-  const grandTotal = Object.values(totals).reduce((a, b) => a + b, 0)
-  const byService = Object.entries(totals)
-    .map(([service, total]) => ({ service, total, pct: grandTotal > 0 ? (total / grandTotal) * 100 : 0 }))
-    .sort((a, b) => b.total - a.total)
-
-  const dateRange = dates.length
-    ? `${dates[0].slice(0, 10)} — ${dates[dates.length - 1].slice(0, 10)}`
-    : 'Period unknown'
-
-  return { rows, byService, grandTotal, dateRange }
-}
-
-function buildGroqPrompt(parsed: ParsedBill): string {
-  const top10 = parsed.byService.slice(0, 10)
-  const lines = top10.map(r => `${r.service}: $${r.total.toFixed(2)} (${r.pct.toFixed(1)}%)`).join('\n')
-  return `AWS bill breakdown — total $${parsed.grandTotal.toFixed(2)} for ${parsed.dateRange}:\n\n${lines}\n\nAnalyze this bill as a FinOps expert. Give: 1) What each major charge is in plain English, 2) Top 3 items to cut immediately with specific dollar savings, 3) One action to take this week. Write for a non-technical founder. Be specific.`
-}
+// CSV parsing + multi-provider detection lives in lib/billParsers.ts.
 
 // ─── component ───────────────────────────────────────────────────────────────
 
@@ -131,43 +36,39 @@ export default function BillUploadPage() {
       const raw = ev.target?.result as string
       setCsvRaw(raw)
       try {
-        setParsed(parseCSV(raw))
+        setParsed(parseBill(raw))
       } catch (err) {
-        setParseError(err instanceof Error ? err.message : 'Could not parse CSV')
+        setParseError(err instanceof Error ? err.message : 'Could not parse this CSV.')
       }
     }
     reader.readAsText(file)
   }
 
   async function analyze() {
-    const content = tab === 'paste'
-      ? billText
-      : parsed ? buildGroqPrompt(parsed) : csvRaw
+    // CSV tab requires a successfully-parsed bill — never send raw CSV blindly.
+    if (tab === 'csv' && !parsed) {
+      setParseError('Upload a billing CSV we can read before analyzing, or switch to the Paste tab.')
+      return
+    }
+    const content = tab === 'paste' ? billText : buildAnalysisPrompt(parsed!)
 
     if (!content.trim() || loading) return
     setLoading(true)
     setResponse('')
 
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      // Calls the server route — the Groq API key never touches the browser.
+      const res = await fetch('/api/analyze-bill', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          max_tokens: 1500,
-          stream: true,
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a FinOps expert. Analyze cloud bills in plain English for non-technical founders. Be specific about dollar amounts and exact actions.',
-            },
-            { role: 'user', content },
-          ],
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content }),
       })
+
+      if (!res.ok) {
+        const info = await res.json().catch(() => ({}))
+        setResponse(`⚠️ ${info.error || 'Analysis failed. Please try again.'}`)
+        return
+      }
 
       const reader = res.body?.getReader()
       const decoder = new TextDecoder()
@@ -188,8 +89,9 @@ export default function BillUploadPage() {
           } catch { /* partial chunk */ }
         }
       }
+      if (!full) setResponse('⚠️ The analyzer returned no content. Please try again.')
     } catch {
-      setResponse('Analysis failed. Please try again.')
+      setResponse('⚠️ Analysis failed — could not reach the server. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -210,7 +112,7 @@ export default function BillUploadPage() {
             Understand your cloud bill instantly
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16 }}>
-            Upload your AWS Cost &amp; Usage Report CSV for a detailed breakdown and plain-English analysis.
+            Upload any AWS, Azure, GCP, DigitalOcean or Oracle billing CSV for a detailed breakdown and plain-English analysis.
           </p>
         </div>
 
@@ -219,17 +121,24 @@ export default function BillUploadPage() {
           <a href="/analyze" style={{ color: '#818cf8' }}>/analyze</a> with just your spend amount instead.
         </div>
 
-        {/* AWS instructions banner */}
+        {/* Multi-provider instructions banner */}
         <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b', marginBottom: 6 }}>
-              How to download your AWS Cost &amp; Usage Report
+              We auto-detect AWS, Azure, GCP, DigitalOcean &amp; Oracle billing CSVs
             </p>
             <p style={{ fontSize: 13, color: '#a0a0b0', lineHeight: 1.7, margin: 0 }}>
-              <strong style={{ color: '#e0e0e0' }}>AWS Console</strong> → <strong style={{ color: '#e0e0e0' }}>Billing &amp; Cost Management</strong> → <strong style={{ color: '#e0e0e0' }}>Cost Explorer</strong> → set your date range → <strong style={{ color: '#e0e0e0' }}>Download CSV</strong>
+              <strong style={{ color: '#e0e0e0' }}>AWS</strong>: Cost Explorer → Download CSV, or a Cost &amp; Usage Report (CUR). &nbsp;
+              <strong style={{ color: '#e0e0e0' }}>Azure</strong>: Cost Management → Exports. &nbsp;
+              <strong style={{ color: '#e0e0e0' }}>GCP</strong>: Billing → Cost table → Download CSV. &nbsp;
+              <strong style={{ color: '#e0e0e0' }}>DigitalOcean</strong>: Billing → CSV. &nbsp;
+              <strong style={{ color: '#e0e0e0' }}>Oracle</strong>: Cost &amp; Usage Report.
               <br />
-              Also works with <strong style={{ color: '#e0e0e0' }}>Cost &amp; Usage Reports</strong> (CUR) from S3, and Azure/GCP billing exports.
+              <span style={{ color: '#777' }}>
+                {NO_CSV_PROVIDERS.join(', ')} don&apos;t offer a granular CSV export — for those, use the{' '}
+                <strong style={{ color: '#a0a0b0' }}>Paste Bill Text</strong> tab.
+              </span>
             </p>
           </div>
         </div>
@@ -255,15 +164,44 @@ export default function BillUploadPage() {
                   {parsed ? '✅' : parseError ? '❌' : '📂'}
                 </div>
                 <p style={{ color: parsed ? '#22c55e' : parseError ? '#f87171' : '#a0a0b0', fontSize: 15, marginBottom: 4, fontWeight: parsed ? 600 : 400 }}>
-                  {parsed ? fileName : parseError ? parseError : 'Click to upload AWS Cost & Usage Report CSV'}
+                  {parsed ? fileName : parseError ? parseError : 'Click to upload your cloud billing CSV'}
                 </p>
                 <p style={{ color: '#555', fontSize: 12 }}>
                   {parsed
                     ? `${parsed.rows.length.toLocaleString()} line items · ${parsed.byService.length} services · ${parsed.dateRange}`
-                    : 'CSV from Cost Explorer, CUR S3 export, or Azure/GCP billing'}
+                    : 'AWS · Azure · GCP · DigitalOcean · Oracle — auto-detected'}
                 </p>
                 <input ref={fileRef} type="file" accept=".csv,.txt" onChange={handleCsvUpload} style={{ display: 'none' }} />
               </div>
+
+              {/* Detection banner + transparent parse summary */}
+              {parsed && (
+                <div style={{ marginTop: 16, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '14px 18px' }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: '#22c55e', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span>✅ Detected {parsed.summary.provider} bill — {loading ? 'analyzing…' : 'ready to analyze'}</span>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6,
+                      color: parsed.summary.confidence === 'high' ? '#22c55e' : parsed.summary.confidence === 'medium' ? '#f59e0b' : '#f87171',
+                      background: parsed.summary.confidence === 'high' ? 'rgba(34,197,94,0.12)' : parsed.summary.confidence === 'medium' ? 'rgba(245,158,11,0.12)' : 'rgba(248,113,113,0.12)',
+                    }}>
+                      {parsed.summary.confidence.toUpperCase()} CONFIDENCE
+                    </span>
+                  </p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px 20px', fontSize: 12, color: '#a0a0b0' }}>
+                    <span>📊 <strong style={{ color: '#e0e0e0' }}>{parsed.summary.rowsParsed.toLocaleString()}</strong> rows parsed</span>
+                    <span>⏭️ <strong style={{ color: '#e0e0e0' }}>{parsed.summary.rowsSkipped.toLocaleString()}</strong> rows skipped (zero/empty)</span>
+                    <span>🧩 <strong style={{ color: '#e0e0e0' }}>{parsed.summary.servicesFound}</strong> services found</span>
+                    <span>📅 <strong style={{ color: '#e0e0e0' }}>{parsed.dateRange}</strong></span>
+                    <span>💵 cost column: <strong style={{ color: '#e0e0e0' }}>{parsed.summary.costColumn}</strong></span>
+                    <span>💱 currency: <strong style={{ color: '#e0e0e0' }}>{parsed.summary.currency}</strong></span>
+                  </div>
+                  {parsed.summary.confidence === 'low' && (
+                    <p style={{ fontSize: 11, color: '#f59e0b', marginTop: 10, marginBottom: 0 }}>
+                      ⚠️ Low confidence — we couldn&apos;t match a known provider signature, so we used a generic cost/service mapping. Double-check the totals below.
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Parsed breakdown table */}
               {parsed && (

@@ -2,48 +2,31 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
-import LiveTicker from '@/components/LiveTicker'
 import { JourneyProvider } from '@/lib/journeyContext'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 import PostHogProvider from '@/components/PostHogProvider'
 import PageTracker from '@/components/PageTracker'
-import PersonalHeader from '@/components/PersonalHeader'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import BackToDashboard from '@/components/BackToDashboard'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: {
-    default: 'Cloud Intelligence Platform — AWS vs Azure vs GCP Comparison',
-    template: '%s | Cloud Intelligence Platform',
-  },
+  title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
   description:
-    'The definitive cloud computing resource. Compare AWS, Azure, and Google Cloud with real financial data, AI-powered recommendations, cost projections, and migration planning tools.',
-  keywords: [
-    'cloud computing',
-    'AWS vs Azure',
-    'Google Cloud comparison',
-    'cloud cost calculator',
-    'cloud migration',
-    'cloud advisor',
-    'AWS pricing',
-    'Azure pricing',
-    'GCP pricing',
-  ],
-  authors: [{ name: 'Yasaswi Dutta' }],
+    'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud — with an explicit crossover projection, sensitivity, and a stated uncertainty band for the analyst-estimated Azure figure.',
   openGraph: {
-    title: 'Cloud Intelligence Platform',
+    title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
     description:
-      'Compare AWS, Azure, and GCP with real data. Get personalized recommendations, cost projections, and migration plans.',
+      'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud.',
     type: 'website',
-    siteName: 'Cloud Intelligence Platform',
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Cloud Intelligence Platform',
-    description: 'The definitive AWS vs Azure vs GCP comparison tool.',
+    card: 'summary',
+    title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
+    description:
+      'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud.',
   },
 }
 
@@ -67,105 +50,26 @@ export default function RootLayout({
           opacity: 0.4,
         }} />
         <Navbar />
-        <LiveTicker />
         <JourneyProvider>
           <TooltipProvider>
           <PostHogProvider>
           <PageTracker />
-          <PersonalHeader />
           <main id="main-content">
             <Breadcrumbs />
             <BackToDashboard />
             <div className="page-enter">{children}</div>
           </main>
-          <footer style={{
-            borderTop: '1px solid rgba(255,255,255,0.06)',
-            padding: '60px 24px 0',
-            background: '#050508',
-          }}>
-            <div style={{ maxWidth: 900, margin: '0 auto' }}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '2fr 1fr 1fr 1fr',
-                gap: 48,
-                marginBottom: 48,
-              }}>
-                {/* Brand */}
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 10, color: 'white' }}>
-                    ☁️ Cloud Intelligence
-                  </div>
-                  <p style={{ color: '#555', fontSize: 13, lineHeight: 1.7 }}>
-                    The cloud advisor for teams that need cloud expertise on demand.
-                  </p>
-                </div>
-
-                {/* Tools */}
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>TOOLS</div>
-                  {[
-                    { label: 'AI Analyze', href: '/analyze' },
-                    { label: 'Instant Audit', href: '/instant-audit' },
-                    { label: 'Cloud Advisor', href: '/advisor' },
-                    { label: 'Bill Upload', href: '/bill-upload' },
-                    { label: 'Report Card', href: '/report-card' },
-                    { label: 'Sanity Check', href: '/sanity-check' },
-                    { label: 'What We Replace', href: '/for-consultants?tab=roles' },
-                    { label: 'Glossary', href: '/learn?tab=glossary' },
-                  ].map(l => (
-                    <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
-                      {l.label}
-                    </a>
-                  ))}
-                </div>
-
-                {/* Company */}
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>COMPANY</div>
-                  {[
-                    { label: 'Pricing', href: '/pricing' },
-                    { label: 'Case Studies', href: '/case-studies' },
-                    { label: 'Live Stats', href: '/stats' },
-                    { label: 'What We Replace', href: '/for-consultants?tab=roles' },
-                    { label: 'Experts', href: '/for-consultants?tab=experts' },
-                    { label: 'Dashboard', href: '/dashboard' },
-                    { label: 'Weekly Digest', href: '/intelligence?tab=digest' },
-                    { label: 'Changelog', href: '/changelog' },
-                    { label: 'White Label', href: '/for-consultants?tab=white-label' },
-                    { label: 'Sign In', href: '/auth' },
-                    { label: 'Terms of Service', href: '/terms' },
-                    { label: 'Privacy Policy', href: '/privacy' },
-                  ].map(l => (
-                    <a key={l.href} href={l.href} style={{ display: 'block', color: '#555', fontSize: 13, marginBottom: 8, textDecoration: 'none' }}>
-                      {l.label}
-                    </a>
-                  ))}
-                </div>
-
-                {/* Data */}
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 11, letterSpacing: 2, color: '#444', marginBottom: 14 }}>DATA</div>
-                  {[
-                    'Powered by Llama 3.3 70B',
-                    'Data from SEC filings & earnings reports',
-                    'Vendor neutral — no sponsorships',
-                  ].map(line => (
-                    <p key={line} style={{ color: '#555', fontSize: 13, marginBottom: 8 }}>{line}</p>
-                  ))}
-                </div>
-              </div>
-
-              {/* Bottom bar */}
-              <div style={{
-                borderTop: '1px solid rgba(255,255,255,0.06)',
-                padding: '20px 0',
-                textAlign: 'center',
-                color: '#333',
-                fontSize: 12,
-              }}>
-                © 2026 Cloud Intelligence. Built for founders, not enterprises.
-              </div>
-            </div>
+          <footer
+            style={{
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              padding: '24px',
+              background: '#050508',
+              textAlign: 'center',
+              color: '#444',
+              fontSize: 12,
+            }}
+          >
+            © 2026 Cloud Intelligence.
           </footer>
           </PostHogProvider>
           </TooltipProvider>
