@@ -1,1 +1,3 @@
 react-frontend/tsconfig.tsbuildinfo
+.vercel
+.env*

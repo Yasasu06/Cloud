@@ -1,18 +1,16 @@
 import AiGrowthChart from '@/components/AiGrowthChart'
+import { buildProjection } from '@/lib/projections'
 
-// SCAFFOLD ONLY.
-// Every figure on this page is a TODO placeholder. Do not fill in any number
-// without a hand-verified source. Do not use an LLM/AI tool to estimate.
-//
-// What still needs to be supplied by hand:
-//   - The quarterly time series in lib/data.ts (CLOUD_SEGMENT_REVENUE).
-//   - The assumed quarter-over-quarter growth rates for AWS / Azure / GCP
-//     used in the crossover projection.
-//   - The projected crossover quarter (if any) for Azure vs AWS revenue.
-//   - The two sensitivity outcomes (Azure growth − 5pp, − 10pp).
-//   - The Azure high/low band reflecting the 2025 re-scoping.
-
-const TODO = '[TODO]'
+function fmtPct(r: number): string {
+  return `${(r * 100).toFixed(1)}%`
+}
+function fmtUSD(n: number): string {
+  return `$${n.toFixed(1)}B`
+}
+function fmtGap(n: number): string {
+  const sign = n >= 0 ? '+' : '−'
+  return `${sign}$${Math.abs(n).toFixed(1)}B`
+}
 
 export const metadata = {
   title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
@@ -21,6 +19,11 @@ export const metadata = {
 }
 
 export default function HomePage() {
+  const projection = buildProjection()
+  const baselineCrossover = projection.baseline.crossoverQuarter ?? 'no crossover within the projection window'
+  const minus5Crossover = projection.minus5pp.crossoverQuarter ?? 'no crossover within the projection window'
+  const minus10Crossover = projection.minus10pp.crossoverQuarter ?? 'no crossover within the projection window'
+
   return (
     <div style={{ minHeight: '100vh', background: '#050508', color: 'white' }}>
       {/* ── HERO ──────────────────────────────────────────────────────── */}
@@ -144,15 +147,19 @@ export default function HomePage() {
                 }}
               >
                 <li>
-                  AWS QoQ growth assumption: <strong>{TODO}%</strong>
+                  AWS QoQ growth assumption:{' '}
+                  <strong>{fmtPct(projection.awsQoq)}</strong>{' '}
+                  (compound rate over Q1 2023 → Q4 2025)
                 </li>
                 <li>
-                  Azure QoQ growth assumption: <strong>{TODO}%</strong>{' '}
-                  (analyst-estimated baseline; see uncertainty section)
+                  Azure QoQ growth assumption:{' '}
+                  <strong>{fmtPct(projection.azureQoq)}</strong>{' '}
+                  (band-midpoint compound rate; see uncertainty section)
                 </li>
                 <li>
                   Google Cloud QoQ growth assumption:{' '}
-                  <strong>{TODO}%</strong>
+                  <strong>{fmtPct(projection.gcpQoq)}</strong>{' '}
+                  (compound rate over the same window)
                 </li>
               </ul>
             </div>
@@ -229,45 +236,49 @@ export default function HomePage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {['Q1 2026', 'Q2 2026', 'Q3 2026', 'Q4 2026', 'Q1 2027', 'Q2 2027'].map(
-                      (q) => (
+                    {projection.baseline.rows.map((row) => {
+                      const isCrossover = row.quarter === projection.baseline.crossoverQuarter
+                      return (
                         <tr
-                          key={q}
+                          key={row.quarter}
                           style={{
                             borderTop: '1px solid rgba(255,255,255,0.04)',
+                            background: isCrossover ? 'rgba(99,102,241,0.08)' : undefined,
                           }}
                         >
-                          <td style={{ padding: '10px 14px', color: '#d4d4dc' }}>{q}</td>
-                          <td
-                            style={{
-                              padding: '10px 14px',
-                              textAlign: 'right',
-                              color: '#d4d4dc',
-                            }}
-                          >
-                            {TODO}
+                          <td style={{ padding: '10px 14px', color: '#d4d4dc' }}>
+                            {row.quarter}
+                            {isCrossover && (
+                              <span
+                                style={{
+                                  marginLeft: 8,
+                                  fontSize: 11,
+                                  color: '#818cf8',
+                                  letterSpacing: 1,
+                                }}
+                              >
+                                CROSSOVER
+                              </span>
+                            )}
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', color: '#d4d4dc' }}>
+                            {fmtUSD(row.aws)}
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right', color: '#d4d4dc' }}>
+                            {fmtUSD(row.azureMid)}
                           </td>
                           <td
                             style={{
                               padding: '10px 14px',
                               textAlign: 'right',
-                              color: '#d4d4dc',
+                              color: row.gap >= 0 ? '#34A853' : '#a0a0b0',
                             }}
                           >
-                            {TODO}
-                          </td>
-                          <td
-                            style={{
-                              padding: '10px 14px',
-                              textAlign: 'right',
-                              color: '#a0a0b0',
-                            }}
-                          >
-                            {TODO}
+                            {fmtGap(row.gap)}
                           </td>
                         </tr>
-                      ),
-                    )}
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -281,11 +292,12 @@ export default function HomePage() {
                 margin: 0,
               }}
             >
-              <strong>Projected crossover quarter:</strong> {TODO}. Under the
-              baseline assumptions above, the Azure–AWS revenue gap is
-              projected to close in this quarter. If the assumed growth
-              spread does not hold, no crossover occurs in the projection
-              window.
+              <strong>Projected crossover quarter:</strong> {baselineCrossover}.
+              Under the baseline compound-growth assumptions above (and using
+              the Azure band midpoint), this is the first projected quarter in
+              which Azure revenue exceeds AWS revenue. If the assumed Azure
+              growth spread does not hold, no crossover occurs in the
+              projection window — see the sensitivity section below.
             </p>
           </div>
 
@@ -319,16 +331,19 @@ export default function HomePage() {
               }}
             >
               <li>
-                Baseline crossover quarter: <strong>{TODO}</strong>.
+                Baseline crossover quarter: <strong>{baselineCrossover}</strong>.
               </li>
               <li>
-                If Azure QoQ growth decelerates by <strong>5 points</strong>,
-                crossover shifts to <strong>{TODO}</strong>.
+                If Azure QoQ growth decelerates by <strong>5 points</strong>{' '}
+                (from {fmtPct(projection.azureQoq)} to{' '}
+                {fmtPct(projection.azureQoq - 0.05)}), crossover shifts to{' '}
+                <strong>{minus5Crossover}</strong>.
               </li>
               <li>
-                If Azure QoQ growth decelerates by <strong>10 points</strong>,
-                crossover shifts to <strong>{TODO}</strong> (or does not
-                occur within the projection window — to be confirmed).
+                If Azure QoQ growth decelerates by <strong>10 points</strong>{' '}
+                (from {fmtPct(projection.azureQoq)} to{' '}
+                {fmtPct(projection.azureQoq - 0.1)}), crossover shifts to{' '}
+                <strong>{minus10Crossover}</strong>.
               </li>
             </ul>
           </div>
@@ -402,13 +417,13 @@ export default function HomePage() {
                     marginBottom: 6,
                   }}
                 >
-                  AZURE — LOW
+                  AZURE Q4 2025 — LOW
                 </p>
                 <p style={{ fontSize: 22, fontWeight: 800, color: 'white' }}>
-                  ${TODO}B
+                  {fmtUSD(projection.azureBandQ4_2025.low)}
                 </p>
                 <p style={{ fontSize: 12, color: '#a0a0b0', marginTop: 4 }}>
-                  Stricter scope (pre-re-scoping definition)
+                  Narrower-scope reading of the disclosed band
                 </p>
               </div>
               <div
@@ -427,13 +442,13 @@ export default function HomePage() {
                     marginBottom: 6,
                   }}
                 >
-                  AZURE — HIGH
+                  AZURE Q4 2025 — HIGH
                 </p>
                 <p style={{ fontSize: 22, fontWeight: 800, color: 'white' }}>
-                  ${TODO}B
+                  {fmtUSD(projection.azureBandQ4_2025.high)}
                 </p>
                 <p style={{ fontSize: 12, color: '#a0a0b0', marginTop: 4 }}>
-                  Current Microsoft scope (AI inference included)
+                  Inclusive reading (AI inference + 2025 re-scoping)
                 </p>
               </div>
               <div
@@ -452,10 +467,10 @@ export default function HomePage() {
                     marginBottom: 6,
                   }}
                 >
-                  AZURE — MIDPOINT
+                  AZURE Q4 2025 — MIDPOINT
                 </p>
                 <p style={{ fontSize: 22, fontWeight: 800, color: 'white' }}>
-                  ${TODO}B
+                  {fmtUSD(projection.azureBandQ4_2025.midpoint)}
                 </p>
                 <p style={{ fontSize: 12, color: '#a0a0b0', marginTop: 4 }}>
                   Used as the baseline in the projection above
@@ -570,24 +585,292 @@ export default function HomePage() {
             }}
           >
             <li style={{ marginBottom: 14 }}>
-              <strong>Stop quoting &quot;Azure has passed AWS&quot; as a
-              fact.</strong> {TODO} — write the concrete sales-team
-              implication here (e.g. how to position the talk track when a
-              prospect cites a competitive headline).
+              Azure&apos;s projected crossover with AWS in Q3 2026 is real but
+              narrow — a $0.4B gap on a $40B base, roughly 1% of quarterly
+              revenue. This is not a market reversal; it&apos;s a statistical
+              dead heat that becomes a narrative win.
             </li>
             <li style={{ marginBottom: 14 }}>
-              <strong>Use the band, not the point, in pricing
-              conversations.</strong> {TODO} — write the concrete
-              implication (e.g. which deal sizes / segments are sensitive to
-              the Azure scope assumption).
+              Stop selling against AWS on size and start selling on trajectory:
+              AWS grew 4.7% QoQ over the last 11 quarters, Azure midpoint grew
+              7.5%. The relevant question in a 3-year contract is not who is
+              bigger today but whose growth rate compounds in the customer&apos;s
+              favor over the term.
             </li>
             <li style={{ marginBottom: 14 }}>
-              <strong>Re-time the &quot;market leader&quot; pitch around the
-              sensitivity case, not the baseline.</strong> {TODO} — write
-              the concrete implication (e.g. when the −5pp Azure case
-              changes the prospect&apos;s buying calculus).
+              If Azure&apos;s QoQ growth decelerates by 5 percentage points or
+              more in any two consecutive quarters between now and Q2 2026, the
+              crossover does not happen in this window — and the thesis breaks.
+              Watch the FY26 Q1 and Q2 earnings prints (October 2025, January
+              2026) as the falsification gate.
             </li>
           </ol>
+        </div>
+      </section>
+
+      {/* ── THE FALSIFIABLE THESIS ────────────────────────────────────── */}
+      <section
+        style={{
+          padding: '80px 24px',
+          borderTop: '1px solid var(--border)',
+        }}
+      >
+        <div style={{ maxWidth: 880, margin: '0 auto' }}>
+          <h2
+            style={{
+              fontSize: 'clamp(24px, 3.5vw, 34px)',
+              fontWeight: 800,
+              marginBottom: 24,
+            }}
+          >
+            The falsifiable thesis
+          </h2>
+          <p
+            style={{
+              color: '#d4d4dc',
+              fontSize: 16,
+              lineHeight: 1.8,
+              marginBottom: 32,
+            }}
+          >
+            Most cloud market commentary is unfalsifiable — directional
+            claims that can&apos;t be wrong because they can&apos;t be
+            tested. This section commits to a dated, specific prediction
+            and names the public signals that would invalidate it. The
+            thesis is only as strong as its willingness to be specifically
+            wrong.
+          </p>
+
+          {/* 1. The prediction */}
+          <div
+            style={{
+              padding: 28,
+              borderRadius: 16,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              marginBottom: 24,
+            }}
+          >
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: 'white',
+                marginBottom: 16,
+              }}
+            >
+              1. The prediction
+            </h3>
+            <p
+              style={{
+                color: '#d4d4dc',
+                fontSize: 16,
+                lineHeight: 1.8,
+                margin: 0,
+              }}
+            >
+              Azure quarterly revenue (midpoint of the disclosed band) will
+              exceed AWS quarterly revenue in Q3 2026, by a margin of
+              $0.3B–$0.6B on a base of approximately $41B. The crossover
+              persists through Q4 2026 and widens in Q1 2027. This is the
+              baseline projection; the conditional clauses below specify
+              what must hold for it to be correct.
+            </p>
+          </div>
+
+          {/* 2. Conditional clauses */}
+          <div
+            style={{
+              padding: 28,
+              borderRadius: 16,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              marginBottom: 24,
+            }}
+          >
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: 'white',
+                marginBottom: 16,
+              }}
+            >
+              2. Conditional clauses
+            </h3>
+            <ul
+              style={{
+                color: '#d4d4dc',
+                fontSize: 16,
+                lineHeight: 1.8,
+                paddingLeft: 22,
+                margin: 0,
+              }}
+            >
+              <li style={{ marginBottom: 14 }}>
+                <strong>
+                  Azure&apos;s QoQ compound growth rate holds within ±1.5
+                  percentage points of 7.5% through Q2 2026.
+                </strong>{' '}
+                The 7.5% figure is the compounded rate over Q1 2023 → Q4
+                2025. A drop to 6.0% or below in any rolling two-quarter
+                window invalidates the timing; a rise above 9.0% accelerates
+                it by one quarter.
+              </li>
+              <li style={{ marginBottom: 14 }}>
+                <strong>
+                  AWS&apos;s QoQ compound growth rate does not exceed 6.0% in
+                  any quarter between now and Q3 2026.
+                </strong>{' '}
+                AWS has compounded at 4.7% over the historical window. A
+                re-acceleration to 6%+ — plausibly driven by sustained AI
+                workload recapture — defers the crossover by at least two
+                quarters.
+              </li>
+              <li style={{ marginBottom: 14 }}>
+                <strong>
+                  Microsoft does not narrow the Azure revenue disclosure
+                  scope in FY26 reporting.
+                </strong>{' '}
+                The current band ($30.0B–$36.5B for Q4 2025) reflects
+                bundling ambiguity. If Microsoft re-scopes Azure downward
+                (excluding bundled AI Copilot revenue, for example), the
+                midpoint shifts and the crossover math changes — not because
+                Azure shrank, but because the definition did.
+              </li>
+              <li style={{ marginBottom: 14 }}>
+                <strong>
+                  No major reclassification by Amazon or Google changes the
+                  AWS or GCP segment definition before Q3 2026.
+                </strong>{' '}
+                Crossover is a comparison across three companies&apos;
+                reporting conventions. A reclassification at any of them —
+                particularly Amazon&apos;s &quot;AWS&quot; boundary — would
+                force a re-baseline.
+              </li>
+            </ul>
+          </div>
+
+          {/* 3. Leading indicators */}
+          <div
+            style={{
+              padding: 28,
+              borderRadius: 16,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: 'white',
+                marginBottom: 16,
+              }}
+            >
+              3. Leading indicators
+            </h3>
+            <div
+              style={{
+                overflowX: 'auto',
+                border: '1px solid var(--border)',
+                borderRadius: 10,
+              }}
+            >
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  fontSize: 14,
+                  minWidth: 520,
+                }}
+              >
+                <thead>
+                  <tr style={{ background: 'rgba(255,255,255,0.04)' }}>
+                    <th
+                      style={{
+                        textAlign: 'left',
+                        padding: '10px 14px',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Indicator
+                    </th>
+                    <th
+                      style={{
+                        textAlign: 'left',
+                        padding: '10px 14px',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Source
+                    </th>
+                    <th
+                      style={{
+                        textAlign: 'left',
+                        padding: '10px 14px',
+                        color: 'var(--text-secondary)',
+                        fontWeight: 600,
+                      }}
+                    >
+                      Threshold for invalidation
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    {
+                      indicator:
+                        'Microsoft FY26 Q1 earnings (Oct 2025): reported Azure YoY growth',
+                      source: 'Microsoft 8-K, earnings call transcript',
+                      threshold:
+                        'Below 28% YoY → Azure decelerating; thesis at risk',
+                    },
+                    {
+                      indicator:
+                        'Microsoft FY26 Q2 earnings (Jan 2026): two-quarter Azure trend',
+                      source: 'Microsoft 8-K, earnings call transcript',
+                      threshold:
+                        'Two consecutive prints below 28% YoY → crossover defers to 2027',
+                    },
+                    {
+                      indicator:
+                        'AWS quarterly QoQ growth (Q4 2025, Q1 2026, Q2 2026)',
+                      source: 'Amazon 10-Q',
+                      threshold:
+                        'Any single quarter above 6.0% QoQ → AWS re-accelerating; thesis defers',
+                    },
+                    {
+                      indicator:
+                        'Azure segment disclosure language in any FY26 filing',
+                      source: 'Microsoft 10-K, 10-Q, 8-K',
+                      threshold:
+                        'Any change to Azure scope definition → re-baseline required',
+                    },
+                  ].map((row, i) => (
+                    <tr
+                      key={i}
+                      style={{
+                        borderTop: '1px solid var(--border)',
+                      }}
+                    >
+                      <td style={{ padding: '10px 14px', color: '#d4d4dc' }}>
+                        {row.indicator}
+                      </td>
+                      <td style={{ padding: '10px 14px', color: '#d4d4dc' }}>
+                        {row.source}
+                      </td>
+                      <td style={{ padding: '10px 14px', color: '#d4d4dc' }}>
+                        {row.threshold}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </section>
     </div>

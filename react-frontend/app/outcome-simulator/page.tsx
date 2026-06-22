@@ -56,9 +56,9 @@ export default function OutcomeSimulatorPage() {
   async function generate() {
     setLoading(true); setPlan(null); setDone({})
     try {
-      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.NEXT_PUBLIC_GROQ_API_KEY}` },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'llama-3.3-70b-versatile',
           max_tokens: 1800,
