@@ -274,16 +274,6 @@ export default function DemoPage() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             style={{ maxWidth: 820, margin: '0 auto' }}
           >
-            {/* Specific credibility pill (replaces the generic AI badge) */}
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 30, padding: '6px 16px', fontSize: 12.5, color: '#b4b4c4', fontWeight: 500, marginBottom: 30,
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
-              Used by founders managing <strong style={{ color: 'white', fontWeight: 700 }}>$2.4M</strong> in cloud spend
-            </div>
-
             {/* Headline — large, tight, gradient on key words only */}
             <h1 style={{ fontSize: 'clamp(44px, 8.5vw, 92px)', fontWeight: 900, lineHeight: 0.98, letterSpacing: '-0.045em', marginBottom: 24 }}>
               Three tools.<br />

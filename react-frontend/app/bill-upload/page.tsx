@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { parseBill, buildAnalysisPrompt, NO_CSV_PROVIDERS, type ParsedBill } from '@/lib/billParsers'
 import ToolShell from '@/components/ToolShell'
+import { saveAnalysis, loadHistory, migrateAnonToUser, type AnalysisRecord } from '@/lib/billHistory'
+import BillHistoryPanel from '@/components/BillHistoryPanel'
 
 // CSV parsing + multi-provider detection lives in lib/billParsers.ts.
 
@@ -21,7 +23,22 @@ export default function BillUploadPage() {
   const [parseError, setParseError] = useState('')
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState<AnalysisRecord[]>([])
+  const [saved, setSaved] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  // Bill analyzer memory: on mount, migrate any anonymous analyses if the
+  // visitor is now logged in, then load history (Supabase if logged in, else
+  // localStorage).
+  useEffect(() => {
+    let active = true
+    ;(async () => {
+      await migrateAnonToUser()
+      const h = await loadHistory()
+      if (active) setHistory(h)
+    })()
+    return () => { active = false }
+  }, [])
 
   function handleCsvUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -54,6 +71,7 @@ export default function BillUploadPage() {
     if (!content.trim() || loading) return
     setLoading(true)
     setResponse('')
+    setSaved(false)
 
     try {
       // Calls the server route — the Groq API key never touches the browser.
@@ -88,7 +106,16 @@ export default function BillUploadPage() {
           } catch { /* partial chunk */ }
         }
       }
-      if (!full) setResponse('⚠️ The analyzer returned no content. Please try again.')
+      if (!full) {
+        setResponse('⚠️ The analyzer returned no content. Please try again.')
+      } else if (tab === 'csv' && parsed) {
+        // Agent memory: persist this analysis, then refresh history + trend.
+        try {
+          await saveAnalysis(parsed)
+          setSaved(true)
+          setHistory(await loadHistory())
+        } catch { /* non-fatal — the analysis is still shown */ }
+      }
     } catch {
       setResponse('⚠️ Analysis failed — could not reach the server. Please try again.')
     } finally {
@@ -114,6 +141,15 @@ export default function BillUploadPage() {
             Upload any AWS, Azure, GCP, DigitalOcean or Oracle billing CSV for a detailed breakdown and a plain-English action plan.
           </p>
         </div>
+
+        {/* Feature 4 — returning-visitor welcome with last-bill recall */}
+        {history.length > 0 && !response && (
+          <div style={{ marginBottom: 16, padding: '14px 18px', borderRadius: 12, background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(124,58,237,0.06))', border: '1px solid rgba(99,102,241,0.3)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
+            <p style={{ fontSize: 14, color: 'white', fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
+              👋 Welcome back! Your last bill was <strong style={{ color: '#a5b4fc' }}>${history[0].total_amount.toLocaleString()}</strong> on {new Date(history[0].analyzed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. Let&apos;s see how this month compares.
+            </p>
+          </div>
+        )}
 
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
           💡 <strong style={{ color: 'white', fontWeight: 600 }}>No CSV file?</strong> Switch to the{' '}
@@ -318,12 +354,21 @@ export default function BillUploadPage() {
           </div>
         )}
 
+        {saved && (
+          <div style={{ marginTop: 14, fontSize: 13, color: '#22c55e', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontWeight: 800 }}>✓</span> Analysis saved to your history
+          </div>
+        )}
+
         {response && !loading && (
           <div style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', fontSize: 13, color: '#a0a0b0', display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 16 }}>✅</span>
             <span>Analysis complete. Upload another bill above to compare months — or use <strong style={{ color: '#a5b4fc' }}>← Back to Tools</strong> for the compliance and pricing tools.</span>
           </div>
         )}
+
+        {/* Features 2 & 3 — month-over-month comparison, trend chart, history cards */}
+        <BillHistoryPanel history={history} />
       </div>
     </ToolShell>
   )

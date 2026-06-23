@@ -146,6 +146,37 @@ create table if not exists public.search_queries (
 );
 
 -- ============================================================================
+-- 7b. bill_analyses  (bill analyzer "memory" — history + trends)
+-- ----------------------------------------------------------------------------
+-- One row per analyzed bill. Anonymous visitors keep their history in the
+-- browser (localStorage) and never write here; logged-in users persist to this
+-- table (RLS: own rows only). On login, anonymous local analyses are upserted
+-- up to the user's id. Self-contained: table + index + RLS live together.
+-- ============================================================================
+create table if not exists public.bill_analyses (
+  id                uuid primary key default gen_random_uuid(),
+  session_id        text,                                             -- anon browser session (localStorage cip_session_id)
+  user_id           uuid references auth.users(id) on delete cascade, -- nullable (set on login/migration)
+  provider          text,
+  total_amount      numeric,
+  top_service       text,
+  waste_pct         numeric,        -- estimated % of spend that is waste
+  savings_estimate  numeric,        -- estimated $/month recoverable
+  service_breakdown jsonb,          -- [{ service, total, pct }, …]
+  analyzed_at       timestamptz not null default now()
+);
+create index if not exists bill_analyses_user_id_idx    on public.bill_analyses(user_id);
+create index if not exists bill_analyses_session_id_idx on public.bill_analyses(session_id);
+
+alter table public.bill_analyses enable row level security;
+
+-- Authenticated users manage only their own analyses. No anonymous policy —
+-- anon history is localStorage-only, so anon rows are never exposed via the API.
+drop policy if exists "bill_analyses_own" on public.bill_analyses;
+create policy "bill_analyses_own" on public.bill_analyses
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ============================================================================
 -- 8. handle_new_user trigger  (CRITICAL)
 -- ----------------------------------------------------------------------------
 -- The app never inserts into profiles, so without this trigger every profile
