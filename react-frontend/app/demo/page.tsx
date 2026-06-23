@@ -289,6 +289,30 @@ export default function DemoPage() {
           </motion.div>
         </section>
 
+        {/* ── Case study ─────────────────────────────────────────────────── */}
+        <section style={{ padding: '0 24px clamp(40px, 6vw, 56px)' }}>
+          <motion.div
+            className="gradient-card"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            style={{ maxWidth: 760, margin: '0 auto', padding: 'clamp(26px, 4vw, 36px) clamp(24px, 4vw, 38px)' }}
+          >
+            <h2 style={{ fontSize: 'clamp(19px, 2.6vw, 23px)', fontWeight: 800, color: 'white', letterSpacing: '-0.02em', marginBottom: 14 }}>
+              How this was built
+            </h2>
+            <p style={{ fontSize: 'clamp(14px, 1.9vw, 15.5px)', color: '#b4b4c4', lineHeight: 1.75, margin: 0 }}>
+              A startup was spending $31K/month on AWS with no visibility into where it was going.
+              I approached it like a Forward Deployed Engineer — took their actual billing data,
+              identified specific waste patterns, and built a system that does the diagnosis
+              automatically. What I found: EC2 overprovisioned by 40%, staging servers running
+              24/7 adding $1,800/month, S3 logs with no lifecycle policy accumulating $2,100/month.
+              Total identified savings: $12,300/month. This tool is what I left them with.
+            </p>
+          </motion.div>
+        </section>
+
         {/* ── Bento card grid ────────────────────────────────────────────── */}
         <section style={{ padding: '0 24px clamp(52px, 7vw, 76px)' }}>
           <div className="bento" style={{ maxWidth: 1080, margin: '0 auto' }}>
