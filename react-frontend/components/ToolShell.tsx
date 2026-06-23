@@ -32,27 +32,23 @@ export default function ToolShell({
   children: React.ReactNode
 }) {
   return (
-    <div style={{ minHeight: '100vh', position: 'relative', color: 'white', overflow: 'hidden' }}>
+    <div style={{ minHeight: '100vh', position: 'relative', color: 'var(--text)', background: 'var(--bg)' }}>
       <style dangerouslySetInnerHTML={{ __html: HIDE_GLOBAL_CHROME }} />
-
-      {/* Flowing mesh-gradient background (fixed, behind everything) */}
-      <div className="mesh-bg" />
-      <div className="mesh-veil" />
 
       {/* Sticky top bar — Back to Tools + branding */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 30,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         gap: 12, flexWrap: 'wrap',
-        padding: '12px clamp(16px, 4vw, 32px)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        background: 'rgba(5,6,15,0.55)',
-        backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
+        padding: '14px clamp(16px, 4vw, 32px)',
+        borderBottom: '1px solid var(--border)',
+        background: 'rgba(250,250,248,0.85)',
+        backdropFilter: 'saturate(180%) blur(8px)', WebkitBackdropFilter: 'saturate(180%) blur(8px)',
       }}>
         <Link href="/demo" className="back-to-tools">← Back to Tools</Link>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#8a8a9c', fontWeight: 500 }}>
-          <span style={{ color: '#a0a0b0', fontWeight: 700 }}>☁️ Cloud Intelligence</span>
-          <span style={{ color: '#44465a' }}>·</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'var(--text-muted)', fontWeight: 500 }}>
+          <span style={{ color: 'var(--text)', fontWeight: 700 }}>☁️ Cloud Intelligence</span>
+          <span style={{ color: '#C9C9C2' }}>·</span>
           <span>{label}</span>
         </span>
       </header>

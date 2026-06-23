@@ -131,57 +131,57 @@ export default function BillUploadPage() {
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div style={{ display: 'inline-block', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '6px 16px', fontSize: 12, color: '#f59e0b', fontWeight: 700, marginBottom: 18, letterSpacing: 1 }}>
+          <div style={{ display: 'inline-block', background: 'rgba(217,119,6,0.1)', border: '1px solid rgba(217,119,6,0.28)', borderRadius: 20, padding: '6px 16px', fontSize: 12, color: 'var(--amber)', fontWeight: 700, marginBottom: 18, letterSpacing: 1 }}>
             BILL ANALYZER
           </div>
-          <h1 style={{ fontSize: 'clamp(32px, 5.5vw, 52px)', fontWeight: 900, marginBottom: 14, lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+          <h1 className="serif" style={{ fontSize: 'clamp(34px, 5.5vw, 56px)', marginBottom: 14, lineHeight: 1.05, letterSpacing: '-0.02em', color: 'var(--text)' }}>
             Where is your cloud<br /><span className="shimmer-text">money actually going?</span>
           </h1>
-          <p style={{ color: '#b4b4c4', fontSize: 17, maxWidth: 600, margin: '0 auto' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 17, maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
             Upload any AWS, Azure, GCP, DigitalOcean or Oracle billing CSV for a detailed breakdown and a plain-English action plan.
           </p>
         </div>
 
         {/* Feature 4 — returning-visitor welcome with last-bill recall */}
         {history.length > 0 && !response && (
-          <div style={{ marginBottom: 16, padding: '14px 18px', borderRadius: 12, background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(124,58,237,0.06))', border: '1px solid rgba(99,102,241,0.3)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}>
-            <p style={{ fontSize: 14, color: 'white', fontWeight: 600, lineHeight: 1.5, margin: 0 }}>
-              👋 Welcome back! Your last bill was <strong style={{ color: '#a5b4fc' }}>${history[0].total_amount.toLocaleString()}</strong> on {new Date(history[0].analyzed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. Let&apos;s see how this month compares.
+          <div style={{ marginBottom: 16, padding: '14px 18px', borderRadius: 12, background: 'rgba(37,99,235,0.06)', border: '1px solid rgba(37,99,235,0.22)' }}>
+            <p style={{ fontSize: 14, color: 'var(--text)', fontWeight: 500, lineHeight: 1.5, margin: 0 }}>
+              👋 Welcome back! Your last bill was <strong style={{ color: 'var(--blue)', fontWeight: 700 }}>${history[0].total_amount.toLocaleString()}</strong> on {new Date(history[0].analyzed_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}. Let&apos;s see how this month compares.
             </p>
           </div>
         )}
 
-        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', fontSize: 12, color: '#a0a0b0' }}>
-          💡 <strong style={{ color: 'white', fontWeight: 600 }}>No CSV file?</strong> Switch to the{' '}
-          <strong style={{ color: '#818cf8' }}>Paste Bill Text</strong> tab below and paste your line items instead.
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
+          💡 <strong style={{ color: 'var(--text)', fontWeight: 600 }}>No CSV file?</strong> Switch to the{' '}
+          <strong style={{ color: 'var(--blue)' }}>Paste Bill Text</strong> tab below and paste your line items instead.
         </div>
 
         {/* Multi-provider instructions banner */}
-        <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+        <div style={{ background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', gap: 16, alignItems: 'flex-start' }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}>📋</span>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 700, color: '#f59e0b', marginBottom: 6 }}>
+            <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--amber)', marginBottom: 6 }}>
               We auto-detect AWS, Azure, GCP, DigitalOcean &amp; Oracle billing CSVs
             </p>
-            <p style={{ fontSize: 13, color: '#a0a0b0', lineHeight: 1.7, margin: 0 }}>
-              <strong style={{ color: '#e0e0e0' }}>AWS</strong>: Cost Explorer → Download CSV, or a Cost &amp; Usage Report (CUR). &nbsp;
-              <strong style={{ color: '#e0e0e0' }}>Azure</strong>: Cost Management → Exports. &nbsp;
-              <strong style={{ color: '#e0e0e0' }}>GCP</strong>: Billing → Cost table → Download CSV. &nbsp;
-              <strong style={{ color: '#e0e0e0' }}>DigitalOcean</strong>: Billing → CSV. &nbsp;
-              <strong style={{ color: '#e0e0e0' }}>Oracle</strong>: Cost &amp; Usage Report.
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.7, margin: 0 }}>
+              <strong style={{ color: 'var(--text)' }}>AWS</strong>: Cost Explorer → Download CSV, or a Cost &amp; Usage Report (CUR). &nbsp;
+              <strong style={{ color: 'var(--text)' }}>Azure</strong>: Cost Management → Exports. &nbsp;
+              <strong style={{ color: 'var(--text)' }}>GCP</strong>: Billing → Cost table → Download CSV. &nbsp;
+              <strong style={{ color: 'var(--text)' }}>DigitalOcean</strong>: Billing → CSV. &nbsp;
+              <strong style={{ color: 'var(--text)' }}>Oracle</strong>: Cost &amp; Usage Report.
               <br />
-              <span style={{ color: '#777' }}>
+              <span style={{ color: 'var(--text-faint)' }}>
                 {NO_CSV_PROVIDERS.join(', ')} don&apos;t offer a granular CSV export — for those, use the{' '}
-                <strong style={{ color: '#a0a0b0' }}>Paste Bill Text</strong> tab.
+                <strong style={{ color: 'var(--text-muted)' }}>Paste Bill Text</strong> tab.
               </span>
             </p>
           </div>
         </div>
 
         {/* Tab switcher */}
-        <div style={{ display: 'flex', background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: 4, marginBottom: 24, border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ display: 'flex', background: '#F4F4F0', borderRadius: 12, padding: 4, marginBottom: 24, border: '1px solid var(--border)' }}>
           {(['csv', 'paste'] as Tab[]).map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, transition: 'all 0.2s', background: tab === t ? '#6366f1' : 'transparent', color: tab === t ? 'white' : '#a0a0b0' }}>
+            <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '10px 0', borderRadius: 9, border: 'none', cursor: 'pointer', fontWeight: 600, fontSize: 14, transition: 'all 0.2s', background: tab === t ? 'var(--blue)' : 'transparent', color: tab === t ? 'white' : 'var(--text-muted)' }}>
               {t === 'csv' ? '📂  Upload CSV' : '📋  Paste Bill Text'}
             </button>
           ))}
@@ -193,15 +193,15 @@ export default function BillUploadPage() {
             <div>
               <div
                 onClick={() => fileRef.current?.click()}
-                style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: `2px dashed ${parsed ? '#22c55e' : parseError ? '#ef4444' : '#ffffff20'}`, borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}
+                style={{ background: 'var(--surface)', border: `2px dashed ${parsed ? 'var(--green)' : parseError ? 'var(--red)' : '#D5D5CE'}`, borderRadius: 12, padding: '40px 24px', textAlign: 'center', cursor: 'pointer', transition: 'border-color 0.2s' }}
               >
                 <div style={{ fontSize: 40, marginBottom: 12 }}>
                   {parsed ? '✅' : parseError ? '❌' : '📂'}
                 </div>
-                <p style={{ color: parsed ? '#22c55e' : parseError ? '#f87171' : '#a0a0b0', fontSize: 15, marginBottom: 4, fontWeight: parsed ? 600 : 400 }}>
+                <p style={{ color: parsed ? 'var(--green)' : parseError ? 'var(--red)' : 'var(--text-muted)', fontSize: 15, marginBottom: 4, fontWeight: parsed ? 600 : 400 }}>
                   {parsed ? fileName : parseError ? parseError : 'Click to upload your cloud billing CSV'}
                 </p>
-                <p style={{ color: '#555', fontSize: 12 }}>
+                <p style={{ color: 'var(--text-faint)', fontSize: 12 }}>
                   {parsed
                     ? `${parsed.rows.length.toLocaleString()} line items · ${parsed.byService.length} services · ${parsed.dateRange}`
                     : 'AWS · Azure · GCP · DigitalOcean · Oracle — auto-detected'}
@@ -211,27 +211,27 @@ export default function BillUploadPage() {
 
               {/* Detection banner + transparent parse summary */}
               {parsed && (
-                <div style={{ marginTop: 16, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)', borderRadius: 12, padding: '14px 18px' }}>
-                  <p style={{ fontSize: 14, fontWeight: 700, color: '#22c55e', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ marginTop: 16, background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.25)', borderRadius: 12, padding: '14px 18px' }}>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--green)', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <span>✅ Detected {parsed.summary.provider} bill — {loading ? 'analyzing…' : 'ready to analyze'}</span>
                     <span style={{
                       fontSize: 10, fontWeight: 700, letterSpacing: 0.5, padding: '2px 8px', borderRadius: 6,
-                      color: parsed.summary.confidence === 'high' ? '#22c55e' : parsed.summary.confidence === 'medium' ? '#f59e0b' : '#f87171',
-                      background: parsed.summary.confidence === 'high' ? 'rgba(34,197,94,0.12)' : parsed.summary.confidence === 'medium' ? 'rgba(245,158,11,0.12)' : 'rgba(248,113,113,0.12)',
+                      color: parsed.summary.confidence === 'high' ? 'var(--green)' : parsed.summary.confidence === 'medium' ? 'var(--amber)' : 'var(--red)',
+                      background: parsed.summary.confidence === 'high' ? 'rgba(22,163,74,0.1)' : parsed.summary.confidence === 'medium' ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)',
                     }}>
                       {parsed.summary.confidence.toUpperCase()} CONFIDENCE
                     </span>
                   </p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px 20px', fontSize: 12, color: '#a0a0b0' }}>
-                    <span>📊 <strong style={{ color: '#e0e0e0' }}>{parsed.summary.rowsParsed.toLocaleString()}</strong> rows parsed</span>
-                    <span>⏭️ <strong style={{ color: '#e0e0e0' }}>{parsed.summary.rowsSkipped.toLocaleString()}</strong> rows skipped (zero/empty)</span>
-                    <span>🧩 <strong style={{ color: '#e0e0e0' }}>{parsed.summary.servicesFound}</strong> services found</span>
-                    <span>📅 <strong style={{ color: '#e0e0e0' }}>{parsed.dateRange}</strong></span>
-                    <span>💵 cost column: <strong style={{ color: '#e0e0e0' }}>{parsed.summary.costColumn}</strong></span>
-                    <span>💱 currency: <strong style={{ color: '#e0e0e0' }}>{parsed.summary.currency}</strong></span>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px 20px', fontSize: 12, color: 'var(--text-muted)' }}>
+                    <span>📊 <strong style={{ color: 'var(--text)' }}>{parsed.summary.rowsParsed.toLocaleString()}</strong> rows parsed</span>
+                    <span>⏭️ <strong style={{ color: 'var(--text)' }}>{parsed.summary.rowsSkipped.toLocaleString()}</strong> rows skipped (zero/empty)</span>
+                    <span>🧩 <strong style={{ color: 'var(--text)' }}>{parsed.summary.servicesFound}</strong> services found</span>
+                    <span>📅 <strong style={{ color: 'var(--text)' }}>{parsed.dateRange}</strong></span>
+                    <span>💵 cost column: <strong style={{ color: 'var(--text)' }}>{parsed.summary.costColumn}</strong></span>
+                    <span>💱 currency: <strong style={{ color: 'var(--text)' }}>{parsed.summary.currency}</strong></span>
                   </div>
                   {parsed.summary.confidence === 'low' && (
-                    <p style={{ fontSize: 11, color: '#f59e0b', marginTop: 10, marginBottom: 0 }}>
+                    <p style={{ fontSize: 11, color: 'var(--amber)', marginTop: 10, marginBottom: 0 }}>
                       ⚠️ Low confidence — we couldn&apos;t match a known provider signature, so we used a generic cost/service mapping. Double-check the totals below.
                     </p>
                   )}
@@ -243,30 +243,30 @@ export default function BillUploadPage() {
                 <div style={{ marginTop: 24 }}>
                   {/* Summary cards */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
-                    <div className="glass-card" style={{ padding: '16px 20px' }}>
-                      <p style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>TOTAL BILL</p>
-                      <p style={{ fontSize: 24, fontWeight: 900, color: '#f59e0b' }}>${parsed.grandTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+                    <div className="edi-card" style={{ padding: '16px 20px' }}>
+                      <p style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>TOTAL BILL</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)' }}>${parsed.grandTotal.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
                     </div>
-                    <div className="glass-card" style={{ padding: '16px 20px' }}>
-                      <p style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>SERVICES</p>
-                      <p style={{ fontSize: 24, fontWeight: 900, color: 'white' }}>{parsed.byService.length}</p>
+                    <div className="edi-card" style={{ padding: '16px 20px' }}>
+                      <p style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>SERVICES</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)' }}>{parsed.byService.length}</p>
                     </div>
-                    <div className="glass-card" style={{ padding: '16px 20px' }}>
-                      <p style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>LINE ITEMS</p>
-                      <p style={{ fontSize: 24, fontWeight: 900, color: 'white' }}>{parsed.rows.length.toLocaleString()}</p>
+                    <div className="edi-card" style={{ padding: '16px 20px' }}>
+                      <p style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>LINE ITEMS</p>
+                      <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)' }}>{parsed.rows.length.toLocaleString()}</p>
                     </div>
-                    <div className="glass-card" style={{ padding: '16px 20px' }}>
-                      <p style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>TOP DRIVER</p>
-                      <p style={{ fontSize: 14, fontWeight: 800, color: '#ef4444', lineHeight: 1.3 }}>{parsed.byService[0]?.service ?? '—'}</p>
+                    <div className="edi-card" style={{ padding: '16px 20px' }}>
+                      <p style={{ fontSize: 10, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>TOP DRIVER</p>
+                      <p style={{ fontSize: 14, fontWeight: 800, color: 'var(--red)', lineHeight: 1.3 }}>{parsed.byService[0]?.service ?? '—'}</p>
                     </div>
                   </div>
 
                   {/* Breakdown table */}
-                  <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
-                    <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: '1fr 120px 90px', gap: 8 }}>
-                      <span style={{ fontSize: 11, color: '#444', fontWeight: 700, letterSpacing: 1 }}>SERVICE</span>
-                      <span style={{ fontSize: 11, color: '#444', fontWeight: 700, letterSpacing: 1, textAlign: 'right' }}>TOTAL COST</span>
-                      <span style={{ fontSize: 11, color: '#444', fontWeight: 700, letterSpacing: 1, textAlign: 'right' }}>% OF BILL</span>
+                  <div style={{ background: 'var(--surface)', borderRadius: 16, border: '1px solid var(--border)', overflow: 'hidden' }}>
+                    <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 120px 90px', gap: 8 }}>
+                      <span style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1 }}>SERVICE</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, textAlign: 'right' }}>TOTAL COST</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-faint)', fontWeight: 700, letterSpacing: 1, textAlign: 'right' }}>% OF BILL</span>
                     </div>
                     {parsed.byService.slice(0, 15).map((row, i) => {
                       const isTopDriver = i < 3
@@ -275,31 +275,31 @@ export default function BillUploadPage() {
                           key={row.service}
                           style={{
                             padding: '12px 20px',
-                            borderBottom: '1px solid rgba(255,255,255,0.04)',
+                            borderBottom: '1px solid var(--border)',
                             display: 'grid',
                             gridTemplateColumns: '1fr 120px 90px',
                             gap: 8,
                             alignItems: 'center',
-                            background: isTopDriver ? 'rgba(239,68,68,0.04)' : 'transparent',
+                            background: isTopDriver ? 'rgba(220,38,38,0.03)' : 'transparent',
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             {isTopDriver && (
-                              <span style={{ fontSize: 10, fontWeight: 700, color: '#ef4444', background: 'rgba(239,68,68,0.12)', padding: '2px 7px', borderRadius: 5, flexShrink: 0 }}>
+                              <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--red)', background: 'rgba(220,38,38,0.1)', padding: '2px 7px', borderRadius: 5, flexShrink: 0 }}>
                                 TOP {i + 1}
                               </span>
                             )}
-                            <span style={{ fontSize: 13, color: isTopDriver ? '#fff' : '#d0d0e0', fontWeight: isTopDriver ? 700 : 400 }}>
+                            <span style={{ fontSize: 13, color: isTopDriver ? 'var(--text)' : '#3A3A3A', fontWeight: isTopDriver ? 700 : 400 }}>
                               {row.service}
                             </span>
                           </div>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: isTopDriver ? '#ef4444' : '#e0e0e0', textAlign: 'right' }}>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: isTopDriver ? 'var(--red)' : 'var(--text)', textAlign: 'right' }}>
                             ${row.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                           </span>
                           <div style={{ textAlign: 'right' }}>
-                            <span style={{ fontSize: 13, color: '#666' }}>{row.pct.toFixed(1)}%</span>
-                            <div style={{ marginTop: 4, height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-                              <div style={{ width: `${Math.min(100, row.pct)}%`, height: '100%', background: isTopDriver ? '#ef4444' : '#6366f1', borderRadius: 2 }} />
+                            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.pct.toFixed(1)}%</span>
+                            <div style={{ marginTop: 4, height: 3, background: '#EFEFEA', borderRadius: 2, overflow: 'hidden' }}>
+                              <div style={{ width: `${Math.min(100, row.pct)}%`, height: '100%', background: isTopDriver ? 'var(--red)' : 'var(--blue)', borderRadius: 2 }} />
                             </div>
                           </div>
                         </div>
@@ -307,7 +307,7 @@ export default function BillUploadPage() {
                     })}
                     {parsed.byService.length > 15 && (
                       <div style={{ padding: '10px 20px', textAlign: 'center' }}>
-                        <span style={{ fontSize: 12, color: '#444' }}>+{parsed.byService.length - 15} more services</span>
+                        <span style={{ fontSize: 12, color: 'var(--text-faint)' }}>+{parsed.byService.length - 15} more services</span>
                       </div>
                     )}
                   </div>
@@ -319,7 +319,7 @@ export default function BillUploadPage() {
               value={billText}
               onChange={e => setBillText(e.target.value)}
               placeholder={`Paste your cloud bill here — AWS Cost Explorer export, Azure invoice, or line items.\n\nExample:\nEC2 instances: $3,200\nRDS: $890\nData Transfer: $1,100\nS3: $240\nNAT Gateway: $680`}
-              style={{ width: '100%', minHeight: 240, background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, padding: '16px', color: 'white', fontSize: 14, lineHeight: 1.6, resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ width: '100%', minHeight: 240, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px', color: 'var(--text)', fontSize: 14, lineHeight: 1.6, resize: 'vertical', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
           )}
         </div>
@@ -335,35 +335,35 @@ export default function BillUploadPage() {
 
         {/* AI Response */}
         {response && (
-          <div style={{ marginTop: 28, background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', borderRadius: 16, padding: '28px 32px', border: '1px solid rgba(255,255,255,0.09)', lineHeight: 1.7, fontSize: 15 }}>
-            <p style={{ fontSize: 11, color: '#6366f1', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>AI ANALYSIS</p>
+          <div style={{ marginTop: 28, background: 'var(--surface)', borderRadius: 16, padding: '28px 32px', border: '1px solid var(--border)', lineHeight: 1.7, fontSize: 15 }}>
+            <p style={{ fontSize: 11, color: 'var(--blue)', fontWeight: 700, letterSpacing: 1, marginBottom: 16 }}>AI ANALYSIS</p>
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                h2: ({ children }) => <h2 style={{ fontSize: 18, fontWeight: 700, color: '#6366f1', marginTop: 24, marginBottom: 8 }}>{children}</h2>,
-                h3: ({ children }) => <h3 style={{ fontSize: 16, fontWeight: 600, marginTop: 16, marginBottom: 6 }}>{children}</h3>,
-                strong: ({ children }) => <strong style={{ color: '#f0f0ff' }}>{children}</strong>,
+                h2: ({ children }) => <h2 className="serif" style={{ fontSize: 20, color: 'var(--text)', marginTop: 24, marginBottom: 8 }}>{children}</h2>,
+                h3: ({ children }) => <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginTop: 16, marginBottom: 6 }}>{children}</h3>,
+                strong: ({ children }) => <strong style={{ color: 'var(--text)', fontWeight: 700 }}>{children}</strong>,
                 ul: ({ children }) => <ul style={{ paddingLeft: 20, marginBottom: 12 }}>{children}</ul>,
-                li: ({ children }) => <li style={{ color: '#d0d0e0', marginBottom: 6 }}>{children}</li>,
-                p: ({ children }) => <p style={{ color: '#c0c0d0', marginBottom: 12 }}>{children}</p>,
+                li: ({ children }) => <li style={{ color: '#3A3A3A', marginBottom: 6 }}>{children}</li>,
+                p: ({ children }) => <p style={{ color: '#333', marginBottom: 12 }}>{children}</p>,
               }}
             >
               {response}
             </ReactMarkdown>
-            {loading && <span style={{ color: '#6366f1' }}>▍</span>}
+            {loading && <span style={{ color: 'var(--blue)' }}>▍</span>}
           </div>
         )}
 
         {saved && (
-          <div style={{ marginTop: 14, fontSize: 13, color: '#22c55e', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ marginTop: 14, fontSize: 13, color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontWeight: 800 }}>✓</span> Analysis saved to your history
           </div>
         )}
 
         {response && !loading && (
-          <div style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', fontSize: 13, color: '#a0a0b0', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ marginTop: 24, padding: '14px 18px', borderRadius: 12, background: 'rgba(22,163,74,0.05)', border: '1px solid rgba(22,163,74,0.2)', fontSize: 13, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 16 }}>✅</span>
-            <span>Analysis complete. Upload another bill above to compare months — or use <strong style={{ color: '#a5b4fc' }}>← Back to Tools</strong> for the compliance and pricing tools.</span>
+            <span>Analysis complete. Upload another bill above to compare months — or use <strong style={{ color: 'var(--blue)' }}>← Back to Tools</strong> for the compliance and pricing tools.</span>
           </div>
         )}
 
