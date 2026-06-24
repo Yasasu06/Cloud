@@ -343,17 +343,32 @@ export default function DemoPage() {
           maxWidth: 1080, margin: '0 auto',
           padding: 'clamp(28px, 5vw, 44px) clamp(20px, 5vw, 24px) clamp(40px, 6vw, 56px)',
         }}>
-          <span style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
-            Cloud Intelligence Platform — <span style={{ color: 'var(--text)', fontWeight: 600 }}>Built by Yasaswi Dutta</span>
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 520 }}>
+            <span style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
+              Cloud Intelligence Platform — <span style={{ color: 'var(--text)', fontWeight: 600 }}>Built by Yasaswi Dutta</span>
+            </span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.55 }}>
+              Cloud Intelligence Platform — AI-powered cloud cost analyzer, compliance checker, and pricing explorer. Built with Next.js, Groq AI, Supabase, and live cloud pricing APIs.
+            </span>
+          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <SocialLink href="#" label="LinkedIn">
-              <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.25 8h4.5v13.5H.25V8zM8.5 8h4.32v1.85h.06c.6-1.14 2.07-2.34 4.26-2.34 4.56 0 5.4 3 5.4 6.9v7.09h-4.5v-6.28c0-1.5-.03-3.43-2.09-3.43-2.09 0-2.41 1.63-2.41 3.32v6.39H8.5V8z" />
-            </SocialLink>
-            <SocialLink href="https://github.com/Yasasu06" label="GitHub">
-              <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.39 1.24-3.23-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z" />
-            </SocialLink>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <SocialLink href="https://www.linkedin.com/in/yasaswidutta/" label="LinkedIn">
+                <path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.25 8h4.5v13.5H.25V8zM8.5 8h4.32v1.85h.06c.6-1.14 2.07-2.34 4.26-2.34 4.56 0 5.4 3 5.4 6.9v7.09h-4.5v-6.28c0-1.5-.03-3.43-2.09-3.43-2.09 0-2.41 1.63-2.41 3.32v6.39H8.5V8z" />
+              </SocialLink>
+              <SocialLink href="https://github.com/Yasasu06/Cloud" label="GitHub">
+                <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.39 1.24-3.23-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.92 1.24 3.23 0 4.62-2.81 5.64-5.49 5.94.43.37.81 1.1.81 2.22 0 1.6-.01 2.9-.01 3.29 0 .32.22.7.83.58A12.01 12.01 0 0 0 24 12.5C24 5.87 18.63.5 12 .5z" />
+              </SocialLink>
+            </div>
+            <a
+              href="https://github.com/Yasasu06/Cloud"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 12.5, color: 'var(--text-muted)', fontWeight: 500, textDecoration: 'none' }}
+            >
+              View source on GitHub →
+            </a>
           </div>
         </div>
 
