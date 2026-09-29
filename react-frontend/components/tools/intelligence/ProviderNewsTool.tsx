@@ -80,12 +80,13 @@ export default function ProviderNewsTool({ embedded = false }: Props) {
             Cloud Provider News
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 15, maxWidth: 460, margin: '0 auto' }}>
-            Pricing changes, new features, and announcements from AWS, Azure, GCP and alternatives — curated for cost impact.
+            Static examples of provider announcements. Dates and claims here are not verified current news; check each provider before acting.
           </p>
         </div>
       )}
 
       {/* Provider filter */}
+      <p style={{ color: '#fbbf24', fontSize: 13, marginBottom: 20 }}>Sample content only. This page has no live news feed.</p>
       <div style={{ display: 'flex', gap: 8, marginBottom: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
         {PROVIDERS.map(p => (
           <button
@@ -128,12 +129,12 @@ export default function ProviderNewsTool({ embedded = false }: Props) {
 
       {/* Newsletter CTA */}
       <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 20, padding: '32px', textAlign: 'center' }}>
-        <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>Get the weekly cloud digest</h3>
+        <h3 style={{ fontSize: 18, fontWeight: 900, marginBottom: 8 }}>See the digest preview</h3>
         <p style={{ color: '#a0a0b0', fontSize: 14, maxWidth: 360, margin: '0 auto 20px' }}>
-          Pricing changes, new savings opportunities, and provider news — every week, free.
+          See how account analysis recaps are presented. Automatic weekly delivery is not enabled.
         </p>
         <Link href={digestHref} style={{ background: '#6366f1', borderRadius: 10, padding: '11px 24px', color: 'white', fontWeight: 700, fontSize: 14, textDecoration: 'none' }}>
-          Subscribe to Weekly Digest →
+          View Digest Preview →
         </Link>
       </div>
     </>

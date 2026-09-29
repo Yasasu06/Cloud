@@ -165,10 +165,10 @@ export default function ROICalculatorPage() {
             ROI CALCULATOR
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, marginBottom: 12 }}>
-            What is cloud chaos costing you?
+            Explore a hypothetical cloud cost scenario
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 460, margin: '0 auto' }}>
-            Enter your numbers. See the exact return on using Cloud Intelligence to fix it.
+            Enter your numbers to model assumed time savings and a 28% cost opportunity. This does not predict results.
           </p>
         </div>
 
@@ -191,13 +191,13 @@ export default function ROICalculatorPage() {
                 <span style={{ fontSize: 18 }}>🔥</span>
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 700, color: '#ef4444', letterSpacing: 1 }}>THE PROBLEM</p>
-                  <p style={{ fontSize: 12, color: '#444' }}>What cloud chaos costs you right now</p>
+                  <p style={{ fontSize: 12, color: '#444' }}>Assumed costs for this scenario</p>
                 </div>
               </div>
               <MetricRow label="Time cost (managing cloud)" value={timeCost} color="#f87171" />
-              <MetricRow label="Cloud waste (28% industry avg)" value={cloudWaste} color="#f87171" />
+              <MetricRow label="Assumed cost opportunity (28%)" value={cloudWaste} color="#f87171" />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#e0e0e0' }}>Total monthly problem</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#e0e0e0' }}>Modeled monthly amount</span>
                 <span style={{ fontSize: 26, fontWeight: 900, color: '#ef4444' }}>
                   ${animTotalProblem.toLocaleString()}
                 </span>
@@ -209,15 +209,15 @@ export default function ROICalculatorPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
                 <span style={{ fontSize: 18 }}>⚡</span>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#818cf8', letterSpacing: 1 }}>WHAT CLOUD INTELLIGENCE SAVES</p>
-                  <p style={{ fontSize: 12, color: '#444' }}>At $49/month</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: '#818cf8', letterSpacing: 1 }}>HYPOTHETICAL IMPROVEMENT</p>
+                  <p style={{ fontSize: 12, color: '#444' }}>Includes a hypothetical $49/month tool cost; no paid plan is offered</p>
                 </div>
               </div>
-              <MetricRow label="Time saved (80% reduction)" value={timeSaved} color="#818cf8" />
-              <MetricRow label="Waste eliminated" value={wasteElim} color="#818cf8" />
+              <MetricRow label="Assumed time saving (80%)" value={timeSaved} color="#818cf8" />
+              <MetricRow label="Assumed opportunity fully captured" value={wasteElim} color="#818cf8" />
               <MetricRow label="Tool cost" value={toolCost} color="#555" dimmed />
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#e0e0e0' }}>Net monthly saving</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#e0e0e0' }}>Modeled net amount</span>
                 <span style={{ fontSize: 26, fontWeight: 900, color: '#22c55e' }}>
                   ${animNetSaving.toLocaleString()}
                 </span>
@@ -236,8 +236,8 @@ export default function ROICalculatorPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
                 <span style={{ fontSize: 18 }}>📈</span>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#22c55e', letterSpacing: 1 }}>YOUR ROI</p>
-                  <p style={{ fontSize: 12, color: '#444' }}>Return on your $49/month investment</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: '#22c55e', letterSpacing: 1 }}>SCENARIO ROI</p>
+                  <p style={{ fontSize: 12, color: '#444' }}>Hypothetical return using a $49/month cost assumption</p>
                 </div>
               </div>
 
@@ -248,7 +248,7 @@ export default function ROICalculatorPage() {
                     {animRoi.toLocaleString()}%
                   </div>
                   <p style={{ color: '#555', fontSize: 14, marginTop: 6 }}>
-                    You make <strong style={{ color: '#22c55e' }}>${perDollar}</strong> for every $1 spent
+                    Scenario value: <strong style={{ color: '#22c55e' }}>${perDollar}</strong> per $1 of assumed cost
                   </p>
                 </div>
 
@@ -261,11 +261,11 @@ export default function ROICalculatorPage() {
                   flex: 1,
                   minWidth: 180,
                 }}>
-                  <p style={{ fontSize: 11, color: '#22c55e', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>ANNUAL SAVING</p>
+                  <p style={{ fontSize: 11, color: '#22c55e', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>ANNUALIZED SCENARIO</p>
                   <div style={{ fontSize: 36, fontWeight: 900, color: '#22c55e', lineHeight: 1 }}>
                     ${animAnnual.toLocaleString()}
                   </div>
-                  <p style={{ fontSize: 12, color: '#555', marginTop: 6 }}>per year recovered</p>
+                  <p style={{ fontSize: 12, color: '#555', marginTop: 6 }}>if all assumptions held</p>
                 </div>
               </div>
             </div>
@@ -283,12 +283,12 @@ export default function ROICalculatorPage() {
               gap: 16,
             }}>
               <div>
-                <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 6, letterSpacing: 1 }}>READY TO CAPTURE THIS?</div>
+                <div style={{ fontSize: 12, color: '#a0a0b0', marginBottom: 6, letterSpacing: 1 }}>EXPLORE THE DEMO</div>
                 <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>
-                  Start saving ${animNetSaving.toLocaleString()}/month
+                  Verify opportunities against your own data
                 </h3>
                 <p style={{ color: '#a0a0b0', fontSize: 13 }}>
-                  $49/month · Cancel anytime · ROI from day one.
+                  No paid plan or guaranteed return is offered in this demo.
                 </p>
               </div>
               <button
@@ -309,7 +309,7 @@ export default function ROICalculatorPage() {
                 onMouseEnter={e => { e.currentTarget.style.background = '#16a34a' }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#22c55e' }}
               >
-                Start Saving ${animNetSaving.toLocaleString()}/month →
+                View available tools →
               </button>
             </div>
           </div>
@@ -317,12 +317,12 @@ export default function ROICalculatorPage() {
 
         {!hasInputs && (
           <div className="glass-card" style={{ padding: '48px 28px', textAlign: 'center' }}>
-            <p style={{ color: '#444', fontSize: 15 }}>Enter your numbers above to see your ROI instantly.</p>
+            <p style={{ color: '#444', fontSize: 15 }}>Enter numbers above to explore a hypothetical scenario.</p>
           </div>
         )}
 
         <p style={{ color: '#333', fontSize: 11, textAlign: 'center', marginTop: 32, lineHeight: 1.6 }}>
-          Time savings based on customer-reported averages. Cloud waste figure uses the 28% industry benchmark from the FinOps Foundation 2024 report. Individual results will vary.
+          Assumptions: 80% less management time, a 28% cost opportunity, full capture of that opportunity, and a hypothetical $49 monthly tool cost. These inputs are not measured customer results.
         </p>
       </div>
     </div>

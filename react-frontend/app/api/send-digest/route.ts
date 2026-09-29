@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { timingSafeEqual } from 'crypto'
+import { rateLimited } from '@/lib/serverGuard'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,15 +24,13 @@ interface ProfileRow {
 }
 
 export async function POST(request: Request) {
-  // Auth: require either user-self or admin token
-  const url = new URL(request.url)
-  const adminToken = url.searchParams.get('admin_token')
-  const userIdParam = url.searchParams.get('user_id')
-
-  const isAdmin = adminToken && adminToken === process.env.DIGEST_ADMIN_TOKEN
-  if (!isAdmin && !userIdParam) {
-    return NextResponse.json({ error: 'admin_token or user_id required' }, { status: 401 })
+  const configured = process.env.DIGEST_ADMIN_TOKEN
+  const supplied = request.headers.get('authorization')?.match(/^Bearer (\S+)$/i)?.[1]
+  if (!configured || !supplied || Buffer.byteLength(supplied) !== Buffer.byteLength(configured) ||
+      !timingSafeEqual(Buffer.from(supplied), Buffer.from(configured))) {
+    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
   }
+  if (rateLimited(request, 'digest', 2, 60 * 60_000)) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
 
   const supaUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -39,11 +39,9 @@ export async function POST(request: Request) {
   }
   const supabase = createClient(supaUrl, serviceKey)
 
-  // Pick recipients: a single user (self-trigger) or all users with digest enabled (admin trigger)
-  const profileQuery = supabase.from('profiles').select('id, email, full_name, weekly_digest_enabled')
-  const { data: profiles, error: profErr } = isAdmin
-    ? await profileQuery.eq('weekly_digest_enabled', true)
-    : await profileQuery.eq('id', userIdParam!).limit(1)
+  const { data: profiles, error: profErr } = await supabase.from('profiles')
+    .select('id, email, full_name, weekly_digest_enabled')
+    .eq('weekly_digest_enabled', true)
 
   if (profErr) return NextResponse.json({ error: profErr.message }, { status: 500 })
   if (!profiles?.length) return NextResponse.json({ sent: 0, message: 'No recipients' })
@@ -79,7 +77,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           from: 'Cloud Intelligence <digest@cloudintelligence.app>',
           to: p.email,
-          subject: 'Your Cloud Intelligence Weekly Digest',
+          subject: 'Your Cloud Intelligence Analysis Recap',
           html,
         }),
       })
@@ -106,7 +104,7 @@ function buildDigestHtml(name: string | null, recs: SavedRec[]): string {
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto">
       <div style="background:#6366f1;padding:24px;border-radius:12px 12px 0 0">
         <h1 style="color:white;margin:0;font-size:24px">☁️ Cloud Intelligence</h1>
-        <p style="color:rgba(255,255,255,0.85);margin:8px 0 0">Your Weekly Digest</p>
+        <p style="color:rgba(255,255,255,0.85);margin:8px 0 0">Your Analysis Recap</p>
       </div>
       <div style="background:#f9f9f9;padding:24px;border-radius:0 0 12px 12px">
         <h2 style="color:#1a1a2e;margin-top:0">Hi ${escapeHtml(name || 'there')},</h2>
@@ -115,10 +113,9 @@ function buildDigestHtml(name: string | null, recs: SavedRec[]): string {
         <h3 style="color:#1a1a2e;margin-top:24px">Recent analyses</h3>
         <ul style="list-style:none;padding:0;margin:0">${recList}</ul>
 
-        <h3 style="color:#1a1a2e;margin-top:32px">Pricing changes worth reviewing</h3>
+        <h3 style="color:#1a1a2e;margin-top:32px">Pricing comparison</h3>
         <p style="color:#666;font-size:13px;line-height:1.6">
-          Hetzner reduced ARM instance pricing by ~8%. AWS Reserved Instance rates updated for c6i family.
-          Visit <a href="${BASE_URL}/pricing-explorer" style="color:#6366f1">Pricing Explorer</a> for live comparisons.
+          Visit <a href="${BASE_URL}/pricing-explorer" style="color:#6366f1">Pricing Explorer</a> for selected AWS and Azure live compute prices with fallbacks, plus static reference prices for other providers. Verify prices with the provider.
         </p>
 
         <h3 style="color:#1a1a2e;margin-top:32px">Try next</h3>

@@ -9,9 +9,9 @@ import WeeklyDigestTool from '@/components/tools/intelligence/WeeklyDigestTool'
 type TabId = 'news' | 'alerts' | 'digest'
 
 const TABS: Array<{ id: TabId; label: string; icon: string; color: string; blurb: string }> = [
-  { id: 'news',   label: 'Provider News',  icon: '📰', color: '#6366f1', blurb: 'Latest pricing changes, service launches, deprecations' },
-  { id: 'alerts', label: 'Price Alerts',   icon: '🔔', color: '#f59e0b', blurb: 'Get notified when prices change' },
-  { id: 'digest', label: 'Weekly Digest',  icon: '📧', color: '#22c55e', blurb: 'One email per week with everything that matters' },
+  { id: 'news',   label: 'Provider News Examples', icon: '📰', color: '#6366f1', blurb: 'Static examples; verify announcements with providers' },
+  { id: 'alerts', label: 'Price Alert Examples', icon: '🔔', color: '#f59e0b', blurb: 'Illustrative price-change scenarios' },
+  { id: 'digest', label: 'Digest Preview', icon: '📧', color: '#22c55e', blurb: 'Preview the account recap format' },
 ]
 
 export default function IntelligenceHubPage() {
@@ -44,7 +44,7 @@ export default function IntelligenceHubPage() {
             Stay ahead of cloud market changes
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 640 }}>
-            Provider news, price alerts, and weekly digest in one place.
+            Explore sample provider news, illustrative price alerts, and the digest preview.
           </p>
         </div>
 

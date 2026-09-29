@@ -499,7 +499,7 @@ ALTERNATIVE PROVIDERS: Consider alternatives equally — DigitalOcean, Hetzner, 
 
           <NextActionCards actions={[
             { icon: '🛠️', title: 'Implementation Plan', desc: '12-week visual journey',  href: '/outcome-simulator' },
-            { icon: '💰', title: 'Estimate Costs',      desc: 'Live pricing for stack',    href: '/cost-intelligence' },
+            { icon: '💰', title: 'Estimate Costs',      desc: 'Selected compute price references',    href: '/cost-intelligence' },
             { icon: '✓',  title: 'Validate Choice',     desc: 'Pre-decision sanity check', href: '/sanity-check' },
           ]} />
         </div>

@@ -1,55 +1,53 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Transparent server-side proxy for the Groq chat-completions API.
-//
-// Every client page that used to call api.groq.com directly now POSTs the exact
-// same request body to /api/groq instead. The body is forwarded verbatim — same
-// model, messages, temperature, max_tokens, streaming flag, response_format,
-// etc. — so no page logic changes; only the API key moves server-side.
-//
-// The key lives ONLY here (GROQ_API_KEY), so it can no longer be read from the
-// browser's DevTools / network tab. Falls back to the legacy
-// NEXT_PUBLIC_GROQ_API_KEY so the app keeps working before env is migrated.
+import { rateLimited, readJsonBody } from '@/lib/serverGuard'
 
 export const dynamic = 'force-dynamic'
-
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const MODEL = 'llama-3.3-70b-versatile'
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: 'AI service is not configured. Set GROQ_API_KEY in the server environment.' },
-      { status: 503 },
-    )
-  }
+  if (rateLimited(req, 'groq', 12)) return NextResponse.json({ error: 'Too many requests.' }, { status: 429 })
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) return NextResponse.json({ error: 'AI service is not configured.' }, { status: 503 })
 
-  let body: string
-  try {
-    body = JSON.stringify(await req.json())
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body.' }, { status: 400 })
+  let input: unknown
+  try { input = await readJsonBody(req, 32_000) }
+  catch (error) { return NextResponse.json({ error: (error as Error).message }, { status: 400 }) }
+  if (!input || typeof input !== 'object') return NextResponse.json({ error: 'Invalid request.' }, { status: 400 })
+  const body = input as Record<string, unknown>
+  const messages = body.messages
+  if (!Array.isArray(messages) || messages.length < 1 || messages.length > 12 ||
+      !messages.every(m => m && typeof m === 'object' &&
+        ['system', 'user', 'assistant'].includes(m.role) &&
+        typeof m.content === 'string' && m.content.length > 0 && m.content.length <= 16_000) ||
+      !messages.some(m => m.role === 'user')) {
+    return NextResponse.json({ error: 'Invalid messages.' }, { status: 400 })
   }
-
-  let upstream: Response
+  if (body.model !== undefined && body.model !== MODEL) {
+    return NextResponse.json({ error: 'Unsupported model.' }, { status: 400 })
+  }
+  const maxTokens = typeof body.max_tokens === 'number' && Number.isInteger(body.max_tokens)
+    ? Math.min(Math.max(body.max_tokens, 1), 4000) : 1500
+  const payload = {
+    model: MODEL,
+    messages,
+    max_tokens: maxTokens,
+    stream: body.stream === true,
+    ...(body.response_format && typeof body.response_format === 'object' &&
+      (body.response_format as { type?: unknown }).type === 'json_object'
+      ? { response_format: { type: 'json_object' } } : {}),
+  }
   try {
-    upstream = await fetch(GROQ_URL, {
+    const upstream = await fetch(GROQ_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body,
+      body: JSON.stringify(payload),
+    })
+    return new Response(upstream.body, {
+      status: upstream.status,
+      headers: { 'Content-Type': upstream.headers.get('Content-Type') || 'application/json', 'Cache-Control': 'no-store' },
     })
   } catch {
     return NextResponse.json({ error: 'Could not reach the AI service.' }, { status: 502 })
   }
-
-  // Pass the upstream response straight through, preserving status and content
-  // type. This works identically for streaming (SSE) and plain JSON responses,
-  // so each page's existing response handling continues to work unchanged.
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: {
-      'Content-Type': upstream.headers.get('Content-Type') || 'application/json',
-      'Cache-Control': 'no-cache, no-transform',
-    },
-  })
 }

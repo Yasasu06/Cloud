@@ -8,6 +8,7 @@ export interface ComputeInstance {
   price_hourly_usd?: number
   region?: string
   notes?: string
+  price_source?: 'live' | 'fallback' | 'static'
 }
 
 export interface StoragePrice {

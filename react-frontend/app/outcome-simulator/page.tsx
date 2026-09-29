@@ -169,8 +169,8 @@ Generate 4-6 milestones spanning 12 weeks. Be specific with action titles (e.g.,
           <>
             {/* Total savings hero card */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 24 }}>
-              <StatCard label="MONTHLY SAVINGS" value={`$${adjustedTotal.monthly.toLocaleString()}`} color="#22c55e" />
-              <StatCard label="ANNUAL SAVINGS" value={`$${adjustedTotal.annual.toLocaleString()}`} color="#22c55e" />
+              <StatCard label="ESTIMATED MONTHLY OPPORTUNITY" value={`$${adjustedTotal.monthly.toLocaleString()}`} color="#22c55e" />
+              <StatCard label="ESTIMATED ANNUAL OPPORTUNITY" value={`$${adjustedTotal.annual.toLocaleString()}`} color="#22c55e" />
               <StatCard label="ROI" value={`${adjustedTotal.roi_pct}%`} color="#818cf8" />
               <StatCard label="MILESTONES" value={`${adjustedMilestones.length}`} color="#a0a0b0" />
             </div>
@@ -219,7 +219,7 @@ Generate 4-6 milestones spanning 12 weeks. Be specific with action titles (e.g.,
                       <div style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 4, textDecoration: done[m.week] ? 'line-through' : 'none' }}>{m.action}</div>
                       <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#a0a0b0', flexWrap: 'wrap' }}>
                         <span>New spend: <strong style={{ color: 'white' }}>${m.expected_spend.toLocaleString()}/mo</strong></span>
-                        <span>Saved: <strong style={{ color: '#22c55e' }}>${m.savings.toLocaleString()}/mo</strong></span>
+                        <span>Estimated: <strong style={{ color: '#22c55e' }}>${m.savings.toLocaleString()}/mo</strong></span>
                       </div>
                     </div>
                   </div>
@@ -252,7 +252,7 @@ Generate 4-6 milestones spanning 12 weeks. Be specific with action titles (e.g.,
 
             {/* Next action cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginTop: 32 }}>
-              <NextActionCard href="/optimize" icon="💰" title="Run Optimization Tools" desc="Calculate exact savings now" />
+              <NextActionCard href="/optimize" icon="💰" title="Run Optimization Tools" desc="Explore estimated opportunities" />
               <NextActionCard href="/sanity-check" icon="🛟" title="Validate First Step" desc="Get a DO IT / WAIT verdict" />
               <NextActionCard href="/track-results" icon="📈" title="Track Implementation" desc="Log outcomes as you go" />
             </div>

@@ -39,9 +39,9 @@ const TOOLS: Tool[] = [
     name: 'Cloud Bill Analyzer',
     problem: "If you're not sure where your cloud money is going, upload your bill and find out in 30 seconds.",
     bullets: [
-      'Supports AWS, Azure, GCP, DigitalOcean and Oracle bills',
+      'Parses compatible AWS, Azure, GCP, DigitalOcean and Oracle CSVs',
       'Exact cost breakdown by service, with percentages',
-      'Pinpoints waste and hands you a prioritized action plan',
+      'Suggests optimization hypotheses to verify against resource data',
     ],
     cta: 'Upload Your Bill',
     href: '/bill-upload',
@@ -62,9 +62,9 @@ const TOOLS: Tool[] = [
   {
     emoji: '💰',
     name: 'Pricing Explorer',
-    problem: 'If you want the cheapest provider for your exact workload, compare all 12 in seconds.',
+    problem: 'Compare listed compute instances across 12 providers for a selected CPU and RAM spec.',
     bullets: [
-      'Live pricing from AWS and Azure APIs',
+      'Selected AWS and Azure compute prices may use live APIs, with static fallbacks',
       'Compare 12 providers — AWS, Hetzner, DO and more',
       'Download results as a PDF for your team',
     ],
@@ -106,7 +106,7 @@ function LiveResultPreview() {
       style={{ maxWidth: 460, margin: '0 auto' }}
     >
       <p style={{ fontSize: 10.5, letterSpacing: 2.5, color: 'var(--text-faint)', fontWeight: 700, marginBottom: 10, textAlign: 'center' }}>
-        LIVE RESULT PREVIEW
+        SAMPLE RESULT PREVIEW
       </p>
 
       <div className="edi-card" style={{ padding: 0, overflow: 'hidden', textAlign: 'left' }}>
@@ -120,7 +120,7 @@ function LiveResultPreview() {
 
         <div style={{ padding: '20px 22px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 16 }}>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>AWS bill analyzed</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Sample AWS bill</span>
             <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 5 }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }} />
               complete
@@ -134,7 +134,7 @@ function LiveResultPreview() {
 
           {/* waste bar */}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 7 }}>
-            <span style={{ color: 'var(--amber)', fontWeight: 600 }}>⚠ Top waste — EC2 overprovision</span>
+            <span style={{ color: 'var(--amber)', fontWeight: 600 }}>Example hypothesis — EC2 sizing</span>
             <span style={{ color: 'var(--text-muted)', fontFamily: MONO }}>28%</span>
           </div>
           <div style={{ height: 6, borderRadius: 4, background: '#EFEFEA', overflow: 'hidden', marginBottom: 20 }}>
@@ -148,7 +148,7 @@ function LiveResultPreview() {
 
           {/* savings */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderRadius: 12, background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.22)' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Potential savings</span>
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Illustrative opportunity</span>
             <span style={{ fontFamily: MONO, fontSize: 20, fontWeight: 700, color: 'var(--green)' }}>
               ${savings.toLocaleString()}<span style={{ fontSize: 12, color: '#15803d' }}>/mo</span>
             </span>
@@ -271,12 +271,12 @@ export default function DemoPage() {
             {/* Headline — DM Serif Display, near-black, no gradient */}
             <h1 className="serif" style={{ fontSize: 'clamp(46px, 9vw, 100px)', lineHeight: 1.0, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 24 }}>
               Three tools.<br />
-              Real answers in <span className="grad-word">60 seconds</span>.
+              Cost insights in <span className="grad-word">60 seconds</span>.
             </h1>
 
             {/* Subheadline — lighter, muted, airy */}
             <p style={{ fontSize: 'clamp(16px, 2.2vw, 20px)', color: 'var(--text-muted)', fontWeight: 400, lineHeight: 1.6, maxWidth: 540, margin: '0 auto 44px' }}>
-              No login. No setup. Pick a tool and get a real answer.
+              No login needed for the demo tools. Upload a compatible CSV or explore example estimates.
             </p>
 
             <LiveResultPreview />
@@ -297,13 +297,12 @@ export default function DemoPage() {
               How this was built
             </h2>
             <p style={{ fontSize: 'clamp(14px, 1.9vw, 15.5px)', color: 'var(--text-muted)', lineHeight: 1.75, margin: 0 }}>
-              A startup was spending $31K/month on AWS with no visibility into where it was going.
-              I approached it like a Forward Deployed Engineer — took their actual billing data,
-              identified specific waste patterns, and built a system that does the diagnosis
-              automatically. What I found: EC2 overprovisioned by 40%, staging servers running
-              24/7 adding $1,800/month, S3 logs with no lifecycle policy accumulating $2,100/month.
-              Total identified savings: <strong style={{ color: 'var(--green)', fontWeight: 700 }}>$12,300/month</strong>.
-              This tool is what I left them with.
+              <strong>Illustrative startup scenario:</strong> An example AWS bill of $31,000/month
+              can be grouped by service to show where spending is concentrated. This demo uses a
+              sample $12,300/month optimization opportunity to illustrate a possible action plan.
+              Those numbers are not a customer result or measured savings. The bill analyzer
+              calculates service totals from a compatible uploaded CSV; its optimization suggestions
+              require separate resource and utilization checks.
             </p>
           </motion.div>
         </section>
@@ -325,10 +324,10 @@ export default function DemoPage() {
         }}>
           <div style={{ maxWidth: 820, margin: '0 auto', textAlign: 'center' }}>
             <p style={{ fontSize: 'clamp(13px, 1.8vw, 15px)', color: 'var(--text)', fontWeight: 600, marginBottom: 8 }}>
-              Real data, no signups, no paywalls.
+              CSV cost breakdowns and clearly labeled estimates.
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', letterSpacing: 0.3 }}>
-              Live pricing across{' '}
+              Compute price comparison across{' '}
               <span style={{ color: 'var(--text)', fontWeight: 600 }}>AWS</span> · <span style={{ color: 'var(--text)', fontWeight: 600 }}>Azure</span> ·{' '}
               <span style={{ color: 'var(--text)', fontWeight: 600 }}>GCP</span> · <span style={{ color: 'var(--text)', fontWeight: 600 }}>DigitalOcean</span> ·{' '}
               <span style={{ color: 'var(--text)', fontWeight: 600 }}>Oracle</span> · <span style={{ color: 'var(--text)', fontWeight: 600 }}>9 more</span>

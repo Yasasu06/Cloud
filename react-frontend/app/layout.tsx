@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import Navbar from '@/components/Navbar'
 import { JourneyProvider } from '@/lib/journeyContext'
@@ -10,23 +9,21 @@ import PageTracker from '@/components/PageTracker'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import BackToDashboard from '@/components/BackToDashboard'
 
-const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
-  title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
+  title: 'Cloud Intelligence — Cloud Cost Exploration Demo',
   description:
-    'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud — with an explicit crossover projection, sensitivity, and a stated uncertainty band for the analyst-estimated Azure figure.',
+    'Explore compatible cloud billing CSVs, service-level costs, selected compute prices, and estimated optimization opportunities.',
   openGraph: {
-    title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
+    title: 'Cloud Intelligence — Cloud Cost Exploration Demo',
     description:
-      'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud.',
+      'Explore cloud billing CSVs and selected compute prices.',
     type: 'website',
   },
   twitter: {
     card: 'summary',
-    title: 'AWS vs Azure vs Google Cloud — Segment Revenue Trend',
+    title: 'Cloud Intelligence — Cloud Cost Exploration Demo',
     description:
-      'A multi-quarter look at total cloud segment revenue for AWS, Azure, and Google Cloud.',
+      'Explore cloud billing CSVs and selected compute prices.',
   },
 }
 
@@ -39,7 +36,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
       </head>
-      <body className={inter.className} style={{ background: '#050508' }}>
+      <body style={{ background: '#050508', fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif' }}>
         <a href="#main-content" className="skip-link">Skip to main content</a>
         <div style={{
           position: 'fixed',

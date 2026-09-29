@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 
 const SEARCH_ITEMS = [
   { title: 'AI Analyze', desc: 'Explain your cloud situation', url: '/analyze', emoji: '🔍' },
-  { title: 'Bill Upload', desc: 'Analyze your actual bill', url: '/bill-upload', emoji: '📄' },
+  { title: 'Bill Upload', desc: 'Break down a compatible billing CSV', url: '/bill-upload', emoji: '📄' },
   { title: 'Architecture', desc: 'Visualize your stack', url: '/architecture', emoji: '🏗️' },
   { title: 'Savings Calculator', desc: 'Find your savings', url: '/optimize?tab=savings', emoji: '💰' },
   { title: 'Cost Forecast', desc: 'Predict future spending', url: '/cost-intelligence?tab=forecast', emoji: '📈' },

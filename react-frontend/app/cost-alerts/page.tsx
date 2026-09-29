@@ -128,11 +128,13 @@ export default function CostAlertsPage() {
         router.push('/auth')
         return
       }
-      const { error } = await supabase
+      const { data: updated, error } = await supabase
         .from('profiles')
         .update({ monthly_budget: budgetNum })
         .eq('id', session.user.id)
-      if (error) throw error
+        .select('id')
+        .maybeSingle()
+      if (error || !updated) throw error ?? new Error('Budget was not saved.')
       setSaved(true)
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Save failed. Please try again.')
@@ -158,10 +160,10 @@ export default function CostAlertsPage() {
             COST ALERTS
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, marginBottom: 12 }}>
-            Never get a surprise bill again
+            Set up billing alerts with your provider
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 460, margin: '0 auto' }}>
-            Enter your budget and get exact, copy-paste instructions to set up
+            Enter your budget for guided steps to set up
             billing alerts in your cloud provider&apos;s console.
           </p>
         </div>
@@ -293,7 +295,7 @@ export default function CostAlertsPage() {
         {budgetNum > 0 && (
           <div style={{ marginBottom: 28 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>
-              STEP 3 — ALERTS YOU&apos;LL RECEIVE
+              STEP 3 — SAMPLE ALERT PREVIEW
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {ALERT_LEVELS.map(level => {
@@ -345,7 +347,7 @@ export default function CostAlertsPage() {
               STEP 4 — SAVE YOUR BUDGET
             </p>
             <p style={{ fontSize: 14, color: '#a0a0b0', marginBottom: 16 }}>
-              Save your <strong style={{ color: 'white' }}>${budgetNum.toLocaleString()}/month</strong> budget to your account so we can flag anomalies in your analyses.
+              Save your <strong style={{ color: 'white' }}>${budgetNum.toLocaleString()}/month</strong> budget to your account. The app does not send automatic billing alerts; configure those in your provider console.
             </p>
 
             {saved ? (
@@ -405,7 +407,7 @@ export default function CostAlertsPage() {
 
         <p style={{ color: '#333', fontSize: 11, textAlign: 'center', marginTop: 28, lineHeight: 1.6 }}>
           Billing alerts are configured directly in your cloud provider&apos;s console — we never access your account.
-          Instructions are based on AWS, Azure, and GCP documentation as of 2025.
+          Verify the current setup steps in your provider&apos;s documentation.
         </p>
 
       </div>

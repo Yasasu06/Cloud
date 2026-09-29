@@ -109,7 +109,7 @@ export default function SavingsCalculatorTool({ embedded = false }: Props) {
             How much are you leaving on the table?
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 440, margin: '0 auto' }}>
-            Enter your current spend to see your exact savings opportunity.
+            Enter your current spend to see a benchmark-based savings scenario.
           </p>
         </div>
       )}
@@ -167,14 +167,14 @@ export default function SavingsCalculatorTool({ embedded = false }: Props) {
             padding: '36px 28px', textAlign: 'center', marginBottom: 24,
           }}>
             <p style={{ color: '#a0a0b0', fontSize: 15, marginBottom: 10 }}>
-              At your current {provider} spend, you could save
+              Illustrative opportunity at your entered {provider} spend
             </p>
             <div style={{ fontSize: 'clamp(40px, 7vw, 72px)', fontWeight: 900, color: '#22c55e', lineHeight: 1, marginBottom: 10 }}>
               ${displayed.total.toLocaleString()}
               <span style={{ fontSize: '0.35em', color: '#a0a0b0', fontWeight: 600 }}>/month</span>
             </div>
             <p style={{ color: '#22c55e', fontSize: 20, fontWeight: 700, marginBottom: 8 }}>
-              That&apos;s ${annualSaving.toLocaleString()}/year
+              Illustrative annual equivalent: ${annualSaving.toLocaleString()}/year
             </p>
             <p style={{ color: '#555', fontSize: 13 }}>
               Based on industry benchmarks for {companySize} on {provider} · FinOps Foundation 2025
