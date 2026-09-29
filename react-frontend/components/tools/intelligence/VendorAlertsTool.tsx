@@ -135,10 +135,10 @@ export default function VendorAlertsTool({ embedded = false }: Props) {
             PRICE INTELLIGENCE
           </div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 42px)', fontWeight: 900, marginBottom: 12 }}>
-            Cloud pricing changes you need to know
+            Sample cloud price alert scenarios
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 480, margin: '0 auto' }}>
-            We track AWS, Azure, and GCP pricing changes so you don&apos;t have to.
+            These are illustrative examples, not verified provider price changes or live notifications.
           </p>
         </div>
       )}
@@ -154,10 +154,10 @@ export default function VendorAlertsTool({ embedded = false }: Props) {
           <span style={{ fontSize: 22 }}>📡</span>
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>
-              Price Intelligence — Last updated May 2026
+              Sample price alerts — illustrative data
             </p>
             <p style={{ fontSize: 12, color: '#555' }}>
-              Tracking AWS, Azure, and GCP pricing changes across compute, storage, networking, and AI
+              Verify any price change directly with AWS, Azure, or GCP before acting.
             </p>
           </div>
         </div>
@@ -221,10 +221,10 @@ export default function VendorAlertsTool({ embedded = false }: Props) {
       }}>
         <p style={{ fontSize: 11, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 12 }}>NEXT STEP</p>
         <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>
-          Want alerts when prices change for <em style={{ color: '#818cf8', fontStyle: 'normal' }}>your</em> services?
+          Want to explore costs for <em style={{ color: '#818cf8', fontStyle: 'normal' }}>your</em> services?
         </h3>
         <p style={{ color: '#a0a0b0', fontSize: 14, maxWidth: 420, margin: '0 auto 20px' }}>
-          Tell us what you&apos;re running and we&apos;ll flag every price change that affects your bill — before it hits.
+          Describe your workload for model-generated optimization suggestions. Automatic price alerts are not enabled.
         </p>
         <button
           onClick={() => router.push('/analyze')}
@@ -236,7 +236,7 @@ export default function VendorAlertsTool({ embedded = false }: Props) {
           onMouseEnter={e => { e.currentTarget.style.background = '#4f46e5' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#6366f1' }}
         >
-          Analyze My Stack for Price Alerts →
+          Analyze My Stack →
         </button>
       </div>
 

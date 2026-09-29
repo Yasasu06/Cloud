@@ -24,11 +24,12 @@ export async function fetchAWSCompute(): Promise<ComputeInstance[]> {
       price_monthly_usd: i.price_monthly_usd,
       price_hourly_usd: i.price_hourly_usd,
       region: json.region,
+      price_source: 'live',
     }))
     cached = { data, fetched: Date.now() }
     return data
   } catch {
-    return AWS_FALLBACK
+    return AWS_FALLBACK.map(i => ({ ...i, price_source: 'fallback' as const }))
   }
 }
 

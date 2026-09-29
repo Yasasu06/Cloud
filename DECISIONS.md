@@ -17,7 +17,7 @@
 
 ## DECISION 4 — Visual JSON Output Instead of Text
 **Choice:** AI returns structured JSON rendered as charts and cards instead of streaming text.
-**Reasoning:** Premium feel. Easier to scan than text walls. Differentiates from ChatGPT.
+**Reasoning:** Structured results are easier to scan than long text responses.
 **Tradeoff:** Lost typewriter effect. Slower perceived response time.
 
 ## DECISION 5 — Plain English Mode Toggle
@@ -31,22 +31,22 @@
 **Tradeoff:** Each analysis fires up to 7 Groq calls for full Four Perspectives mode.
 
 ## DECISION 7 — Performance Pricing Model
-**Choice:** Offered "Pay only when we save you money" pricing tier.
+**Choice:** Explored a "pay only after verified savings" pricing concept.
 **Reasoning:** Trust signal. Skin in the game.
-**Outcome:** ProsperOps and others already do this — not unique.
+**Outcome:** This was never offered to customers. The public demo now labels the model illustrative.
 
-## DECISION 8 — Free Tier With 5 Analyses Per Month
-**Choice:** Hard limit at 5 analyses for free users, contextual upgrade prompts.
-**Reasoning:** Generous enough to demonstrate value, restrictive enough to drive Pro tier.
-**Status:** Built but never tested with real users.
+## DECISION 8 — Free Usage Meter Prototype
+**Choice:** A client-side meter displayed five analyses per month and upgrade prompts.
+**Reasoning:** Explore a possible future plan structure.
+**Status:** It was not enforced server-side and has been removed from the public demo. Server routes have basic request limits, not a subscription quota.
 
 ## DECISION 9 — Live Pricing APIs
-**Choice:** Integrated AWS and Azure live pricing, kept others hardcoded with verification dates.
+**Choice:** Integrated selected AWS and Azure compute-pricing requests with static fallbacks; other comparisons use reference tables.
 **Reasoning:** Live pricing builds trust vs guessing.
-**Tradeoff:** GCP API too brittle for full integration. Still hardcoded.
+**Tradeoff:** The GCP catalog probe does not supply displayed instance prices. GCP remains static.
 
 ## DECISION 10 — Built Without User Validation
-**Choice:** Built 60+ pages before showing tool to any real user.
+**Choice:** Built a large set of pages before usability validation.
 **Reasoning:** Wanted polish before exposure.
 **Lesson:** This was a mistake. First user testing revealed routing bugs and UX gaps that earlier validation would have caught.
 
@@ -95,5 +95,5 @@ Backward compatibility. Bookmarks don't break. SEO maintained.
 1. **Build for validation, not perfection** — 60 pages before first user was wasteful.
 2. **Research competition before building** — Many features already existed in mature products.
 3. **AI-powered ≠ unique** — Adding AI to existing concepts isn't enough differentiation.
-4. **Honest tradeoffs beat premature optimization** — Claude Code's deferred items were correct calls.
+4. **Honest tradeoffs beat premature optimization** — Deferred work should be described clearly.
 5. **Hub consolidation is real engineering value** — Even if positioning was wrong, the architectural lessons apply to future projects.

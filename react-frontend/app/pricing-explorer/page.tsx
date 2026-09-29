@@ -108,7 +108,7 @@ export default function PricingExplorerPage() {
             Which cloud is <span className="shimmer-text">cheapest</span> for<br />your exact workload?
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 17, maxWidth: 640, lineHeight: 1.6 }}>
-            Live AWS + Azure prices, verified pricing for the other 10. Pick a workload spec, see who&apos;s cheapest in real time.
+            Selected AWS and Azure compute prices may come from live APIs, with static fallback. The other ten providers use static reference prices. Compare listed instances by CPU and RAM.
           </p>
         </div>
 
@@ -190,10 +190,10 @@ export default function PricingExplorerPage() {
                 background: 'rgba(22,163,74,0.06)',
                 border: '1px solid rgba(22,163,74,0.28)',
               }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)', letterSpacing: 1.5, marginBottom: 6 }}>SAVINGS OPPORTUNITY</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)', letterSpacing: 1.5, marginBottom: 6 }}>LISTED PRICE DIFFERENCE</div>
                 <div style={{ fontSize: 'clamp(18px, 2.6vw, 24px)', fontWeight: 700, color: 'var(--text)', lineHeight: 1.3 }}>
-                  Save <span style={{ color: 'var(--green)' }}>${(mostExpensive.instance.price_monthly_usd - cheapest.instance.price_monthly_usd).toFixed(0)}/mo</span>
-                  {' '}by choosing {cheapest.provider} ({cheapest.instance.name}) over {mostExpensive.provider}
+                  Listed difference <span style={{ color: 'var(--green)' }}>${(mostExpensive.instance.price_monthly_usd - cheapest.instance.price_monthly_usd).toFixed(0)}/mo</span>
+                  {' '}between {cheapest.provider} ({cheapest.instance.name}) and {mostExpensive.provider}; migration and operating costs are excluded
                 </div>
               </div>
             )}
@@ -216,7 +216,7 @@ export default function PricingExplorerPage() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
                         <strong style={{ color, fontSize: 14, fontWeight: 800 }}>{row.provider}</strong>
                         {isCheapest && <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', background: 'rgba(22,163,74,0.12)', color: 'var(--green)', borderRadius: 4, letterSpacing: 1 }}>CHEAPEST</span>}
-                        <LivePricingBadge provider={row.provider} compact />
+                        <LivePricingBadge provider={row.provider} source={row.instance.price_source} compact />
                       </div>
                       <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.instance.name}</div>
                       {row.instance.notes && <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{row.instance.notes}</div>}
@@ -243,7 +243,7 @@ export default function PricingExplorerPage() {
 
         {/* Footer note */}
         <div style={{ marginTop: 32, padding: '14px 18px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-          🟢 = Live API · 📌 = Verified by hand. AWS pricing fetched from <code style={{ color: 'var(--blue)' }}>pricing.us-east-1.amazonaws.com</code>; Azure from <code style={{ color: 'var(--blue)' }}>prices.azure.com</code>. Other providers verified {PROVIDER_LAST_UPDATED.GCP}. Pricing changes frequently — always verify with provider before committing.
+          Live = API response · Fallback = stored reference after API failure · Static reference = bundled price. AWS pricing fetched from <code style={{ color: 'var(--blue)' }}>pricing.us-east-1.amazonaws.com</code>; Azure from <code style={{ color: 'var(--blue)' }}>prices.azure.com</code>. Other providers verified {PROVIDER_LAST_UPDATED.GCP}. Pricing changes frequently — always verify with provider before committing.
         </div>
 
         <style>{`

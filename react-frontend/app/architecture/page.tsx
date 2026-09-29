@@ -279,7 +279,7 @@ ALTERNATIVE PROVIDERS: Recommend alternatives where appropriate — Cloudflare f
             </div>
 
             <NextActionCards actions={[
-              { icon: '💸', title: 'Estimate Costs',  desc: 'Live pricing for stack',     href: '/cost-intelligence' },
+              { icon: '💸', title: 'Estimate Costs',  desc: 'Selected compute price references',     href: '/cost-intelligence' },
               { icon: '🔄', title: 'Plan Migration',  desc: 'Provider switch planner',     href: '/migrate' },
               { icon: '✓',  title: 'Validate Decision', desc: 'Pre-decision sanity check',  href: '/sanity-check' },
             ]} />

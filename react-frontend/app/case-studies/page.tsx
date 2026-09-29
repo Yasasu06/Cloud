@@ -11,10 +11,10 @@ export default function CaseStudiesPage() {
             CASE STUDIES
           </div>
           <h1 style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 900, marginBottom: 14, lineHeight: 1.1 }}>
-            Real Results From Real Customers
+            Illustrative Cloud Cost Scenarios
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 17, maxWidth: 540, margin: '0 auto' }}>
-            Coming soon — be the first.
+            Examples below are placeholders, not customer outcomes.
           </p>
         </div>
 
@@ -37,13 +37,13 @@ export default function CaseStudiesPage() {
                   {card.tag}
                 </p>
                 <h3 style={{ fontSize: 18, fontWeight: 800, color: 'white', marginBottom: 12 }}>
-                  Case Study Coming Soon
+                  Illustrative scenario
                 </h3>
                 <p style={{ color: '#a0a0b0', fontSize: 13, lineHeight: 1.6, marginBottom: 20 }}>
-                  We&apos;re documenting our first customers&apos; results.
+                  No verified customer case study is published here.
                 </p>
                 <p style={{ color: '#666', fontSize: 12, fontStyle: 'italic' }}>
-                  Hint: {card.hint}
+                  Example only: {card.hint}
                 </p>
               </div>
             </div>
@@ -58,10 +58,10 @@ export default function CaseStudiesPage() {
           textAlign: 'center',
         }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: 'white', marginBottom: 10 }}>
-            Want to be featured?
+            Share a future case study
           </h2>
           <p style={{ color: '#a0a0b0', fontSize: 14, marginBottom: 24, maxWidth: 460, margin: '0 auto 24px', lineHeight: 1.6 }}>
-            We&apos;re looking for early customers willing to share their cloud cost stories. Email{' '}
+            If you have a verified result you would like to share, email{' '}
             <a href="mailto:case-studies@cloudintelligence.ai" style={{ color: '#818cf8', textDecoration: 'none' }}>
               case-studies@cloudintelligence.ai
             </a>{' '}
@@ -72,7 +72,7 @@ export default function CaseStudiesPage() {
             padding: '12px 28px', color: 'white', fontWeight: 700, fontSize: 14,
             textDecoration: 'none',
           }}>
-            Get Early Access — Be a Case Study →
+            Sign in →
           </Link>
         </div>
       </div>

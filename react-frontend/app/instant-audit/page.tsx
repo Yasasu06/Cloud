@@ -170,14 +170,14 @@ export default function InstantAuditPage() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div style={{ display: 'inline-block', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '6px 16px', fontSize: 12, color: '#818cf8', fontWeight: 700, marginBottom: 16, letterSpacing: 1 }}>
-            FREE CLOUD AUDIT
+            ILLUSTRATIVE COST SCENARIO
           </div>
           <h1 style={{ fontSize: 'clamp(26px,5vw,44px)', fontWeight: 900, marginBottom: 12, lineHeight: 1.1 }}>
-            Get Your Visual Cloud Audit<br />
+            Explore a Visual Cost Scenario<br />
             <span style={{ color: '#22c55e' }}>in 30 Seconds</span>
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 15, maxWidth: 460, margin: '0 auto' }}>
-            Enter your monthly spend. Get a complete waste report, action plan, and recommendations.
+            Enter monthly spend to explore an illustrative cost mix and possible optimization actions. No bill or resource data is inspected.
           </p>
         </div>
 
@@ -223,7 +223,7 @@ export default function InstantAuditPage() {
               transition: 'all 0.15s',
             }}
           >
-            {loading ? '⏳ Generating your audit...' : '🔍 Generate Free Audit Report →'}
+            {loading ? '⏳ Generating scenario...' : '🔍 Generate Example Scenario →'}
           </button>
         </div>
 
@@ -250,23 +250,23 @@ export default function InstantAuditPage() {
               <div style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', letterSpacing: 2, marginBottom: 12 }}>EXECUTIVE SUMMARY</div>
               <div style={{ fontSize: 'clamp(28px,6vw,52px)', fontWeight: 900, color: '#ef4444', lineHeight: 1, marginBottom: 8 }}>
                 ${counterWaste.toLocaleString()}
-                <span style={{ fontSize: '0.4em', color: '#a0a0b0', fontWeight: 600 }}>/month in waste</span>
+                <span style={{ fontSize: '0.4em', color: '#a0a0b0', fontWeight: 600 }}>/month estimated opportunity</span>
               </div>
               <p style={{ color: '#a0a0b0', fontSize: 15, marginBottom: 8 }}>
-                found in your <strong style={{ color: 'white' }}>${spendNum.toLocaleString()}/month</strong> {provider} bill
+                modeled from an entered <strong style={{ color: 'white' }}>${spendNum.toLocaleString()}/month</strong> {provider} spend amount
               </p>
               <div style={{ display: 'flex', gap: 24, justifyContent: 'center', flexWrap: 'wrap', marginTop: 16, marginBottom: 8 }}>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 22, fontWeight: 900, color: wastePct > industryAvg ? '#ef4444' : '#22c55e' }}>{wastePct}%</div>
-                  <div style={{ fontSize: 11, color: '#555' }}>Your waste rate</div>
+                  <div style={{ fontSize: 11, color: '#555' }}>Scenario rate</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 22, fontWeight: 900, color: '#a0a0b0' }}>{industryAvg}%</div>
-                  <div style={{ fontSize: 11, color: '#555' }}>Industry average</div>
+                  <div style={{ fontSize: 11, color: '#555' }}>28% reference assumption</div>
                 </div>
                 <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: 22, fontWeight: 900, color: '#22c55e' }}>${counterAnnual.toLocaleString()}</div>
-                  <div style={{ fontSize: 11, color: '#555' }}>Annual waste</div>
+                  <div style={{ fontSize: 11, color: '#555' }}>Annualized scenario</div>
                 </div>
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function InstantAuditPage() {
 
               {/* Waste heatmap */}
               <div className="glass-card" style={{ padding: 24 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 14 }}>WASTE HEATMAP</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 14 }}>ILLUSTRATIVE COST MIX</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {services.map(s => {
                     const svcSpend = Math.round(spendNum * s.pct)
@@ -312,14 +312,14 @@ export default function InstantAuditPage() {
                           <span style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{s.emoji} {s.name}</span>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <span style={{ fontSize: 10, fontWeight: 700, background: cm.bg, color: cm.color, padding: '2px 7px', borderRadius: 5 }}>{cm.label}</span>
-                            <span style={{ fontSize: 13, color: '#ef4444', fontWeight: 700 }}>${svcWaste.toLocaleString()} waste</span>
+                            <span style={{ fontSize: 13, color: '#ef4444', fontWeight: 700 }}>${svcWaste.toLocaleString()} estimated</span>
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                           <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 4, overflow: 'hidden' }}>
                             <div style={{ height: '100%', width: `${s.wastePct * 100}%`, background: s.color, borderRadius: 4 }} />
                           </div>
-                          <span style={{ fontSize: 11, color: '#555' }}>{Math.round(s.wastePct * 100)}% waste</span>
+                          <span style={{ fontSize: 11, color: '#555' }}>{Math.round(s.wastePct * 100)}% assumption</span>
                         </div>
                         <a href={s.actionHref} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#818cf8', textDecoration: 'none', fontWeight: 600 }}>
                           → {s.action}
@@ -356,12 +356,12 @@ export default function InstantAuditPage() {
 
             {/* 5. Industry comparison gauge */}
             <div className="glass-card" style={{ padding: 24, marginBottom: 24 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>📊 COMPARISON TO INDUSTRY PEERS</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>📊 COMPARISON TO REFERENCE ASSUMPTION</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#555', marginBottom: 6 }}>
-                    <span>0% waste</span>
-                    <span>Industry avg {industryAvg}%</span>
+                    <span>0% modeled</span>
+                    <span>Reference {industryAvg}%</span>
                     <span>50%+</span>
                   </div>
                   <div style={{ position: 'relative', height: 20, background: 'rgba(255,255,255,0.05)', borderRadius: 10, overflow: 'hidden' }}>
@@ -374,14 +374,14 @@ export default function InstantAuditPage() {
                     {wastePct > industryAvg ? `+${wastePct - industryAvg}%` : `-${industryAvg - wastePct}%`}
                   </div>
                   <div style={{ fontSize: 12, color: '#555' }}>
-                    {wastePct > industryAvg ? 'above industry avg' : 'below industry avg'}
+                    {wastePct > industryAvg ? 'above 28% reference' : 'below 28% reference'}
                   </div>
                 </div>
               </div>
               <p style={{ fontSize: 13, color: '#666', margin: 0 }}>
                 {wastePct > industryAvg
-                  ? `You spend ${wastePct - industryAvg}% more than similar companies. Implementing the above recommendations would bring you to the industry average.`
-                  : `Your waste rate is better than the ${industryAvg}% industry average. Focus on the quick wins above to improve further.`}
+                  ? `This example scenario exceeds the 28% reference assumption by ${wastePct - industryAvg} points. Verify actual usage before acting.`
+                  : `This example scenario is ${industryAvg - wastePct} points below the 28% reference assumption. It does not measure your real waste.`}
               </p>
             </div>
 
@@ -406,7 +406,7 @@ export default function InstantAuditPage() {
                           </span>
                         </div>
                         <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#555' }}>
-                          <span>💰 Save: <strong style={{ color: '#22c55e' }}>{rec.saving}</strong></span>
+                          <span>💰 Possible range: <strong style={{ color: '#22c55e' }}>{rec.saving}</strong></span>
                           <span>⏱ Effort: {rec.effort}</span>
                         </div>
                       </div>

@@ -105,7 +105,7 @@ export default function ReservedInstancesTool({ embedded = false }: Props) {
             Should you buy reserved instances?
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 15, maxWidth: 520 }}>
-            Answer 4 questions. Get a clear buy/wait/avoid verdict with exact savings numbers.
+            Answer 4 questions. Get a clear buy/wait/avoid verdict with estimated savings based on your inputs.
           </p>
         </div>
       )}

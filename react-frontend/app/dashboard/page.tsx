@@ -4,12 +4,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
-import { getMockAWSData, type AWSCostData } from '@/lib/awsBilling'
 import DecisionsMade from '@/components/DecisionsMade'
 import RoleAwareToolGrid from '@/components/RoleAwareToolGrid'
 import OnboardingTour from '@/components/OnboardingTour'
 import WeeklyDigestToggle from '@/components/WeeklyDigestToggle'
-import FreeTrialMeter from '@/components/FreeTrialMeter'
 import EmptyState from '@/components/EmptyState'
 
 const ROLE_LABELS: Record<string, { icon: string; label: string }> = {
@@ -43,83 +41,6 @@ interface Stats {
   lastDate: string | null
   topProvider: string | null
   plan: string
-}
-
-// ─── AWS Connect panel ────────────────────────────────────────────────────────
-
-const UNLOCK_ITEMS = [
-  { icon: '📄', label: 'Real bill analysis',         desc: 'Line-by-line from your actual charges' },
-  { icon: '🔍', label: 'Automatic waste detection',  desc: 'Idle resources found every 24 hours' },
-  { icon: '🚨', label: 'Spending anomaly alerts',    desc: 'Know before your bill arrives' },
-  { icon: '📊', label: 'Monthly optimization report',desc: 'Emailed savings summary each month' },
-]
-
-function AwsConnectPanel({ onSaved }: { onSaved: () => void }) {
-  const [accessKeyId, setAccessKeyId] = useState('')
-  const [secretKey, setSecretKey] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-
-  const inputStyle: React.CSSProperties = {
-    width: '100%', background: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: 10, padding: '12px 14px', color: 'white', fontSize: 14,
-    outline: 'none', fontFamily: 'monospace', boxSizing: 'border-box',
-  }
-
-  async function save() {
-    if (!accessKeyId.trim() || !secretKey.trim()) { setError('Both fields are required.'); return }
-    if (!/^AKIA[A-Z0-9]{16}$/.test(accessKeyId.trim())) {
-      setError('Access Key ID should start with AKIA and be 20 characters.')
-      return
-    }
-    setSaving(true); setError('')
-    try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) throw new Error('Not signed in')
-      const { error: dbErr } = await supabase
-        .from('profiles')
-        .update({ aws_access_key_id: accessKeyId.trim(), aws_secret_key: btoa(secretKey.trim()) })
-        .eq('id', session.user.id)
-      if (dbErr) throw dbErr
-      onSaved()
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Save failed.')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div style={{ background: '#111118', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 16, padding: 24, marginTop: 16 }}>
-      <p style={{ fontSize: 14, fontWeight: 700, color: 'white', marginBottom: 20 }}>Connect AWS (Read-Only)</p>
-      <div style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 12, padding: '16px 18px', marginBottom: 20 }}>
-        <p style={{ fontSize: 11, color: '#f59e0b', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>HOW TO GET YOUR KEYS</p>
-        {['Open AWS Console → IAM → Users', 'Click Add User → name it "cloud-intelligence"', 'Attach policies: Billing + ReadOnlyAccess', 'Click Security Credentials → Create Access Key', 'Choose "Third-party service" → paste both keys below'].map((step, i) => (
-          <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 8, alignItems: 'flex-start' }}>
-            <span style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b', background: 'rgba(245,158,11,0.15)', borderRadius: 4, padding: '1px 6px', flexShrink: 0, marginTop: 1 }}>{i + 1}</span>
-            <span style={{ fontSize: 13, color: '#a0a0b0', lineHeight: 1.5 }}>{step}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
-        <div>
-          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 6 }}>AWS ACCESS KEY ID</label>
-          <input type="text" value={accessKeyId} onChange={e => setAccessKeyId(e.target.value)} placeholder="AKIAIOSFODNN7EXAMPLE" style={inputStyle} />
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 6 }}>AWS SECRET ACCESS KEY</label>
-          <input type="password" value={secretKey} onChange={e => setSecretKey(e.target.value)} placeholder="••••••••••••••••••••••••••••••••••••••••" style={inputStyle} />
-        </div>
-      </div>
-      {error && <p style={{ fontSize: 13, color: '#f87171', marginBottom: 12 }}>{error}</p>}
-      <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 10, padding: '12px 14px', marginBottom: 16, fontSize: 12, color: '#86efac', lineHeight: 1.6 }}>
-        🔒 <strong>Read-only access only.</strong> We can never modify, delete, or access your actual infrastructure. Only billing data is read.
-      </div>
-      <button onClick={save} disabled={saving || !accessKeyId.trim() || !secretKey.trim()} style={{ background: '#f59e0b', border: 'none', borderRadius: 10, padding: '12px 28px', color: 'white', fontWeight: 700, fontSize: 14, cursor: saving || !accessKeyId.trim() || !secretKey.trim() ? 'not-allowed' : 'pointer', opacity: saving || !accessKeyId.trim() || !secretKey.trim() ? 0.5 : 1 }}>
-        {saving ? 'Saving…' : 'Save & Connect AWS →'}
-      </button>
-    </div>
-  )
 }
 
 // ─── Saved Analyses tab ───────────────────────────────────────────────────────
@@ -357,81 +278,6 @@ function TeamTab({ userEmail, plan }: { userEmail: string | null; plan: string }
   )
 }
 
-// ─── Live AWS Data section ────────────────────────────────────────────────────
-
-function LiveAWSSection({ data, lastRefresh, onRefresh }: { data: AWSCostData; lastRefresh: Date | null; onRefresh: () => void }) {
-  const maxCost = data.topServices[0]?.cost ?? 1
-
-  function fmt(n: number) {
-    if (n >= 1000) return `$${(n / 1000).toFixed(1)}K`
-    return `$${Math.round(n).toLocaleString()}`
-  }
-
-  function minutesAgo(d: Date) {
-    const mins = Math.floor((Date.now() - d.getTime()) / 60000)
-    return mins === 0 ? 'just now' : `${mins}m ago`
-  }
-
-  return (
-    <div style={{ marginBottom: 40 }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />
-          <h2 style={{ fontSize: 18, fontWeight: 700 }}>Live AWS Data</h2>
-          <span style={{ fontSize: 11, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22c55e', padding: '2px 8px', borderRadius: 6, fontWeight: 700 }}>LIVE</span>
-        </div>
-        <button
-          onClick={onRefresh}
-          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '5px 12px', color: '#666', cursor: 'pointer', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}
-        >
-          ↺ Refresh
-          {lastRefresh && <span style={{ color: '#444' }}>· {minutesAgo(lastRefresh)}</span>}
-        </button>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 20 }}>
-        <div className="glass-card" style={{ padding: '18px 20px' }}>
-          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>THIS MONTH SO FAR</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#f59e0b' }}>{fmt(data.totalThisMonth)}</div>
-          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>of {fmt(data.projectedThisMonth)} projected</div>
-        </div>
-        <div className="glass-card" style={{ padding: '18px 20px' }}>
-          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>PROJECTED TOTAL</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: 'white' }}>{fmt(data.projectedThisMonth)}</div>
-          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>end of month</div>
-        </div>
-        <div className="glass-card" style={{ padding: '18px 20px' }}>
-          <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>WASTE ESTIMATE</div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#ef4444' }}>{fmt(data.wasteEstimate)}</div>
-          <div style={{ fontSize: 11, color: '#555', marginTop: 3 }}>28% industry avg</div>
-        </div>
-      </div>
-
-      <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '20px 22px' }}>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#555', letterSpacing: 1, marginBottom: 16 }}>TOP SERVICES</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {data.topServices.map(svc => (
-            <div key={svc.service}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                <span style={{ fontSize: 13, color: '#a0a0b0' }}>{svc.service}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: 'white' }}>{fmt(svc.cost)}</span>
-              </div>
-              <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
-                <div style={{ height: '100%', background: '#f59e0b', borderRadius: 2, width: `${(svc.cost / maxCost) * 100}%`, transition: 'width 0.4s ease' }} />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-          <a href="/bill-upload" style={{ fontSize: 13, color: '#6366f1', textDecoration: 'none', fontWeight: 600 }}>
-            View full breakdown →
-          </a>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -456,11 +302,6 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<Stats>({ total: 0, lastDate: null, topProvider: null, plan: 'Free' })
   const [loading, setLoading] = useState(true)
   const [loggedOut, setLoggedOut] = useState(false)
-  const [awsConnected, setAwsConnected] = useState(false)
-  const [showAwsPanel, setShowAwsPanel] = useState(false)
-  const [awsData, setAwsData] = useState<AWSCostData | null>(null)
-  const [awsLastRefresh, setAwsLastRefresh] = useState<Date | null>(null)
-  const [awsSpend, setAwsSpend] = useState(2000)
   const [recentlyViewed, setRecentlyViewed] = useState<{ title: string; url: string; emoji: string; desc: string; visitedAt?: number }[]>([])
 
   useEffect(() => {
@@ -482,7 +323,7 @@ export default function DashboardPage() {
           .select('id, provider, confidence, workload, created_at')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false }),
-        supabase.from('profiles').select('plan, aws_access_key_id, monthly_spend').eq('id', session.user.id).single(),
+        supabase.from('profiles').select('plan').eq('id', session.user.id).single(),
       ])
 
       const list = (allRecs ?? []) as Rec[]
@@ -493,22 +334,10 @@ export default function DashboardPage() {
         topProvider: list[0]?.provider ?? null,
         plan: profile?.plan ? capitalize(profile.plan as string) : 'Free',
       })
-      if (profile?.aws_access_key_id) {
-        setAwsConnected(true)
-        const spend = (profile as { monthly_spend?: number }).monthly_spend ?? 2000
-        setAwsSpend(spend)
-        setAwsData(getMockAWSData(spend))
-        setAwsLastRefresh(new Date())
-      }
       setLoading(false)
     }
     load()
   }, [router])
-
-  function refreshAwsData() {
-    setAwsData(getMockAWSData(awsSpend))
-    setAwsLastRefresh(new Date())
-  }
 
   if (loggedOut) {
     return (
@@ -632,10 +461,6 @@ export default function DashboardPage() {
         {/* ── Overview tab ── */}
         {tab === 'overview' && (
           <>
-            {awsConnected && awsData && (
-              <LiveAWSSection data={awsData} lastRefresh={awsLastRefresh} onRefresh={refreshAwsData} />
-            )}
-
             {/* Continue Where You Left Off */}
             {(recentlyViewed.length > 0 || recentRecs.length > 0) && (
               <div style={{ marginBottom: 40 }}>
@@ -714,7 +539,6 @@ export default function DashboardPage() {
             </div>
 
             {/* Free tier usage meter */}
-            <FreeTrialMeter />
 
             {/* Weekly digest preference */}
             <WeeklyDigestToggle />
@@ -725,16 +549,14 @@ export default function DashboardPage() {
             {/* Decisions Made */}
             <DecisionsMade />
 
-            {/* Activity Feed */}
+            {/* Suggested next steps */}
             <div style={{ marginBottom: 40 }}>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Activity Feed</h2>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16 }}>Suggested next steps</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {[
-                  { dot: '#22c55e', tag: 'TODAY',     text: 'AWS released updated t3 and m6i instance pricing in us-east-1' },
-                  { dot: '#f59e0b', tag: 'YESTERDAY', text: 'New optimization opportunity found: S3 Intelligent-Tiering could apply to 3 buckets' },
-                  { dot: '#818cf8', tag: 'THIS WEEK', text: 'Your industry peers reduced cloud spend by an average of 8% this quarter' },
-                  { dot: '#0ea5e9', tag: 'THIS MONTH',text: '47 founders implemented savings recommendations using this platform' },
-                  { dot: '#a855f7', tag: 'PLATFORM',  text: 'New tool live: Cloud Sanity Check — get a DO IT / WAIT / DON\'T DO IT verdict before any change' },
+                  { dot: '#22c55e', tag: 'BILL', text: 'Upload a compatible CSV to review service-level spend.' },
+                  { dot: '#f59e0b', tag: 'REVIEW', text: 'Check optimization suggestions against actual resource utilization.' },
+                  { dot: '#818cf8', tag: 'PRICING', text: 'Compare selected compute prices and verify the final quote with providers.' },
                 ].map((item, i) => (
                   <div key={i} style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.dot, flexShrink: 0, marginTop: 4 }} />
@@ -784,47 +606,10 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Connect Your Cloud */}
-            <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>Connect Your Cloud</h2>
-              <p style={{ color: '#555', fontSize: 13, marginBottom: 20 }}>Connect your account for real bill analysis, automatic waste detection, and anomaly alerts.</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
-                <div style={{ background: '#111118', border: `1px solid ${awsConnected ? 'rgba(34,197,94,0.4)' : showAwsPanel ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 16, padding: 20, transition: 'border-color 0.15s' }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#f59e0b', marginBottom: 12 }}>AWS</div>
-                  {awsConnected ? (
-                    <span style={{ fontSize: 12, fontWeight: 700, color: '#22c55e', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)', padding: '4px 12px', borderRadius: 8 }}>✓ Connected</span>
-                  ) : (
-                    <button onClick={() => setShowAwsPanel(p => !p)} style={{ background: showAwsPanel ? 'rgba(245,158,11,0.15)' : '#f59e0b', border: showAwsPanel ? '1px solid rgba(245,158,11,0.4)' : 'none', borderRadius: 8, padding: '8px 18px', color: showAwsPanel ? '#f59e0b' : 'white', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
-                      {showAwsPanel ? 'Cancel' : 'Connect →'}
-                    </button>
-                  )}
-                </div>
-                <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, opacity: 0.6 }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#0078D4', marginBottom: 12 }}>Azure</div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#555', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: 6 }}>Coming soon</span>
-                </div>
-                <div style={{ background: '#111118', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: 20, opacity: 0.6 }}>
-                  <div style={{ fontSize: 22, fontWeight: 900, color: '#22c55e', marginBottom: 12 }}>GCP</div>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#555', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', padding: '4px 10px', borderRadius: 6 }}>Coming soon</span>
-                </div>
-              </div>
-              {showAwsPanel && !awsConnected && (
-                <AwsConnectPanel onSaved={() => { setAwsConnected(true); setShowAwsPanel(false) }} />
-              )}
-              <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.02))', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 16, padding: '20px 24px', marginTop: 20 }}>
-                <p style={{ fontSize: 11, color: '#6366f1', fontWeight: 700, letterSpacing: 1, marginBottom: 14 }}>WHAT YOU UNLOCK WITH A CONNECTED ACCOUNT</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-                  {UNLOCK_ITEMS.map(item => (
-                    <div key={item.label} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                      <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 2 }}>{item.label}</p>
-                        <p style={{ fontSize: 12, color: '#555', lineHeight: 1.5 }}>{item.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div style={{ padding: 24, borderRadius: 14, background: '#111118', marginBottom: 32 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Analyze a billing export</h2>
+              <p style={{ color: '#a0a0b0', fontSize: 13, marginBottom: 12 }}>Direct AWS account connection is not enabled in this demo. Upload a compatible billing CSV for a service-level cost breakdown and estimated optimization suggestions.</p>
+              <Link href="/bill-upload" style={{ color: '#818cf8', fontWeight: 700 }}>Open Bill Analyzer →</Link>
             </div>
           </>
         )}

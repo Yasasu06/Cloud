@@ -1,3 +1,4 @@
 react-frontend/tsconfig.tsbuildinfo
 .vercel
 .env*
+!react-frontend/.env.example

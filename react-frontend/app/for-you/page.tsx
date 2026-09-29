@@ -40,7 +40,7 @@ const ROLES = [
     icon: '🎯',
     title: 'Cloud Consultant',
     desc: 'You serve multiple clients. We give you white-label reports and scaling tools.',
-    tools: ['White Label', 'Experts', 'Multi-Client Tab', 'Performance Pricing'],
+    tools: ['White Label', 'Illustrative Experts', 'Multi-Client Tab', 'Pricing Concept'],
     color: '#f59e0b',
   },
   {

@@ -225,7 +225,7 @@ export const ALTERNATIVE_PROVIDERS: AlternativeProvider[] = [
     logo: '🇩🇪',
     tagline: "Europe's best value cloud",
     monthlyStarting: '$3.29',
-    strengths: ['Cheapest European option', 'GDPR compliant by default', 'Excellent hardware specs', 'Green energy powered'],
+    strengths: ['European hosting option', 'Review data residency terms', 'Hardware options', 'Energy-efficiency information available'],
     weaknesses: ['Europe and US only', 'Limited managed services', 'Smaller ecosystem'],
     bestFor: ['European startups', 'GDPR-sensitive workloads', 'Budget European hosting', 'Environmentally conscious teams'],
     freetier: 'No free tier but cheapest paid option in Europe',

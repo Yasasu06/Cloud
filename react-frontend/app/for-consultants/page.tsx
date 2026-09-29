@@ -11,9 +11,9 @@ type TabId = 'white-label' | 'experts' | 'pricing' | 'roles'
 
 const TABS: Array<{ id: TabId; label: string; icon: string; color: string; blurb: string }> = [
   { id: 'white-label', label: 'White Label',         icon: '🏷️', color: '#6366f1', blurb: "Branded reports under your firm's identity" },
-  { id: 'experts',     label: 'Expert Marketplace',  icon: '👥', color: '#22c55e', blurb: 'Connect with vetted cloud consultants' },
-  { id: 'pricing',     label: 'Performance Pricing', icon: '💰', color: '#f59e0b', blurb: 'Pay only when we deliver verified savings' },
-  { id: 'roles',       label: 'Roles Replaced',      icon: '💼', color: '#a855f7', blurb: '$400K of expertise for $49/month' },
+  { id: 'experts',     label: 'Expert Review',  icon: '👥', color: '#22c55e', blurb: 'Understand when a qualified reviewer is needed' },
+  { id: 'pricing',     label: 'Pricing Concept', icon: '💰', color: '#f59e0b', blurb: 'Explore an illustrative performance-fee model' },
+  { id: 'roles',       label: 'Tool Directory',      icon: '💼', color: '#a855f7', blurb: 'Find tools for specific cloud decisions' },
 ]
 
 export default function ForConsultantsPage() {
@@ -46,7 +46,7 @@ export default function ForConsultantsPage() {
             Tools for cloud consultants and agencies
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 16, maxWidth: 640 }}>
-            White-label reports, expert marketplace, performance pricing, and roles you can replace.
+            Printable report tools, illustrative expert profiles, and an example pricing model.
           </p>
         </div>
 

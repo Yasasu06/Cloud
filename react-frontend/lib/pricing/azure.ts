@@ -48,14 +48,15 @@ export async function fetchAzureCompute(): Promise<ComputeInstance[]> {
         price_hourly_usd: hourly,
         price_monthly_usd: Math.round(hourly * 730 * 100) / 100,
         region: 'eastus',
+        price_source: 'live',
       })
       seen.add(item.armSkuName)
     }
-    if (data.length === 0) return AZURE_FALLBACK
+    if (data.length === 0) return AZURE_FALLBACK.map(i => ({ ...i, price_source: 'fallback' as const }))
     cached = { data: data.sort((a, b) => a.price_monthly_usd - b.price_monthly_usd), fetched: Date.now() }
     return cached.data
   } catch {
-    return AZURE_FALLBACK
+    return AZURE_FALLBACK.map(i => ({ ...i, price_source: 'fallback' as const }))
   }
 }
 

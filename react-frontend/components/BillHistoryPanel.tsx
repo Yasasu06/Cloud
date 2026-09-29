@@ -123,7 +123,7 @@ export default function BillHistoryPanel({ history }: { history: AnalysisRecord[
                 Top: <span style={{ color: 'var(--text)' }}>{r.top_service}</span>
               </div>
               <div style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>
-                {money(r.savings_estimate)}/mo savings found
+                {money(r.savings_estimate)}/mo estimated opportunity
               </div>
             </div>
           )

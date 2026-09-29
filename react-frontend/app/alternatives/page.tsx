@@ -105,7 +105,7 @@ const PROVIDERS: AltProvider[] = [
     stat: '#1',
     statLabel: 'EU cloud provider',
     color: '#123f6d',
-    strengths: ['Data stays in Europe', 'Dedicated servers from €40/month', 'Anti-DDoS included', 'GDPR compliant'],
+    strengths: ['European hosting regions', 'Dedicated server options', 'Anti-DDoS features', 'Review provider terms for data protection'],
     compareSlug: 'OVH',
   },
   {

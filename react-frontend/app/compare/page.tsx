@@ -168,7 +168,7 @@ export default function ComparePage() {
           <div style={{ background: '#1a1a2e', borderRadius: 20, padding: '24px 28px', border: '1px solid rgba(34,197,94,0.2)', marginBottom: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0 }}>Live Pricing</h2>
+                <h2 style={{ fontSize: 16, fontWeight: 800, color: 'white', margin: 0 }}>Selected Compute Prices</h2>
                 <LivePricingBadge compact />
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -195,8 +195,8 @@ export default function ComparePage() {
                   const delta = top.instance.price_monthly_usd - cheapest.instance.price_monthly_usd
                   return delta > 0 ? (
                     <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.25)', marginBottom: 12, fontSize: 13 }}>
-                      <strong style={{ color: '#22c55e' }}>Save ${delta.toFixed(0)}/mo</strong>{' '}
-                      <span style={{ color: '#a0a0b0' }}>vs the most expensive — {cheapest.provider} ({cheapest.instance.name}) is the cheapest match.</span>
+                      <strong style={{ color: '#22c55e' }}>${delta.toFixed(0)}/mo reference price difference</strong>{' '}
+                      <span style={{ color: '#a0a0b0' }}>vs the highest listed price — {cheapest.provider} ({cheapest.instance.name}) is the lowest listed match. Verify workload equivalence and provider pricing.</span>
                     </div>
                   ) : null
                 })()}
@@ -210,7 +210,7 @@ export default function ComparePage() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                             <strong style={{ color, fontSize: 13 }}>{row.provider}</strong>
                             {isCheapest && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', background: 'rgba(34,197,94,0.15)', color: '#22c55e', borderRadius: 4, letterSpacing: 0.8 }}>WINNER</span>}
-                            <LivePricingBadge provider={row.provider} compact />
+                            <LivePricingBadge provider={row.provider} source={row.instance.price_source} compact />
                           </div>
                           <div style={{ fontSize: 11, color: '#666', marginTop: 2 }}>{row.instance.name} — {row.instance.vcpus}vCPU/{row.instance.ram_gb}GB</div>
                         </div>

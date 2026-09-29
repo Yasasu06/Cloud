@@ -115,6 +115,9 @@ export default function MigrationPlannerTool({ embedded = false }: Props) {
 
       {info && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <p style={{ color: '#fbbf24', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+            Illustrative scenario only. Cost ranges, monthly impact, complexity, and risks are static examples; they are not calculated from your infrastructure or verified quotes.
+          </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             <div className="glass-card" style={{ padding: '22px 24px' }}>
               <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>COMPLEXITY</div>
@@ -128,7 +131,7 @@ export default function MigrationPlannerTool({ embedded = false }: Props) {
               <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>one-time estimate</div>
             </div>
             <div className="glass-card" style={{ padding: '22px 24px' }}>
-              <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>MONTHLY IMPACT</div>
+              <div style={{ fontSize: 11, color: '#666', fontWeight: 700, letterSpacing: 1, marginBottom: 10 }}>SAMPLE MONTHLY IMPACT</div>
               <div style={{ fontSize: 16, fontWeight: 800, color: info.monthlySaving.startsWith('Save') ? '#22c55e' : '#f97316' }}>
                 {info.monthlySaving}
               </div>

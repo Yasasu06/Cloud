@@ -32,28 +32,24 @@ export default function WeeklyDigestToggle() {
 
   async function toggle() {
     const next = !enabled
-    setEnabled(next)
+    setError('')
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
-      const { error: dbErr } = await supabase
+      if (!session) { setError('Sign in to change this preference.'); return }
+      const { data: updated, error: dbErr } = await supabase
         .from('profiles')
         .update({ weekly_digest_enabled: next })
         .eq('id', session.user.id)
-      if (dbErr) {
-        if (dbErr.message.includes('weekly_digest_enabled') || dbErr.code === '42703') {
-          setError('Column profiles.weekly_digest_enabled not yet provisioned. Saved locally for now.')
-          localStorage.setItem('weekly_digest_enabled', String(next))
-        } else {
-          setError(dbErr.message)
-          setEnabled(!next)
-          return
-        }
+        .select('id')
+        .maybeSingle()
+      if (dbErr || !updated) {
+        setError('Could not save digest preference.')
+        return
       }
+      setEnabled(next)
       setSavedAt(Date.now())
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Save failed')
-      setEnabled(!next)
+      setError('Could not save digest preference.')
     }
   }
 
@@ -69,7 +65,7 @@ export default function WeeklyDigestToggle() {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'white', marginBottom: 4 }}>📧 Weekly Digest</div>
         <div style={{ fontSize: 12, color: '#a0a0b0', lineHeight: 1.5 }}>
-          Get a summary email each week with your recent analyses + pricing changes.
+          Opt in to recaps of saved analyses. Emails are sent only when an administrator triggers a digest; there is no automatic schedule.
         </div>
         {error && <div style={{ fontSize: 11, color: '#fca5a5', marginTop: 4 }}>{error}</div>}
         {savedAt > 0 && !error && <div style={{ fontSize: 11, color: '#22c55e', marginTop: 4 }}>✓ Preference saved</div>}

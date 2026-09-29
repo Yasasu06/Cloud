@@ -1,7 +1,7 @@
 import type { ComputeInstance } from './types'
 import { fetchAWSCompute, AWS_LAST_UPDATED } from './aws'
 import { fetchAzureCompute, AZURE_LAST_UPDATED } from './azure'
-import { fetchGCPCompute, GCP_LAST_UPDATED, isGCPLive } from './gcp'
+import { fetchGCPCompute, GCP_LAST_UPDATED } from './gcp'
 import { fetchDOCompute, DO_LAST_UPDATED } from './digitalocean'
 import { fetchHetznerCompute, HETZNER_LAST_UPDATED } from './hetzner'
 import { fetchLinodeCompute, LINODE_LAST_UPDATED } from './linode'
@@ -27,10 +27,7 @@ export const PROVIDER_LAST_UPDATED: Record<string, string> = {
   'Fly.io': FLY_LAST_UPDATED,
 }
 
-// Note: providerSource() is a function so GCP can flip to 'live-api' after the probe succeeds.
-// Existing imports of PROVIDER_SOURCE keep working (snapshot at module load is still 'hardcoded' for GCP).
 export function providerSource(name: string): 'live-api' | 'hardcoded' {
-  if (name === 'GCP') return isGCPLive() ? 'live-api' : 'hardcoded'
   return PROVIDER_SOURCE[name] ?? 'hardcoded'
 }
 

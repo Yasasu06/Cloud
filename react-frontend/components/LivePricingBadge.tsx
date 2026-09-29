@@ -11,16 +11,18 @@ function timeAgo(dateStr: string): string {
 }
 
 interface Props {
-  provider?: string  // if provided, shows that provider's status; otherwise shows generic "live data"
+  provider?: string
+  source?: 'live' | 'fallback' | 'static'
   compact?: boolean
 }
 
-export default function LivePricingBadge({ provider, compact }: Props) {
+export default function LivePricingBadge({ provider, source, compact }: Props) {
   if (provider) {
     const last = PROVIDER_LAST_UPDATED[provider]
-    const source = providerSource(provider)
     if (!last) return null
-    const isLive = source === 'live-api'
+    const label = source === 'live' ? 'Live' : source === 'fallback' ? 'Fallback' :
+      source === 'static' || providerSource(provider) === 'hardcoded' ? 'Static reference' : 'Live or fallback'
+    const isLive = label === 'Live'
     return (
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -32,7 +34,7 @@ export default function LivePricingBadge({ provider, compact }: Props) {
         whiteSpace: 'nowrap',
       }}>
         <span style={{ fontSize: compact ? 8 : 9 }}>{isLive ? '🟢' : '📌'}</span>
-        {isLive ? 'Live' : 'Verified'} · {timeAgo(last)}
+        {label}{isLive ? '' : ` · updated ${timeAgo(last)}`}
       </span>
     )
   }
@@ -46,7 +48,7 @@ export default function LivePricingBadge({ provider, compact }: Props) {
       border: '1px solid rgba(34,197,94,0.25)',
       color: '#22c55e', whiteSpace: 'nowrap',
     }}>
-      🟢 Live pricing data
+      AWS/Azure live or fallback · others static
     </span>
   )
 }

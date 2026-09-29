@@ -29,7 +29,7 @@ async function buildPricingContext(userText: string): Promise<string> {
       .map(i => `${i.provider} ${i.name}: ${i.vcpus}vCPU/${i.ram_gb}GB = $${i.price_monthly_usd}/mo`)
       .join('\n')
     if (!slim) return ''
-    return `\n\nLIVE PRICING DATA (use these EXACT numbers — do not estimate):\n${slim}\n`
+    return `\n\nLISTED COMPUTE PRICES (AWS/Azure may use live APIs or static fallback; others are static references):\n${slim}\n`
   } catch { return '' }
 }
 import SummaryCard from '@/components/analysis/SummaryCard'
@@ -489,7 +489,7 @@ export default function AnalyzePage() {
 
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
-        await supabase.from('saved_recommendations').insert({
+        const { error: saveError } = await supabase.from('saved_recommendations').insert({
           user_id: session.user.id,
           provider: mode.title,
           confidence: 0,
@@ -498,7 +498,7 @@ export default function AnalyzePage() {
           budget: '',
           raw_analysis: fullText,
         })
-        setSaved(true)
+        if (!saveError) setSaved(true)
       }
     } catch (e) {
       console.error('analyze() failed', e)
@@ -991,7 +991,7 @@ Focus on things they can do TODAY.`,
 
               {/* Next Action cards */}
               <NextActionCards actions={[
-                { icon: '💰', title: 'Calculate Exact Savings', desc: 'Run optimization tools',  href: '/optimize' },
+                { icon: '💰', title: 'Estimate Savings Opportunities', desc: 'Run optimization tools',  href: '/optimize' },
                 { icon: '📊', title: 'See Visual Journey',      desc: '12-week trajectory',       href: '/outcome-simulator' },
                 { icon: '📝', title: 'Document This Decision',  desc: 'Save reasoning + review', onClick: () => setShowDecisionModal(true) },
               ]} />

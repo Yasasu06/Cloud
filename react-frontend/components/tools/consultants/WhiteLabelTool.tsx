@@ -229,18 +229,19 @@ Details:
 Generate a professional consulting report with:
 1. Executive Summary (2-3 paragraphs)
 2. Current State Assessment
-3. Cost Optimization Opportunities (with specific dollar amounts based on $${clientSpend}/month spend)
+3. Hypothetical Cost Optimization Opportunities (label any dollar amounts as estimates based on $${clientSpend}/month entered spend)
 4. Security & Compliance Observations
 5. Recommended 90-Day Roadmap (with prioritized action items)
 6. Investment Summary
 
-Use ${clientProvider} service names. Be specific with dollar amounts. Write in a professional consulting tone.`
+Use ${clientProvider} service names. State that no resource utilization has been inspected and all savings require verification. Write in a professional consulting tone.`
 
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt }),
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', stream: true, max_tokens: 1800,
+          messages: [{ role: 'user', content: prompt }] }),
       })
       if (!res.ok || !res.body) throw new Error('Stream failed')
       const reader = res.body.getReader()

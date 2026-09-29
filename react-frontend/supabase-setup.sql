@@ -4,7 +4,7 @@
 -- Run this ONCE in the Supabase SQL Editor of your NEW project
 -- (Dashboard → SQL Editor → New query → paste → Run).
 --
--- It is idempotent: safe to re-run. It creates the 7 tables the app uses, the
+-- It is idempotent: safe to re-run. It creates the 8 tables the app uses, the
 -- auth→profiles trigger, the email_subscribers unique constraint, and RLS
 -- policies for every table.
 --
@@ -14,8 +14,7 @@
 --
 -- The app talks to the DB three ways, which shaped the policies below:
 --   1. Browser, logged-in user, ANON key  → per-user row access (auth.uid()).
---   2. Browser, anonymous visitor, ANON key → public inserts (newsletter,
---      search logging) and the public /stats aggregate reads.
+--   2. Browser, anonymous visitor, ANON key → search logging only.
 --   3. Server route (send-digest), SERVICE ROLE key → bypasses RLS entirely.
 -- ============================================================================
 
@@ -35,8 +34,8 @@ create table if not exists public.profiles (
   ai_queries_today       integer not null default 0,
   queries_reset_date     date,                              -- inferred: daily reset marker (could be timestamptz)
   weekly_digest_enabled  boolean not null default false,
-  aws_access_key_id      text,                              -- user-supplied AWS key id
-  aws_secret_key         text,                              -- NOTE: app stores this base64-encoded, NOT encrypted
+  aws_access_key_id      text,                              -- legacy compatibility only; public app no longer collects keys
+  aws_secret_key         text,                              -- legacy compatibility only; do not use for new credentials
   monthly_spend          numeric,                           -- inferred numeric (USD)
   monthly_budget         numeric,                           -- inferred numeric (USD)
   provider               text,                              -- inferred: user's primary cloud
@@ -57,8 +56,10 @@ create table if not exists public.saved_recommendations (
   workload    text,
   team_size   text,               -- inferred text (stored as a label/range)
   budget      text,               -- inferred text (stored as a label/range)
+  raw_analysis text,               -- model output saved by /analyze
   created_at  timestamptz not null default now()
 );
+alter table public.saved_recommendations add column if not exists raw_analysis text;
 create index if not exists saved_recommendations_user_id_idx on public.saved_recommendations(user_id);
 
 -- ============================================================================
@@ -119,15 +120,15 @@ create index if not exists decisions_user_id_idx on public.decisions(user_id);
 -- ============================================================================
 -- 6. email_subscribers
 -- ----------------------------------------------------------------------------
--- Newsletter / weekly-digest signups from anonymous visitors. The app does
--- .upsert(..., { onConflict: 'email' }) so EMAIL MUST BE UNIQUE.
+-- Legacy newsletter signups. The public app no longer collects subscriptions;
+-- anonymous callers cannot insert or update subscriber rows.
 -- ============================================================================
 create table if not exists public.email_subscribers (
   id          uuid primary key default gen_random_uuid(),
-  email       text not null unique,   -- unique constraint required for upsert onConflict
-  source      text,                   -- e.g. 'weekly-digest'
-  provider    text,                   -- inferred
-  spend_range text,                   -- inferred (label/range)
+  email       text not null unique,
+  source      text,
+  provider    text,
+  spend_range text,
   created_at  timestamptz not null default now()
 );
 
@@ -255,18 +256,9 @@ drop policy if exists "decisions_own" on public.decisions;
 create policy "decisions_own" on public.decisions
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
--- ---- email_subscribers: anonymous newsletter signup (public upsert) --------
--- Upsert needs INSERT and, on conflict, UPDATE. No SELECT policy → rows aren't
--- publicly readable. NOTE: public UPDATE means anyone who knows an email can
--- overwrite that row's source/provider/spend_range. Acceptable for a newsletter
--- list; tighten to service-role-only if that matters to you.
+-- ---- email_subscribers: no public writes -------------------------------
 drop policy if exists "email_subs_insert_public" on public.email_subscribers;
-create policy "email_subs_insert_public" on public.email_subscribers
-  for insert with check (true);
-
 drop policy if exists "email_subs_update_public" on public.email_subscribers;
-create policy "email_subs_update_public" on public.email_subscribers
-  for update using (true) with check (true);
 
 -- ---- search_queries: anyone can log a search; owners read their own ---------
 drop policy if exists "search_insert_public" on public.search_queries;

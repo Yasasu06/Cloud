@@ -59,25 +59,26 @@ export default function WasteReportTool({ embedded = false }: Props) {
     const spend = profile?.monthly_spend ?? 5000
     const industry = profile?.industry ?? 'SaaS'
 
-    const prompt = `Generate a detailed cloud waste report for:
+    const prompt = `Generate an estimated cloud optimization report for:
 Provider: ${provider}
 Monthly spend: $${spend}/month
 Industry: ${industry}
 
 Format as a professional waste report with:
 1. Executive Summary
-2. Top 5 Waste Items with dollar amounts
+2. Top 5 possible optimization opportunities with estimated dollar ranges
 3. Quick Win Actions (this week)
 4. Medium Term Optimizations (this month)
 5. Strategic Recommendations (this quarter)
 
-Use real ${provider} service names. Be specific with dollar amounts.`
+Use ${provider} service names. Label all savings as hypotheses; no resource utilization or configuration has been inspected.`
 
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch('/api/groq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: prompt }),
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', stream: true, max_tokens: 1500,
+          messages: [{ role: 'user', content: prompt }] }),
       })
 
       if (!res.ok || !res.body) throw new Error('Stream failed')
@@ -124,9 +125,9 @@ Use real ${provider} service names. Be specific with dollar amounts.`
         alert('Please sign in to email your report')
         return
       }
-      await fetch('/api/send-email', {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({
           type: 'waste_report',
           email: session.user.email,
@@ -139,6 +140,7 @@ Use real ${provider} service names. Be specific with dollar amounts.`
           ],
         }),
       })
+      if (!response.ok) throw new Error('Email request failed')
       setEmailSent(true)
     } catch (_e) {
       alert('Failed to send email. Please try again.')
@@ -176,10 +178,10 @@ Use real ${provider} service names. Be specific with dollar amounts.`
             WASTE REPORT
           </div>
           <h1 style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 900, marginBottom: 10 }}>
-            Your Cloud Waste Report
+            Estimated Cloud Opportunities
           </h1>
           <p style={{ color: '#a0a0b0', fontSize: 15, maxWidth: 520 }}>
-            AI-powered analysis of where your {provider} spend is going to waste and exactly how to fix it.
+            Model-generated suggestions based on entered spend and profile details. No cloud resources or utilization data are inspected.
           </p>
         </div>
       )}
@@ -189,7 +191,7 @@ Use real ${provider} service names. Be specific with dollar amounts.`
           { label: 'PROVIDER',       value: provider },
           { label: 'MONTHLY SPEND',  value: fmt(spend) },
           { label: 'INDUSTRY',       value: profile?.industry ?? 'SaaS' },
-          { label: 'WASTE ESTIMATE', value: fmt(spend * 0.28), color: '#ef4444' },
+          { label: '28% SCENARIO OPPORTUNITY', value: fmt(spend * 0.28), color: '#ef4444' },
         ].map(s => (
           <div key={s.label} className="glass-card" style={{ padding: '16px 18px' }}>
             <div style={{ fontSize: 10, color: '#555', fontWeight: 700, letterSpacing: 1, marginBottom: 6 }}>{s.label}</div>
@@ -202,10 +204,10 @@ Use real ${provider} service names. Be specific with dollar amounts.`
         <div style={{ textAlign: 'center', padding: '48px 0' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>📊</div>
           <p style={{ color: '#666', fontSize: 15, marginBottom: 24 }}>
-            Generate a personalized waste report based on your cloud profile.
+            Generate hypothetical recommendations based on your cloud profile.
           </p>
           <button onClick={generate} style={{ background: '#ef4444', border: 'none', borderRadius: 12, padding: '14px 32px', color: 'white', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
-            Generate My Waste Report →
+            Generate Estimated Report →
           </button>
         </div>
       )}
@@ -214,7 +216,7 @@ Use real ${provider} service names. Be specific with dollar amounts.`
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: 'rgba(239,68,68,0.08)', borderRadius: 12 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', animation: 'pulse 1s infinite', flexShrink: 0 }} />
-            <span style={{ color: '#a0a0b0', fontSize: 14 }}>AI is analyzing your waste patterns...</span>
+            <span style={{ color: '#a0a0b0', fontSize: 14 }}>Generating suggestions from your entered information...</span>
             <span style={{ color: '#555', fontSize: 12, marginLeft: 'auto', whiteSpace: 'nowrap' }}>Usually takes 15–30 seconds</span>
           </div>
           {[90, 75, 85, 60, 70, 50, 80, 65].map((w, i) => (
